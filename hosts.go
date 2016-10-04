@@ -28,7 +28,7 @@ func NewHosts(hs HostsConfig) Hosts {
 }
 
 /*
-Match local /etc/hosts file first, remote redis records second
+Match local /etc/hosts file
 */
 func (h *Hosts) Get(domain string, family int) ([]net.IP, bool) {
 
@@ -60,7 +60,7 @@ func (h *Hosts) Get(domain string, family int) ([]net.IP, bool) {
 }
 
 /*
-Update hosts records from /etc/hosts file and redis per minute
+Update hosts records from /etc/hosts file
 */
 func (h *Hosts) refresh() {
 	ticker := time.NewTicker(h.RefreshInterval)
