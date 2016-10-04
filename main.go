@@ -18,6 +18,8 @@ func main() {
 		tport: Config.TCPServer.Port,
 		uhost: Config.UDPServer.Host,
 		uport: Config.UDPServer.Port,
+		user:  Config.User,
+		group: Config.Group,
 	}
 
 	server.Run()

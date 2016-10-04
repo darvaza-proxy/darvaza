@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -39,11 +40,13 @@ type HostsConfig struct {
 	Refresh_Interval uint
 }
 
-var Config cfg
+var (
+	Config   cfg
+	confFile string
+)
 
 func init() {
-	var confFile string
-	flag.StringVar(&confFile, "f", "/etc/gnocco/gnocco.toml", "specify the config file, defaults to /etc/gnocco/gnocco.toml.")
+	flag.StringVar(&confFile, "f", "/etc/gnocco/gnocco.conf", "specify the config file, defaults to /etc/gnocco/gnocco.conf.")
 
 	flag.Parse()
 

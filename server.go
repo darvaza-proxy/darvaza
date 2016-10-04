@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/fangdingjun/gpp/util"
@@ -13,6 +12,8 @@ type Server struct {
 	tport int
 	uhost string
 	uport int
+	user  string
+	group string
 }
 
 func (s *Server) UAddr() string {
@@ -31,7 +32,6 @@ func (s *Server) Run() {
 
 	udpHandler := dns.NewServeMux()
 	udpHandler.HandleFunc(".", Handler.DoUDP)
-
 	tcpServer := &dns.Server{Addr: s.TAddr(),
 		Net:     "tcp",
 		Handler: tcpHandler}
@@ -44,6 +44,10 @@ func (s *Server) Run() {
 	go s.start(udpServer)
 	go s.start(tcpServer)
 
+	err := util.DropPrivilege(s.user, s.group)
+	if err != nil {
+		logger.Error("Dropping privileges failed %s", err.Error())
+	}
 }
 
 func (s *Server) start(ds *dns.Server) {
@@ -53,9 +57,4 @@ func (s *Server) start(ds *dns.Server) {
 	if err != nil {
 		logger.Error("Start %s listener failed:%s", ds.Net, err.Error())
 	}
-	err = util.DropPrivilege(Config.User, Config.Group)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 }
