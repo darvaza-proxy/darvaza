@@ -58,12 +58,12 @@ func (m *CacheMap) Get(key string) (*dns.Msg, error) {
 	m.mu.RUnlock()
 
 	if !ok {
-		return nil, "Key " + key + " not found."
+		return nil, keyNotFound{key}
 	}
 
 	if mesg.Expire.Before(time.Now()) {
 		m.Remove(key)
-		return nil, "Key " + key + " expired."
+		return nil, keyExpired{key}
 	}
 
 	return mesg.Msg, nil
