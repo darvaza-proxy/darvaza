@@ -23,17 +23,10 @@ func (q *Question) String() string {
 }
 
 type GnoccoHandler struct {
-	hosts Hosts
 }
 
 func NewHandler() *GnoccoHandler {
-
-	var hosts Hosts
-	if Config.HostsCfg.Enable {
-		hosts = NewHosts(Config.HostsCfg)
-	}
-
-	return &GnoccoHandler{hosts}
+	return &GnoccoHandler{}
 }
 
 func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
@@ -47,50 +40,7 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 		remote = w.RemoteAddr().(*net.UDPAddr).IP
 	}
 	logger.Info("%s lookup　%s", remote, Q.String())
-
-	IPQuery := h.isIPQuery(q)
-
-	// Query hosts
-	if Config.HostsCfg.Enable && IPQuery > 0 {
-		if ips, ok := h.hosts.Get(Q.qname, IPQuery); ok {
-			m := new(dns.Msg)
-			m.SetReply(req)
-
-			switch IPQuery {
-			case _IP4Query:
-				rr_header := dns.RR_Header{
-					Name:   q.Name,
-					Rrtype: dns.TypeA,
-					Class:  dns.ClassINET,
-					//Ttl:    settings.Hosts.TTL,
-				}
-				for _, ip := range ips {
-					a := &dns.A{rr_header, ip}
-					m.Answer = append(m.Answer, a)
-				}
-			case _IP6Query:
-				rr_header := dns.RR_Header{
-					Name:   q.Name,
-					Rrtype: dns.TypeAAAA,
-					Class:  dns.ClassINET,
-					//Ttl:    settings.Hosts.TTL,
-				}
-				for _, ip := range ips {
-					aaaa := &dns.AAAA{rr_header, ip}
-					m.Answer = append(m.Answer, aaaa)
-				}
-			}
-
-			w.WriteMsg(m)
-			logger.Debug("%s found in hosts file", Q.qname)
-			return
-		} else {
-			logger.Debug("%s didn't found in hosts file", Q.qname)
-		}
-	}
-
 }
-
 func (h *GnoccoHandler) DoTCP(w dns.ResponseWriter, req *dns.Msg) {
 	h.do("tcp", w, req)
 }

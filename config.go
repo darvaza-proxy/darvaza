@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -30,10 +31,10 @@ type cfg struct {
 		File   string
 	}
 
-	HostsCfg HostsConfig
+	Hosts HostsCfg
 }
 
-type HostsConfig struct {
+type HostsCfg struct {
 	Enable           bool
 	Hosts_File       string
 	Refresh_Interval uint
@@ -44,13 +45,14 @@ var (
 	confFile string
 )
 
-func init() {
+func loadConfig() cfg {
 	flag.StringVar(&confFile, "f", "/etc/gnocco/gnocco.conf", "specify the config file, defaults to /etc/gnocco/gnocco.conf.")
 
 	flag.Parse()
 
 	file, err := os.Open(confFile)
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	defer file.Close()
@@ -61,5 +63,7 @@ func init() {
 	}
 
 	if err := toml.Unmarshal(buf, &Config); err != nil {
+		panic(err)
 	}
+	return Config
 }

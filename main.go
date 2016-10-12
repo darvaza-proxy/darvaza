@@ -10,16 +10,17 @@ var (
 )
 
 func main() {
-
+	cf := loadConfig()
 	initLogger()
+	initResolver()
 
 	server := &Server{
-		thost: Config.TCPServer.Host,
-		tport: Config.TCPServer.Port,
-		uhost: Config.UDPServer.Host,
-		uport: Config.UDPServer.Port,
-		user:  Config.User,
-		group: Config.Group,
+		thost: cf.TCPServer.Host,
+		tport: cf.TCPServer.Port,
+		uhost: cf.UDPServer.Host,
+		uport: cf.UDPServer.Port,
+		user:  cf.User,
+		group: cf.Group,
 	}
 
 	server.Run()
