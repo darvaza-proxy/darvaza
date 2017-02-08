@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 var (
@@ -25,18 +27,18 @@ func main() {
 
 	server.Run()
 
-	sig := make(chan os.Signal)
-	signal.Notify(sig, os.Interrupt)
+	sigs := make(chan os.Signal, 1)
+	done := make(chan bool, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
-forever:
-	for {
-		select {
-		case <-sig:
-			logger.Info("signal received, stopping")
-			break forever
-		}
-	}
-
+	go func() {
+		sig := <-sigs
+		fmt.Println(sig)
+		logger.Info("signal %s received", sig)
+		done <- true
+	}()
+	<-done
+	logger.Info("stopping")
 }
 
 func initLogger() {
@@ -49,6 +51,7 @@ func initLogger() {
 	if Config.Log.File != "" {
 		cfg := map[string]interface{}{"file": Config.Log.File}
 		logger.SetLogger("file", cfg)
+		logger.Info("Logger started")
 	}
 
 }
