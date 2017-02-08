@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net"
 	"strconv"
 
 	"github.com/fangdingjun/gpp/util"
@@ -17,11 +18,11 @@ type Server struct {
 }
 
 func (s *Server) UAddr() string {
-	return s.uhost + ":" + strconv.Itoa(s.uport)
+	return net.JoinHostPort(s.uhost, strconv.Itoa(s.uport))
 }
 
 func (s *Server) TAddr() string {
-	return s.thost + ":" + strconv.Itoa(s.tport)
+	return net.JoinHostPort(s.thost, strconv.Itoa(s.tport))
 }
 func (s *Server) Run() {
 
