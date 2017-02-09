@@ -9,7 +9,8 @@ import (
 const LOG_OUTPUT_BUFFER = 1024
 
 type logMesg struct {
-	Mesg string
+	Mesg  string
+	Fatal bool
 }
 
 type LoggerHandler interface {
@@ -57,36 +58,42 @@ func (l *GnoccoLogger) Run() {
 	}
 }
 
-func (l *GnoccoLogger) writeMesg(mesg string) {
+func (l *GnoccoLogger) writeMesg(mesg string, fatal bool) {
 	lm := &logMesg{
-		Mesg: mesg,
+		Mesg:  mesg,
+		Fatal: fatal,
 	}
 	l.mesgs <- lm
 }
 
 func (l *GnoccoLogger) Debug(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[DEBUG] "+format, v...)
-	l.writeMesg(mesg)
+	l.writeMesg(mesg, false)
 }
 
 func (l *GnoccoLogger) Info(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[INFO] "+format, v...)
-	l.writeMesg(mesg)
+	l.writeMesg(mesg, false)
 }
 
 func (l *GnoccoLogger) Notice(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[NOTICE] "+format, v...)
-	l.writeMesg(mesg)
+	l.writeMesg(mesg, false)
 }
 
 func (l *GnoccoLogger) Warn(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[WARN] "+format, v...)
-	l.writeMesg(mesg)
+	l.writeMesg(mesg, false)
 }
 
 func (l *GnoccoLogger) Error(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[ERROR] "+format, v...)
-	l.writeMesg(mesg)
+	l.writeMesg(mesg, false)
+}
+
+func (l *GnoccoLogger) Fatal(format string, v ...interface{}) {
+	mesg := fmt.Sprintf("[FATAL] "+format, v...)
+	l.writeMesg(mesg, true)
 }
 
 type ConsoleHandler struct {
@@ -104,7 +111,11 @@ func (h *ConsoleHandler) Setup(config map[string]interface{}) error {
 }
 
 func (h *ConsoleHandler) Write(lm *logMesg) {
-	h.logger.Println(lm.Mesg)
+	if !lm.Fatal {
+		h.logger.Println(lm.Mesg)
+	} else {
+		h.logger.Fatalln(lm.Mesg)
+	}
 }
 
 type FileHandler struct {
@@ -135,5 +146,9 @@ func (h *FileHandler) Write(lm *logMesg) {
 		return
 	}
 
-	h.logger.Println(lm.Mesg)
+	if !lm.Fatal {
+		h.logger.Println(lm.Mesg)
+	} else {
+		h.logger.Fatalln(lm.Mesg)
+	}
 }

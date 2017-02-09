@@ -32,11 +32,12 @@ func main() {
 	for {
 		sign := <-signalChan
 		switch sign {
-		case syscall.SIGTERM, syscall.SIGINT:
-			logger.Info("Stoping as requested")
-			os.Exit(0)
+		case syscall.SIGTERM:
+			logger.Fatal("Got SIGTERM, stoping as requested")
+		case syscall.SIGINT:
+			logger.Fatal("Got SIGINT, stoping as requested")
 		default:
-			logger.Info("I received %s signal", sign)
+			logger.Warn("I received %s signal", sign)
 		}
 	}
 }
