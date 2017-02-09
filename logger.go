@@ -58,11 +58,9 @@ func (l *GnoccoLogger) Run() {
 }
 
 func (l *GnoccoLogger) writeMesg(mesg string) {
-
 	lm := &logMesg{
 		Mesg: mesg,
 	}
-
 	l.mesgs <- lm
 }
 

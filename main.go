@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,18 +26,19 @@ func main() {
 
 	server.Run()
 
-	sigs := make(chan os.Signal, 1)
-	done := make(chan bool, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan)
 
-	go func() {
-		sig := <-sigs
-		fmt.Println(sig)
-		logger.Info("signal %s received", sig)
-		done <- true
-	}()
-	<-done
-	logger.Info("stopping")
+	for {
+		sign := <-signalChan
+		switch sign {
+		case syscall.SIGTERM, syscall.SIGINT:
+			logger.Info("Stoping as requested")
+			os.Exit(0)
+		default:
+			logger.Info("I received %s signal", sign)
+		}
+	}
 }
 
 func initLogger() {

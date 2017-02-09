@@ -52,7 +52,6 @@ func (s *Server) Run() {
 }
 
 func (s *Server) start(ds *dns.Server) {
-
 	logger.Info("Start %s listener", ds.Net)
 	err := ds.ListenAndServe()
 	if err != nil {
