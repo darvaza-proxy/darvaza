@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/user"
+	"path/filepath"
+	"strconv"
 )
 
 const LOG_OUTPUT_BUFFER = 1024
@@ -132,12 +135,25 @@ func (h *FileHandler) Setup(config map[string]interface{}) error {
 		h.file = file.(string)
 		if _, err := os.Stat(h.file); os.IsNotExist(err) {
 			if _, err := os.Create(h.file); err != nil {
-				return err
+				if errP := os.MkdirAll(filepath.Dir(h.file), 0755); errP != nil {
+					return errP
+				}
 			}
 		}
-		output, err := os.OpenFile(h.file, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+
+		usr, errU := user.Lookup(Config.User)
+		if errU != nil {
+			return errU
+		}
+		uid, _ := strconv.Atoi(usr.Uid)
+		gid, _ := strconv.Atoi(usr.Gid)
+		output, err := os.OpenFile(h.file, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 		if err != nil {
 			return err
+		}
+
+		if errChown := os.Chown(h.file, uid, gid); errChown != nil {
+			fmt.Println(errChown)
 		}
 
 		h.logger = log.New(output, "", log.Ldate|log.Ltime)
