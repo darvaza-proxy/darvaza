@@ -51,7 +51,7 @@ func initResolver() {
 func lookup(w dns.ResponseWriter, req *dns.Msg, ns string) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	if ns == "" {
-		ns = net.JoinHostPort(roots[r.Intn(len(roots))].ip4.String(), ":53")
+		ns = net.JoinHostPort(roots[r.Intn(len(roots))].ip4.String(), "53")
 	}
 	cl := new(dns.Client)
 
