@@ -130,7 +130,12 @@ func NewFileHandler() LoggerHandler {
 func (h *FileHandler) Setup(config map[string]interface{}) error {
 	if file, ok := config["file"]; ok {
 		h.file = file.(string)
-		output, err := os.Create(h.file)
+		if _, err := os.Stat(h.file); os.IsNotExist(err) {
+			if _, err := os.Create(h.file); err != nil {
+				return err
+			}
+		}
+		output, err := os.OpenFile(h.file, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			return err
 		}
