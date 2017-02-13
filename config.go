@@ -15,13 +15,9 @@ type cfg struct {
 	RootsFile      string
 	PermissionsDir string
 	Daemon         bool
+	DoTCP          bool
 
-	TCPServer struct {
-		Host string
-		Port int
-	}
-
-	UDPServer struct {
+	Listen struct {
 		Host string
 		Port int
 	}

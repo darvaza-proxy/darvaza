@@ -16,10 +16,9 @@ func main() {
 	initResolver()
 
 	server := &Server{
-		thost: cf.TCPServer.Host,
-		tport: cf.TCPServer.Port,
-		uhost: cf.UDPServer.Host,
-		uport: cf.UDPServer.Port,
+		host:  cf.Listen.Host,
+		port:  cf.Listen.Port,
+		dotcp: cf.DoTCP,
 		user:  cf.User,
 		group: cf.Group,
 	}

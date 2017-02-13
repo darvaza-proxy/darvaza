@@ -9,41 +9,40 @@ import (
 )
 
 type Server struct {
-	thost string
-	tport int
-	uhost string
-	uport int
+	host  string
+	port  int
+	dotcp bool
 	user  string
 	group string
 }
 
-func (s *Server) UAddr() string {
-	return net.JoinHostPort(s.uhost, strconv.Itoa(s.uport))
+func (s *Server) Addr() string {
+	return net.JoinHostPort(s.host, strconv.Itoa(s.port))
 }
 
-func (s *Server) TAddr() string {
-	return net.JoinHostPort(s.thost, strconv.Itoa(s.tport))
-}
 func (s *Server) Run() {
 
 	Handler := NewHandler()
 
-	tcpHandler := dns.NewServeMux()
-	tcpHandler.HandleFunc(".", Handler.DoTCP)
+	if s.dotcp {
+		tcpHandler := dns.NewServeMux()
+		tcpHandler.HandleFunc(".", Handler.DoTCP)
+		tcpServer := &dns.Server{Addr: s.Addr(),
+			Net:     "tcp",
+			Handler: tcpHandler}
+		go s.start(tcpServer)
+
+	}
 
 	udpHandler := dns.NewServeMux()
 	udpHandler.HandleFunc(".", Handler.DoUDP)
-	tcpServer := &dns.Server{Addr: s.TAddr(),
-		Net:     "tcp",
-		Handler: tcpHandler}
 
-	udpServer := &dns.Server{Addr: s.UAddr(),
+	udpServer := &dns.Server{Addr: s.Addr(),
 		Net:     "udp",
 		Handler: udpHandler,
 		UDPSize: 65535}
 
 	go s.start(udpServer)
-	go s.start(tcpServer)
 
 	err := util.DropPrivilege(s.user, s.group)
 	if err != nil {
