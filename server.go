@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 
@@ -14,16 +15,21 @@ type Server struct {
 	dotcp bool
 	user  string
 	group string
+	cache *MCache
 }
 
 func (s *Server) Addr() string {
 	return net.JoinHostPort(s.host, strconv.Itoa(s.port))
 }
 
+func (s *Server) DumpCache() {
+	fmt.Println(s.cache)
+}
+
 func (s *Server) Run() {
 
 	Handler := NewHandler()
-
+	s.cache = Handler.Cache
 	if s.dotcp {
 		tcpHandler := dns.NewServeMux()
 		tcpHandler.HandleFunc(".", Handler.DoTCP)

@@ -35,6 +35,9 @@ func main() {
 			logger.Fatal("Got SIGTERM, stoping as requested")
 		case syscall.SIGINT:
 			logger.Fatal("Got SIGINT, stoping as requested")
+		case syscall.SIGUSR2:
+			logger.Info("Got SIGUSR2, dumping cache to stdout")
+			server.DumpCache()
 		default:
 			logger.Warn("I received %s signal", sign)
 		}

@@ -14,15 +14,7 @@ type Mesg struct {
 	Expire time.Time
 }
 
-type Cache interface {
-	Get(key string) (Msg *dns.Msg, err error)
-	Set(key string, Msg *dns.Msg) error
-	Exists(key string) bool
-	Remove(key string)
-	Length() int
-}
-
-type CacheMap struct {
+type MCache struct {
 	Backend  map[string]Mesg
 	Expire   time.Duration
 	Maxcount int
@@ -52,7 +44,7 @@ func (c CacheIsFull) Error() string {
 	return "Cache is Full"
 }
 
-func (m *CacheMap) Get(key string) (*dns.Msg, error) {
+func (m *MCache) Get(key string) (*dns.Msg, error) {
 	m.mu.RLock()
 	mesg, ok := m.Backend[key]
 	m.mu.RUnlock()
@@ -69,7 +61,7 @@ func (m *CacheMap) Get(key string) (*dns.Msg, error) {
 	return mesg.Msg, nil
 }
 
-func (m *CacheMap) Set(key string, msg *dns.Msg) error {
+func (m *MCache) Set(key string, msg *dns.Msg) error {
 	if m.Full() && !m.Exists(key) {
 		return CacheIsFull{}
 	}
@@ -83,30 +75,42 @@ func (m *CacheMap) Set(key string, msg *dns.Msg) error {
 	return nil
 }
 
-func (m *CacheMap) Remove(key string) {
+func (m *MCache) Remove(key string) {
 	m.mu.Lock()
 	delete(m.Backend, key)
 	m.mu.Unlock()
 }
 
-func (m *CacheMap) Exists(key string) bool {
+func (m *MCache) Exists(key string) bool {
 	m.mu.RLock()
 	_, ok := m.Backend[key]
 	m.mu.RUnlock()
 	return ok
 }
 
-func (m *CacheMap) Length() int {
+func (m *MCache) Length() int {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return len(m.Backend)
 }
 
-func (m *CacheMap) Full() bool {
+func (m *MCache) Full() bool {
 	if m.Maxcount == 0 {
 		return false
 	}
 	return m.Length() >= m.Maxcount
+}
+
+func (m *MCache) Load() error {
+	return nil
+}
+
+func (m *MCache) Save() error {
+	return nil
+}
+
+func (m *MCache) Dump() {
+	fmt.Println(m)
 }
 
 func KeyGen(q Question) string {

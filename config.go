@@ -27,6 +27,11 @@ type cfg struct {
 		File   string
 	}
 
+	Cache struct {
+		Expire   int
+		MaxCount int
+	}
+
 	Hosts HostsCfg
 }
 

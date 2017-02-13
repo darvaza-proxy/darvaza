@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"time"
 
 	"github.com/miekg/dns"
 )
@@ -23,10 +24,16 @@ func (q *Question) String() string {
 }
 
 type GnoccoHandler struct {
+	Cache *MCache
 }
 
 func NewHandler() *GnoccoHandler {
-	return &GnoccoHandler{}
+	cache := &MCache{
+		Backend:  make(map[string]Mesg, Config.Cache.MaxCount),
+		Expire:   time.Duration(Config.Cache.Expire) * time.Second,
+		Maxcount: Config.Cache.MaxCount,
+	}
+	return &GnoccoHandler{cache}
 }
 
 func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
