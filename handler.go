@@ -46,8 +46,10 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	} else {
 		remote = w.RemoteAddr().(*net.UDPAddr).IP
 	}
+
 	logger.Info("%s lookup　%s", remote, Q.String())
 }
+
 func (h *GnoccoHandler) DoTCP(w dns.ResponseWriter, req *dns.Msg) {
 	h.do("tcp", w, req)
 }
