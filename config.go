@@ -16,6 +16,7 @@ type cfg struct {
 	PermissionsDir string
 	Daemon         bool
 	DoTCP          bool
+	SafeResolver   bool
 
 	Listen struct {
 		Host string
@@ -60,11 +61,11 @@ func loadConfig() cfg {
 
 	buf, err := ioutil.ReadAll(file)
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 
 	if err := toml.Unmarshal(buf, &Config); err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 	return Config
 }

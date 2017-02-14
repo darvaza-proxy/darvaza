@@ -20,14 +20,28 @@ type root struct {
 
 var roots map[int]root
 
+type resolver struct {
+	ip net.IP
+}
+
+var resolvers map[int]resolver
+
+type Resolver struct {
+	Roots     roots
+	Resolvers resolvers
+	Safe      bool
+}
+
+var Resolver Resolver
+
 func initResolver() {
 	if Config.RootsFile == "" {
-		fmt.Println("Config.RootsFile is empty :(")
-		fmt.Println(Config)
+		logger.Fatal("Config.RootsFile is empty :(")
 	}
 	fl, err := os.Open(Config.RootsFile)
+	defer fl.Close()
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 	scanner := bufio.NewScanner(fl)
 	roots = make(map[int]root)
@@ -45,6 +59,30 @@ func initResolver() {
 		id := int([]byte(rt.name)[0] - 65)
 		roots[id] = rt
 	}
+	Resolver.Roots = roots
+
+	f, err := os.Open("/etc/resolv.conf")
+	defer f.Close()
+
+	if err != nil {
+		logger.Warn(err)
+	}
+
+	scan := bufio.NewScanner(f)
+	resolvers = make(map[int]resolver)
+
+	i := 0
+	for scan.Scan() {
+		var re resolver
+		fields := strings.Fields(scan.Text())
+		if fields[0] == "nameserver" {
+			re.ip = net.ParseIP(fields[1])
+			i++
+			resolvers[i] = re
+		}
+	}
+	Resolver.Resolvers = resolvers
+	Resolver.Safe = Config.SafeResolver
 
 }
 
