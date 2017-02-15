@@ -48,6 +48,7 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	}
 
 	logger.Info("%s lookup　%s", remote, Q.String())
+	lookup(w, req, "")
 }
 
 func (h *GnoccoHandler) DoTCP(w dns.ResponseWriter, req *dns.Msg) {
