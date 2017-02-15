@@ -18,21 +18,16 @@ type root struct {
 	ip6  net.IP
 }
 
-var roots map[int]root
-
-type resolver struct {
+type reser struct {
 	ip net.IP
 }
 
-var resolvers map[int]resolver
+var Roots map[int]root
 
 type Resolver struct {
-	Roots     roots
-	Resolvers resolvers
+	Resolvers map[int]reser
 	Safe      bool
 }
-
-var Resolver Resolver
 
 func initResolver() {
 	if Config.RootsFile == "" {
@@ -41,10 +36,10 @@ func initResolver() {
 	fl, err := os.Open(Config.RootsFile)
 	defer fl.Close()
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatal("Error %s occured.", err)
 	}
 	scanner := bufio.NewScanner(fl)
-	roots = make(map[int]root)
+	Roots = make(map[int]root)
 	for scanner.Scan() {
 		var rt root
 		flds := strings.Fields(scanner.Text())
@@ -57,23 +52,23 @@ func initResolver() {
 		}
 		// A is ascii 65, B is 66 etc.
 		id := int([]byte(rt.name)[0] - 65)
-		roots[id] = rt
+		Roots[id] = rt
 	}
-	Resolver.Roots = roots
+	Resolver := new(Resolver)
 
 	f, err := os.Open("/etc/resolv.conf")
 	defer f.Close()
 
 	if err != nil {
-		logger.Warn(err)
+		logger.Warn("Error %s occured.", err)
 	}
 
 	scan := bufio.NewScanner(f)
-	resolvers = make(map[int]resolver)
+	resolvers := make(map[int]reser)
 
 	i := 0
 	for scan.Scan() {
-		var re resolver
+		var re reser
 		fields := strings.Fields(scan.Text())
 		if fields[0] == "nameserver" {
 			re.ip = net.ParseIP(fields[1])
@@ -82,14 +77,14 @@ func initResolver() {
 		}
 	}
 	Resolver.Resolvers = resolvers
-	Resolver.Safe = Config.SafeResolver
+	Resolver.Safe = Config.SafeResolv
 
 }
 
 func lookup(w dns.ResponseWriter, req *dns.Msg, ns string) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	if ns == "" {
-		ns = net.JoinHostPort(roots[r.Intn(len(roots))].ip4.String(), "53")
+		ns = net.JoinHostPort(Roots[r.Intn(len(Roots))].ip4.String(), "53")
 	}
 	cl := new(dns.Client)
 
