@@ -60,6 +60,6 @@ func (s *Server) start(ds *dns.Server) {
 	logger.Info("Start %s listener", ds.Net)
 	err := ds.ListenAndServe()
 	if err != nil {
-		logger.Error("Start %s listener failed:%s", ds.Net, err.Error())
+		logger.Fatal("Start %s listener failed:%s", ds.Net, err.Error())
 	}
 }
