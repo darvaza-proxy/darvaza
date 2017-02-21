@@ -24,7 +24,8 @@ func (q *Question) String() string {
 }
 
 type GnoccoHandler struct {
-	Cache *MCache
+	Cache    *MCache
+	Resolver *Resolver
 }
 
 func NewHandler() *GnoccoHandler {
@@ -33,12 +34,13 @@ func NewHandler() *GnoccoHandler {
 		Expire:   time.Duration(Config.Cache.Expire) * time.Second,
 		Maxcount: Config.Cache.MaxCount,
 	}
-	return &GnoccoHandler{cache}
+	res := initResolver()
+	return &GnoccoHandler{cache, res}
 }
 
 func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	q := req.Question[0]
-	Q := Question{UnFqdn(q.Name), dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
+	Q := Question{q.Name, dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
 
 	var remote net.IP
 	if Net == "tcp" {
@@ -48,7 +50,7 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	}
 
 	logger.Info("%s lookup　%s", remote, Q.String())
-	lookup(w, req, "")
+	h.Resolver.LookupGen(w, req)
 }
 
 func (h *GnoccoHandler) DoTCP(w dns.ResponseWriter, req *dns.Msg) {
@@ -57,26 +59,4 @@ func (h *GnoccoHandler) DoTCP(w dns.ResponseWriter, req *dns.Msg) {
 
 func (h *GnoccoHandler) DoUDP(w dns.ResponseWriter, req *dns.Msg) {
 	h.do("udp", w, req)
-}
-
-func (h *GnoccoHandler) isIPQuery(q dns.Question) int {
-	if q.Qclass != dns.ClassINET {
-		return notIPQuery
-	}
-
-	switch q.Qtype {
-	case dns.TypeA:
-		return _IP4Query
-	case dns.TypeAAAA:
-		return _IP6Query
-	default:
-		return notIPQuery
-	}
-}
-
-func UnFqdn(s string) string {
-	if dns.IsFqdn(s) {
-		return s[:len(s)-1]
-	}
-	return s
 }

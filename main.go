@@ -13,7 +13,6 @@ var (
 func main() {
 	cf := loadConfig()
 	initLogger()
-	initResolver()
 
 	server := &Server{
 		host:  cf.Listen.Host,
