@@ -23,7 +23,7 @@ type reser struct {
 }
 
 type Resolver struct {
-	RootZone  Zone
+	RootZone  NSZone
 	Resolvers map[int]reser
 	Safe      bool
 }
@@ -33,7 +33,7 @@ var ips []string
 func initResolver() *Resolver {
 	Resolver := new(Resolver)
 	resolvers := make(map[int]reser)
-	roots := initZone()
+	roots := initNSZone()
 
 	if Config.RootsFile == "" {
 		logger.Fatal("Config.RootsFile is empty :(")
@@ -130,7 +130,7 @@ func randint(upper int) int {
 
 }
 
-func (r *Resolver) getIp(host string, zn Zone, tip string) []string {
+func (r *Resolver) getIp(host string, zn NSZone, tip string) []string {
 	if zn.isEmpty() {
 		zn = r.RootZone
 	}
@@ -202,13 +202,13 @@ func (r *Resolver) getIp(host string, zn Zone, tip string) []string {
 
 }
 
-func processResponse(resp *dns.Msg) (RRs, Zone, RRs) {
+func processResponse(resp *dns.Msg) (RRs, NSZone, RRs) {
 	var answer RRs
-	var referal Zone
+	var referal NSZone
 	var ns RRs
 
 	if resp == nil {
-		return nil, Zone{}, nil
+		return nil, NSZone{}, nil
 	}
 
 	rCode := resp.Rcode
@@ -232,8 +232,8 @@ func processResponse(resp *dns.Msg) (RRs, Zone, RRs) {
 	return answer, referal, ns
 }
 
-func processReferal(res *dns.Msg) Zone {
-	var result Zone
+func processReferal(res *dns.Msg) NSZone {
+	var result NSZone
 	result = makeNsZone(res)
 	return result
 }

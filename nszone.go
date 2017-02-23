@@ -29,7 +29,7 @@ func (z *NSZone) addNs(ns string, ip string) {
 	}
 }
 
-func initZone() NSZone {
+func initNSZone() NSZone {
 	var result NSZone
 	result.Nslist = make(map[string][]string)
 	return result
