@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"net"
+	"os"
 	"strconv"
 
 	"github.com/fangdingjun/gpp/util"
@@ -15,7 +15,7 @@ type Server struct {
 	dotcp bool
 	user  string
 	group string
-	cache *MCache
+	cache Cache
 }
 
 func (s *Server) Addr() string {
@@ -23,22 +23,20 @@ func (s *Server) Addr() string {
 }
 
 func (s *Server) DumpCache() {
-	fmt.Println(s.cache)
+	s.cache.Dump(os.Stdout)
 }
 
 func (s *Server) Run() {
 
 	Handler := NewHandler()
-	s.cache = Handler.Cache
-	if s.dotcp {
-		tcpHandler := dns.NewServeMux()
-		tcpHandler.HandleFunc(".", Handler.DoTCP)
-		tcpServer := &dns.Server{Addr: s.Addr(),
-			Net:     "tcp",
-			Handler: tcpHandler}
-		go s.start(tcpServer)
+	s.cache = NewMemory(10000, 60)
 
-	}
+	tcpHandler := dns.NewServeMux()
+	tcpHandler.HandleFunc(".", Handler.DoTCP)
+	tcpServer := &dns.Server{Addr: s.Addr(),
+		Net:     "tcp",
+		Handler: tcpHandler}
+	go s.start(tcpServer)
 
 	udpHandler := dns.NewServeMux()
 	udpHandler.HandleFunc(".", Handler.DoUDP)

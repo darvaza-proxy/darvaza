@@ -2,15 +2,8 @@ package main
 
 import (
 	"net"
-	"time"
 
 	"github.com/miekg/dns"
-)
-
-const (
-	notIPQuery = 0
-	_IP4Query  = 4
-	_IP6Query  = 6
 )
 
 type Question struct {
@@ -24,18 +17,12 @@ func (q *Question) String() string {
 }
 
 type GnoccoHandler struct {
-	Cache    *MCache
 	Resolver *Resolver
 }
 
 func NewHandler() *GnoccoHandler {
-	cache := &MCache{
-		Backend:  make(map[string]Mesg, Config.Cache.MaxCount),
-		Expire:   time.Duration(Config.Cache.Expire) * time.Second,
-		Maxcount: Config.Cache.MaxCount,
-	}
 	res := initResolver()
-	return &GnoccoHandler{cache, res}
+	return &GnoccoHandler{res}
 }
 
 func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {

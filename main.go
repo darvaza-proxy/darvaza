@@ -17,7 +17,6 @@ func main() {
 	server := &Server{
 		host:  cf.Listen.Host,
 		port:  cf.Listen.Port,
-		dotcp: cf.DoTCP,
 		user:  cf.User,
 		group: cf.Group,
 	}

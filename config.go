@@ -15,7 +15,6 @@ type cfg struct {
 	RootsFile      string
 	PermissionsDir string
 	Daemon         bool
-	DoTCP          bool
 	SafeResolv     bool
 
 	Listen struct {
