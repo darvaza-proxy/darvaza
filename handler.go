@@ -42,6 +42,7 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 		logger.Info("%s lookup　%s", remote, Q.String())
 		h.Jobs++
 		h.Resolver.LookupGen(w, req)
+		h.Jobs--
 	} else {
 		m := new(dns.Msg)
 		m.SetRcode(req, 2)
