@@ -12,7 +12,6 @@ import (
 type Server struct {
 	host  string
 	port  int
-	dotcp bool
 	user  string
 	group string
 	cache Cache
@@ -29,7 +28,7 @@ func (s *Server) DumpCache() {
 func (s *Server) Run() {
 
 	Handler := NewHandler()
-	s.cache = NewMemory(10000, 60)
+	s.cache = NewMemory(Config.Cache.MaxCount, Config.Cache.Expire)
 
 	tcpHandler := dns.NewServeMux()
 	tcpHandler.HandleFunc(".", Handler.DoTCP)
