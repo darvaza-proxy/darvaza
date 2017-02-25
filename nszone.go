@@ -34,6 +34,7 @@ func initNSZone() NSZone {
 	result.Nslist = make(map[string][]string)
 	return result
 }
+
 func makeNsZone(msg *dns.Msg) NSZone {
 	if msg != nil {
 		rs := mdRRtoRRs(msg.Ns)
@@ -47,7 +48,6 @@ func makeNsZone(msg *dns.Msg) NSZone {
 			for _, x := range ex {
 				result.addNs(x.Name, x.Value)
 			}
-		} else {
 		}
 		return result
 	}
