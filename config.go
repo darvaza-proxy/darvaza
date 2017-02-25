@@ -22,6 +22,9 @@ type cfg struct {
 		Port int
 	}
 
+	MaxJobs    int
+	MaxQueries int
+
 	Log struct {
 		Stdout bool
 		File   string

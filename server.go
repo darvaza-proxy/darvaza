@@ -10,11 +10,13 @@ import (
 )
 
 type Server struct {
-	host  string
-	port  int
-	user  string
-	group string
-	cache Cache
+	host       string
+	port       int
+	user       string
+	group      string
+	cache      Cache
+	maxjobs    int
+	maxqueries int
 }
 
 func (s *Server) Addr() string {
