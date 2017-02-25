@@ -29,7 +29,7 @@ func (s *Server) DumpCache() {
 
 func (s *Server) Run() {
 
-	Handler := NewHandler()
+	Handler := NewHandler(s.maxjobs)
 	s.cache = NewMemory(Config.Cache.MaxCount, Config.Cache.Expire)
 
 	tcpHandler := dns.NewServeMux()
