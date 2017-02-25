@@ -82,13 +82,18 @@ func initResolver() *Resolver {
 }
 
 func (r *Resolver) LookupGen(w dns.ResponseWriter, req *dns.Msg) {
-	ips = []string{}
-	ips = r.getIp(req.Question[0].Name, emptyZone, "NS")
-	var ip string
-	if len(ips) > 0 {
-		ip = randomfromslice(ips)
-	}
-	if ip != "" {
+	if r.Safe {
+		ips = []string{}
+		ips = r.getIp(req.Question[0].Name, emptyZone, "NS")
+		var ip string
+		if len(ips) > 0 {
+			ip = randomfromslice(ips)
+		}
+		if ip != "" {
+			r.lookup(w, req, net.JoinHostPort(ip, "53"))
+		}
+	} else {
+		ip := r.Resolvers[randint(len(r.Resolvers))].ip
 		r.lookup(w, req, net.JoinHostPort(ip, "53"))
 	}
 }
@@ -125,9 +130,15 @@ func randomfromslice(s []string) string {
 }
 
 func randint(upper int) int {
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	return rnd.Intn(upper)
-
+	var result int
+	switch upper {
+	case 0, 1:
+		result = upper
+	default:
+		rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+		result = rnd.Intn(upper)
+	}
+	return result
 }
 
 func (r *Resolver) getIp(host string, zn NSZone, tip string) []string {

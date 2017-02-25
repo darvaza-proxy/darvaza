@@ -15,10 +15,12 @@ func main() {
 	initLogger()
 
 	server := &Server{
-		host:  cf.Listen.Host,
-		port:  cf.Listen.Port,
-		user:  cf.User,
-		group: cf.Group,
+		host:       cf.Listen.Host,
+		port:       cf.Listen.Port,
+		user:       cf.User,
+		group:      cf.Group,
+		maxjobs:    cf.MaxJobs,
+		maxqueries: cf.MaxQueries,
 	}
 
 	server.Run()
