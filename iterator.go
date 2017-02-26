@@ -51,10 +51,13 @@ func initIterator() *Iterator {
 	return z
 }
 
-func (i *Iterator) Iterate(req *dns.Msg) *dns.Msg {
-	if i.CurrentZone.isEmpty() {
+func (i *Iterator) Iterate(req *dns.Msg, first bool, response chan *dns.Msg) {
+	result := new(dns.Msg)
+
+	if first {
 		i.CurrentZone = i.RootZone
 	}
+
 	tmp := getRandomNsIpFromZone(i.CurrentZone)
 
 	nsrv := net.ParseIP(tmp[0]).To4().String()
@@ -72,12 +75,15 @@ func (i *Iterator) Iterate(req *dns.Msg) *dns.Msg {
 
 	switch {
 	case t == "Answer":
-		return answer
+		result = result.SetReply(req)
+		result.Answer = answer.Answer
+		result.Rcode = dns.RcodeSuccess
+		response <- result
 	case t == "Delegation":
 		if useGlue {
 			ns := makeNsZone(answer)
 			i.CurrentZone = ns
-			i.Iterate(req)
+			go i.Iterate(req, false, response)
 		}
 	case t == "Namezone":
 		s := []string{}
@@ -85,26 +91,34 @@ func (i *Iterator) Iterate(req *dns.Msg) *dns.Msg {
 		for _, r := range rs {
 			s = append(s, r.Value)
 		}
-		ip := i.iterateforip(randomfromslice(s), emptyZone)
-		ans, err := dns.Exchange(req, net.JoinHostPort(ip, "53"))
-		if err == nil {
-			if ans.Rcode == dns.RcodeSuccess {
-				return ans
-			} else {
-				logger.Error("I got response: %s", ans.Rcode)
-			}
+
+		randsl := randomfromslice(s)
+		iter := 0
+		ip := ""
+		zone := emptyZone
+		for ip == "" {
+			iter++
+			ip, zone = i.iterateforip(randsl, zone)
+		}
+		ans, err2 := dns.Exchange(req, net.JoinHostPort(ip, "53"))
+		if err2 == nil && ans.Rcode == dns.RcodeSuccess {
+			result = result.SetReply(req)
+			result.Answer = ans.Answer
+			result.Rcode = dns.RcodeSuccess
+			response <- result
+
 		} else {
-			logger.Error("Error: ", err)
+			logger.Error("I got response: %s", ans.Rcode)
 		}
 
+	case t == "Refused":
+		logger.Error("Iterate got refused by %s", nsrv)
 	default:
 		logger.Error("Untypyfied message: %s", answer)
 	}
-	//We should not get here!
-	return nil
 }
 
-func (i *Iterator) iterateforip(name string, ns NSZone) (ip string) {
+func (i *Iterator) iterateforip(name string, ns NSZone) (ip string, n NSZone) {
 	var tmp []string
 
 	if ns.isEmpty() {
@@ -134,10 +148,14 @@ func (i *Iterator) iterateforip(name string, ns NSZone) (ip string) {
 	switch {
 	case t == "Answer":
 		ip = mdRRtoRRs(answer.Answer)[0].Value
-	case t == "Nil":
+		n = emptyZone
+	case t == "Nil message":
 		logger.Error("I sent Nil to typify")
+	case t == "Refused":
+		logger.Error("IterateForIP was refused")
 	default:
-		ip = i.iterateforip(name, makeNsZone(answer))
+		ip = ""
+		n = makeNsZone(answer)
 	}
 
 	return
@@ -161,9 +179,12 @@ func typify(m *dns.Msg) string {
 				return "Delegation"
 			}
 		}
+		if m.Rcode == dns.RcodeRefused {
+			return "Refused"
+		}
 		return "Unknown"
 	} else {
-		return "Nil"
+		return "Nil message"
 	}
 }
 

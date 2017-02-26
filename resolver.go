@@ -54,12 +54,10 @@ func initResolver() *Resolver {
 
 func (r *Resolver) LookupGen(w dns.ResponseWriter, req *dns.Msg) {
 	if r.Safe {
-		z := r.Iterator.Iterate(req)
-		if z != nil {
-			w.WriteMsg(z)
-		} else {
-			logger.Error("Iterator resulted in nil response")
-		}
+		msgChan := make(chan *dns.Msg)
+		r.Iterator.Iterate(req, true, msgChan)
+		ans := <-msgChan
+		w.WriteMsg(ans)
 	} else {
 		ip := r.Resolvers[randint(len(r.Resolvers))].ip
 		r.lookup(w, req, net.JoinHostPort(ip, "53"))
@@ -67,10 +65,9 @@ func (r *Resolver) LookupGen(w dns.ResponseWriter, req *dns.Msg) {
 }
 
 func (r *Resolver) lookup(w dns.ResponseWriter, req *dns.Msg, ns string) {
-	cl := new(dns.Client)
 	req.RecursionDesired = !r.Safe
 
-	response, _, err := cl.Exchange(req, ns)
+	response, err := dns.Exchange(req, ns)
 
 	if err != nil {
 		logger.Error("Error %s", err)
