@@ -31,8 +31,9 @@ type cfg struct {
 	}
 
 	Cache struct {
-		Expire   int
-		MaxCount int
+		Expire    int
+		MaxCount  int
+		CachePath string
 	}
 
 	Hosts HostsCfg

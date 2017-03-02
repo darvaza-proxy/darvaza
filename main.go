@@ -32,11 +32,13 @@ func main() {
 		sign := <-signalChan
 		switch sign {
 		case syscall.SIGTERM:
+			server.ShutDown()
 			logger.Fatal("Got SIGTERM, stoping as requested")
 		case syscall.SIGINT:
+			server.ShutDown()
 			logger.Fatal("Got SIGINT, stoping as requested")
 		case syscall.SIGUSR2:
-			logger.Info("Got SIGUSR2, dumping cache to stdout")
+			logger.Info("Got SIGUSR2, dumping cache")
 			server.DumpCache()
 		default:
 			logger.Warn("I received %s signal", sign)
