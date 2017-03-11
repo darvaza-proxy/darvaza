@@ -142,7 +142,7 @@ func (c *Cache) Set(key string, mtype string, d *dns.Msg) {
 			}
 			c.pcache[mk] = mrec
 		}
-	case mtype == "A", mtype == "AAAA":
+	case mtype == "A", mtype == "AAAA", mtype == "CNAME":
 		var rec Crecord
 		for _, t := range d.Answer {
 			v, _ := dRRtoRR(t)

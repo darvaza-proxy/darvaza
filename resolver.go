@@ -73,9 +73,19 @@ func (r *Resolver) Lookup(c *Cache, w dns.ResponseWriter, req *dns.Msg) {
 				}
 				w.WriteMsg(result)
 			} else {
-				logger.Error("%s", err)
-				result.SetRcode(req, 4)
-				w.WriteMsg(result)
+				if crcs, err := c.Get(c.MakeKey(qn, "CNAME")); err == nil {
+					if a, err := c.Get(c.MakeKey(crcs.Value[0], "A")); err == nil {
+						for _, rrc := range a.Value {
+							ff, _ := dns.NewRR(qn + " " + qt + " " + rrc)
+							result.Answer = append(result.Answer, ff)
+						}
+						w.WriteMsg(result)
+					}
+				} else {
+					logger.Error("%s", err)
+					result.SetRcode(req, 4)
+					w.WriteMsg(result)
+				}
 			}
 		}
 	} else {
@@ -132,9 +142,14 @@ func (r *Resolver) Iterate(c *Cache, qname string, qtype string, level int) *Cre
 				}
 				break
 			case "Cname":
-				logger.Error("I reached a CNAME. I cannot deal with them yet :/")
-				break
+				c.Set(ans.Answer[0].Header().Name, "CNAME", ans)
+				v := mdRRtoRRs(ans.Answer)
+				for _, g := range v {
+					_ = r.Iterate(c, dns.Fqdn(g.Value), "A", 1)
+				}
+
 			default:
+				logger.Error(Typify(ans))
 			}
 		} else {
 			logger.Error("we got a nsdomain %s but cache has no IP for it", nserr)
@@ -158,23 +173,14 @@ func getans(qname string, qtype string, nameserver string) (result *dns.Msg) {
 
 }
 
-func getParent(domain string) string {
-	var result string
-	x := dns.Split(domain)
-	if len(x) > 1 {
-		result = domain[x[1]:]
-	} else {
-		result = "."
-	}
-	return result
-}
-
 func getParentinCache(domain string, c *Cache) string {
 	var result string
 	x := dns.SplitDomainName(domain)
 	for i := len(x) - 1; i >= 0; i-- {
 		if _, err := c.Get(x[i] + "." + result + "/NS"); err == nil {
 			result = x[i] + "." + result
+		} else {
+			break
 		}
 	}
 
@@ -182,7 +188,6 @@ func getParentinCache(domain string, c *Cache) string {
 	if result == "" {
 		result = "."
 	}
-
 	return result
 }
 
