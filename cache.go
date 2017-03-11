@@ -108,8 +108,9 @@ func (c *Cache) SetVal(key string, mtype string, ttl int, val string) {
 	mrec.Stored = int(time.Now().Unix())
 	mrec.Ttl = ttl
 	mrec.Value = append(mrec.Value, val)
-
+	c.Lock()
 	c.pcache[mk] = mrec
+	c.Unlock()
 
 }
 
@@ -135,12 +136,16 @@ func (c *Cache) Set(key string, mtype string, d *dns.Msg) {
 							srec.Ttl = y.Ttl
 							srec.Value = append(srec.Value, y.Value)
 							sk = c.MakeKey(dns.Fqdn(u.Value), y.Type)
+							c.Lock()
 							c.pcache[sk] = srec
+							c.Unlock()
 						}
 					}
 				}
 			}
+			c.Lock()
 			c.pcache[mk] = mrec
+			c.Unlock()
 		}
 	case mtype == "A", mtype == "AAAA", mtype == "CNAME":
 		var rec Crecord
@@ -151,7 +156,9 @@ func (c *Cache) Set(key string, mtype string, d *dns.Msg) {
 			rec.Value = append(rec.Value, v.Value)
 
 		}
+		c.Lock()
 		c.pcache[mk] = rec
+		c.Unlock()
 	default:
 		logger.Info("%v", mtype)
 	}
@@ -162,9 +169,13 @@ func (c *Cache) Load(r io.Reader, what bool) error {
 	var err error
 	decoder := gob.NewDecoder(r)
 	if what {
+		c.Lock()
 		err = decoder.Decode(c.pcache)
+		c.Unlock()
 	} else {
+		c.Lock()
 		err = decoder.Decode(c.pcache)
+		c.Unlock()
 	}
 	return err
 }
