@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fangdingjun/gpp/util"
 	"github.com/miekg/dns"
@@ -80,6 +81,8 @@ func (s *Server) Run() {
 
 	go s.start(udpServer)
 
+	go s.startCacheDumping()
+
 	err := util.DropPrivilege(s.user, s.group)
 	if err != nil {
 		logger.Error("Dropping privileges failed %s", err.Error())
@@ -96,4 +99,12 @@ func (s *Server) start(ds *dns.Server) {
 
 func (s *Server) ShutDown() {
 	logger.Info("Shutdown called.")
+}
+
+func (s *Server) startCacheDumping() {
+	interval := Config.Cache.DumpInterval
+	for {
+		<-time.After(time.Duration(interval) * time.Second)
+		go s.DumpCache()
+	}
 }

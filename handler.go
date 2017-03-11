@@ -45,11 +45,18 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 		h.Jobs++
 		switch {
 		case Q.qclass == "IN":
-			if r, err := h.Cache.Get(h.Cache.makeKey(Q.qname, Q.qtype), req); err == nil {
-				w.WriteMsg(r)
+			if recs, err := h.Cache.Get(h.Cache.MakeKey(Q.qname, Q.qtype)); err == nil {
+				//we have an answer now construct a dns.Msg
+				result := new(dns.Msg)
+				result.SetReply(req)
+				for _, z := range recs.Value {
+					rec, _ := dns.NewRR(dns.Fqdn(Q.qname) + " " + Q.qtype + " " + z)
+					result.Answer = append(result.Answer, rec)
+				}
+				w.WriteMsg(result)
 			} else {
 				logger.Debug("%s", err)
-				h.Resolver.LookupGen(w, req)
+				h.Resolver.Lookup(h.Cache, w, req)
 			}
 		case Q.qclass == "CH", Q.qtype == "TXT":
 			m := new(dns.Msg)

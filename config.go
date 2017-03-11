@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -15,7 +14,7 @@ type cfg struct {
 	RootsFile      string
 	PermissionsDir string
 	Daemon         bool
-	SafeResolv     bool
+	IterateResolv  bool
 
 	Listen struct {
 		Host string
@@ -31,9 +30,10 @@ type cfg struct {
 	}
 
 	Cache struct {
-		Expire    int
-		MaxCount  int
-		CachePath string
+		DumpInterval int
+		Expire       int
+		MaxCount     int
+		CachePath    string
 	}
 
 	Hosts HostsCfg
@@ -57,7 +57,6 @@ func loadConfig() cfg {
 
 	file, err := os.Open(confFile)
 	if err != nil {
-		fmt.Println(err)
 		panic(err)
 	}
 	defer file.Close()
