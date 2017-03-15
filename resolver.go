@@ -54,18 +54,15 @@ func (r *Resolver) Lookup(c *Cache, w dns.ResponseWriter, req *dns.Msg) {
 	if r.Iterative {
 		qn := req.Question[0].Name
 		qt := dns.TypeToString[req.Question[0].Qtype]
+
 		result := new(dns.Msg)
 		result.SetReply(req)
+		SList := NewStack()
+		SList.Push(qn, qt)
 
-		recs := r.Iterate(c, qn, qt, 1)
-		if !recs.IsEmpty() {
-			for _, z := range recs.Value {
-				rec, _ := dns.NewRR(dns.Fqdn(qn) + " " + qt + " " + z)
-				result.Answer = append(result.Answer, rec)
-			}
-			w.WriteMsg(result)
-		} else {
-			//We have no answer, but Iterate might have written it in cache
+		for !SList.IsEmpty() {
+			r.Iterate(c, qn, qt, SList)
+
 			if rcs, err := c.Get(c.MakeKey(qn, qt)); err == nil {
 				for _, z := range rcs.Value {
 					rc, _ := dns.NewRR(qn + " " + qt + " " + z)
@@ -80,11 +77,11 @@ func (r *Resolver) Lookup(c *Cache, w dns.ResponseWriter, req *dns.Msg) {
 							result.Answer = append(result.Answer, ff)
 						}
 						w.WriteMsg(result)
+					} else {
+						logger.Error("%s", err)
+						result.SetRcode(req, 4)
+						w.WriteMsg(result)
 					}
-				} else {
-					logger.Error("%s", err)
-					result.SetRcode(req, 4)
-					w.WriteMsg(result)
 				}
 			}
 		}
@@ -92,6 +89,7 @@ func (r *Resolver) Lookup(c *Cache, w dns.ResponseWriter, req *dns.Msg) {
 		ip := r.Resolvers[randint(len(r.Resolvers))].ip
 		r.lookup(w, req, net.JoinHostPort(ip, "53"))
 	}
+
 }
 
 func (r *Resolver) lookup(w dns.ResponseWriter, req *dns.Msg, ns string) {
@@ -106,12 +104,11 @@ func (r *Resolver) lookup(w dns.ResponseWriter, req *dns.Msg, ns string) {
 	}
 }
 
-func (r *Resolver) Iterate(c *Cache, qname string, qtype string, level int) *Crecord {
+func (r *Resolver) Iterate(c *Cache, qname string, qtype string, SList *Stack) {
 	//We arrived here because original question was not in cache
 	//so we iterate to find a nameserver for our question.
 
 	//Down the rabbit hole!
-	var result Crecord
 	ancestor := getParentinCache(qname, c)
 	if nstoask, ancerr := c.Get(ancestor + "/NS"); ancerr == nil {
 		if ns, nserr := c.Get(dns.Fqdn(randomfromslice(nstoask.Value)) + "/A"); nserr == nil {
@@ -119,33 +116,38 @@ func (r *Resolver) Iterate(c *Cache, qname string, qtype string, level int) *Cre
 
 			switch Typify(ans) {
 			case "Delegation":
+				//FIXME: Check bailiwick and observe that Extra can have fewer or more
+				//records than NS
 				c.Set(ans.Ns[0].Header().Name, "NS", ans)
+
 				ex := mdRRtoRRs(ans.Extra)
 				for _, x := range ex {
 					c.SetVal(x.Name, x.Type, x.Ttl, x.Value)
 				}
-				_ = r.Iterate(c, qname, qtype, 1)
+				r.Iterate(c, qname, qtype, SList)
 			case "Namezone":
 				c.Set(ans.Ns[0].Header().Name, "NS", ans)
 				t := mdRRtoRRs(ans.Ns)
 				for _, z := range t {
-					_ = r.Iterate(c, dns.Fqdn(z.Value), "A", 2)
+					SList.Push(dns.Fqdn(z.Value), "A")
+					r.Iterate(c, dns.Fqdn(z.Value), "A", SList)
 				}
 			case "Answer":
 				c.Set(ans.Answer[0].Header().Name, qtype, ans)
-				if level == 1 {
-					if r, err := c.Get(ans.Answer[0].Header().Name + "/" + qtype); err == nil {
-						result = r
-					} else {
-						logger.Error("%s", err)
-					}
+				SList.PopFor(ans.Answer[0].Header().Name, qtype)
+				if SList.IsEmpty() {
+					break
+				} else {
+					qn, qt := SList.Pop()
+					r.Iterate(c, qn, qt, SList)
 				}
-				break
 			case "Cname":
 				c.Set(ans.Answer[0].Header().Name, "CNAME", ans)
+				SList.PopFor(ans.Answer[0].Header().Name, qtype)
 				v := mdRRtoRRs(ans.Answer)
 				for _, g := range v {
-					_ = r.Iterate(c, dns.Fqdn(g.Value), "A", 1)
+					SList.Push(dns.Fqdn(g.Value), "A")
+					r.Iterate(c, dns.Fqdn(g.Value), "A", SList)
 				}
 
 			default:
@@ -155,7 +157,7 @@ func (r *Resolver) Iterate(c *Cache, qname string, qtype string, level int) *Cre
 			logger.Error("we got a nsdomain %s but cache has no IP for it", nserr)
 		}
 	}
-	return &result
+
 }
 
 func getans(qname string, qtype string, nameserver string) (result *dns.Msg) {
@@ -174,12 +176,12 @@ func getans(qname string, qtype string, nameserver string) (result *dns.Msg) {
 }
 
 func getParentinCache(domain string, c *Cache) string {
-	var result string
+	result := domain
 	x := dns.SplitDomainName(domain)
-	for i := len(x) - 1; i >= 0; i-- {
-		if _, err := c.Get(x[i] + "." + result + "/NS"); err == nil {
-			result = x[i] + "." + result
-		} else {
+
+	for i := 0; i < len(x); i++ {
+		result = strings.TrimPrefix(result, x[i]+".")
+		if _, err := c.Get(result + "/NS"); err == nil {
 			break
 		}
 	}
