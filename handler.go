@@ -55,8 +55,24 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 				}
 				w.WriteMsg(result)
 			} else {
-				logger.Debug("%s", err)
-				h.Resolver.Lookup(h.Cache, w, req)
+				if rcs, err := h.Cache.Get(h.Cache.MakeKey(Q.qname, "CNAME")); err == nil {
+					logger.Info("Found CNAME ", rcs)
+					result := new(dns.Msg)
+					result.SetReply(req)
+					for _, z := range rcs.Value {
+						rc, _ := dns.NewRR(dns.Fqdn(Q.qname) + " " + "CNAME" + " " + z)
+						result.Answer = append(result.Answer, rc)
+						if rt, err := h.Cache.Get(h.Cache.MakeKey(z, Q.qtype)); err == nil {
+							for _, ey := range rt.Value {
+								gg, _ := dns.NewRR(z + " " + Q.qtype + " " + ey)
+								result.Answer = append(result.Answer, gg)
+							}
+						}
+					}
+					w.WriteMsg(result)
+				} else {
+					h.Resolver.Lookup(h.Cache, w, req)
+				}
 			}
 		case Q.qclass == "CH", Q.qtype == "TXT":
 			m := new(dns.Msg)

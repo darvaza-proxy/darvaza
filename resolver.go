@@ -111,7 +111,8 @@ func (r *Resolver) Iterate(c *Cache, qname string, qtype string, SList *Stack) {
 	//Down the rabbit hole!
 	ancestor := getParentinCache(qname, c)
 	if nstoask, ancerr := c.Get(ancestor + "/NS"); ancerr == nil {
-		if ns, nserr := c.Get(dns.Fqdn(randomfromslice(nstoask.Value)) + "/A"); nserr == nil {
+		qq := randomfromslice(nstoask.Value)
+		if ns, nserr := c.Get(dns.Fqdn(qq) + "/A"); nserr == nil {
 			ans := getans(qname, qtype, ns.Value[0])
 
 			switch Typify(ans) {
@@ -154,7 +155,8 @@ func (r *Resolver) Iterate(c *Cache, qname string, qtype string, SList *Stack) {
 				logger.Error(Typify(ans))
 			}
 		} else {
-			logger.Error("we got a nsdomain %s but cache has no IP for it", nserr)
+			SList.Push(qq, "A")
+			r.Iterate(c, qq, "A", SList)
 		}
 	}
 
