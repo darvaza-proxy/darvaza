@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -41,6 +42,18 @@ func (c *Crecord) IsEmpty() bool {
 		return true
 	}
 	return false
+}
+
+func (c *Crecord) String() string {
+	var result string
+	result = "Value: "
+	for _, z := range c.Value {
+		result = result + z
+	}
+	result = result + " Ttl: " + strconv.Itoa(c.Ttl)
+	result = result + " Rtt: " + strconv.Itoa(c.Rtt)
+	result = result + " Stored: " + time.Unix(int64(c.Stored), 0).String()
+	return result
 }
 
 func NewCache(size int64, exp int32) *Cache {

@@ -56,7 +56,7 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 				w.WriteMsg(result)
 			} else {
 				if rcs, err := h.Cache.Get(h.Cache.MakeKey(Q.qname, "CNAME")); err == nil {
-					logger.Info("Found CNAME ", rcs)
+					logger.Info("Found CNAME %s", rcs.String())
 					result := new(dns.Msg)
 					result.SetReply(req)
 					for _, z := range rcs.Value {
