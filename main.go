@@ -8,6 +8,9 @@ import (
 
 var (
 	logger *GnoccoLogger
+	// Version and BuildTime are filled in during build by the Makefile
+	Version   = "N/A"
+	BuildTime = "N/A"
 )
 
 func main() {
