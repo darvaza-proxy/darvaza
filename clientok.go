@@ -7,11 +7,13 @@ import (
 )
 
 func clientOK(ip net.IP) bool {
+	result := false
 	permdir := Config.PermissionsDir
 	// if we do not have the permissions directory than
 	// everybody is allowed
 	if _, err := os.Stat(permdir); os.IsNotExist(err) {
-		return true
+		result = true
+		return result
 	}
 	var ipsep string
 	if ip.To4() != nil {
@@ -31,10 +33,10 @@ func clientOK(ip net.IP) bool {
 			tail = tail + ipsep + v
 		}
 		if _, err := os.Stat(tail); !os.IsNotExist(err) {
+			result = true
 			break
-			return true
 		}
 	}
 
-	return false
+	return result
 }

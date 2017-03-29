@@ -28,7 +28,7 @@ func initResolver() *Resolver {
 	defer f.Close()
 
 	if err != nil {
-		logger.Warn("Error %s occured.", err)
+		logger.Warn("Error %s occurred.", err)
 	}
 
 	scan := bufio.NewScanner(f)

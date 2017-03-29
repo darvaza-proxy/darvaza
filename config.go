@@ -63,11 +63,11 @@ func loadConfig() cfg {
 
 	buf, err := ioutil.ReadAll(file)
 	if err != nil {
-		logger.Fatal("Error %s occured.", err)
+		logger.Fatal("Error %s occurred.", err)
 	}
 
 	if err := toml.Unmarshal(buf, &Config); err != nil {
-		logger.Fatal("Error %s occured.", err)
+		logger.Fatal("Error %s occurred.", err)
 	}
 	return Config
 }
