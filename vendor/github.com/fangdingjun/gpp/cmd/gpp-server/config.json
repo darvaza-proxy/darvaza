@@ -1,0 +1,56 @@
+{
+    "local_domains":["localhost","127.0.0.1"],
+    "logfile":"",
+    "user":"nobody",
+    "group":"nogroup",
+    "url_routes": [
+        {
+            "url_prefix": "\\.php$|\\.php/", 
+            "path": "unix:///run/php5-fpm.sock", 
+            "type": "fastcgi", 
+            "docroot": "/var/www/html",
+            "use_regex":true
+        },
+        {
+            "url_prefix": "/media/", 
+            "path": "unix:///run/uwsgi/app/media/socket", 
+            "type": "uwsgi", 
+            "docroot": "/",
+            "use_regex":false
+        }, 
+        {
+            "url_prefix": "/shop/", 
+            "path": "unix:///run/uwsgi/app/shop/socket", 
+            "type": "uwsgi", 
+            "docroot": "/",
+            "use_regex":false
+        }, 
+        {
+            "url_prefix": "/", 
+            "path": "", 
+            "type": "dir", 
+            "docroot": "/var/www/html",
+            "use_regex":false
+        } 
+    ], 
+    "listen": [
+        {
+            "cert": "server.crt", 
+            "host": ":10443", 
+            "enable_proxy": true, 
+            "key": "server.key",
+            "proxy_auth":false,
+            "proxy_user":"aaa",
+            "proxy_passwd":""
+        }, 
+        {
+            "cert": "", 
+            "host": ":10080", 
+            "key": "",
+            "enable_proxy": false, 
+            "proxy_auth":false,
+            "proxy_user":"aaa",
+            "proxy_passwd":""
+        }
+    ]
+}
