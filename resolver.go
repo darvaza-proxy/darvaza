@@ -37,7 +37,7 @@ func initResolver() *Resolver {
 	for scan.Scan() {
 		var re reser
 		fields := strings.Fields(scan.Text())
-		if fields[0] == "nameserver" {
+		if len(fields) > 0 && fields[0] == "nameserver" {
 			re.ip = net.ParseIP(fields[1]).String()
 			i++
 			resolvers[i] = re
