@@ -12,67 +12,67 @@ import (
 	"github.com/miekg/dns"
 )
 
-type Server struct {
+type server struct {
 	host       string
 	port       int
 	user       string
 	group      string
 	maxjobs    int
 	maxqueries int
-	handler    *GnoccoHandler
+	handler    *gnoccoHandler
 }
 
-func (s *Server) Addr() string {
+func (s *server) Addr() string {
 	return net.JoinHostPort(s.host, strconv.Itoa(s.port))
 }
 
-func (s *Server) DumpCache() {
-	files := []string{Config.Cache.CachePath + "/pcache", Config.Cache.CachePath + "/ncache"}
+func (s *server) dumpCache() {
+	files := []string{mainconfig.Cache.CachePath + "/pcache", mainconfig.Cache.CachePath + "/ncache"}
 
 	for _, file := range files {
-		_ = os.MkdirAll(Config.Cache.CachePath, 0755)
+		_ = os.MkdirAll(mainconfig.Cache.CachePath, 0755)
 		if fl, err := os.Create(file); err == nil {
 
 			defer fl.Close()
 			if strings.HasSuffix(file, "pcache") {
-				s.handler.Cache.Dump(fl, true)
+				s.handler.Cache.dump(fl, true)
 			} else {
-				s.handler.Cache.Dump(fl, false)
+				s.handler.Cache.dump(fl, false)
 			}
 
 		} else {
-			logger.Error("%s", err)
+			logger.error("%s", err)
 		}
 	}
 
 }
 
-func (s *Server) Run() {
+func (s *server) run() {
 
-	s.handler = NewHandler(s.maxjobs)
-	if _, err := os.Stat(Config.Cache.CachePath + "/pcache"); err == nil {
-		var file, err = os.OpenFile(Config.Cache.CachePath+"/pcache", os.O_RDWR, 0644)
+	s.handler = newHandler(s.maxjobs)
+	if _, err := os.Stat(mainconfig.Cache.CachePath + "/pcache"); err == nil {
+		var file, err = os.OpenFile(mainconfig.Cache.CachePath+"/pcache", os.O_RDWR, 0644)
 		if err == nil {
-			s.handler.Cache.Load(file, true)
+			s.handler.Cache.load(file, true)
 		}
 	}
-	if _, err := os.Stat(Config.Cache.CachePath + "/ncache"); err == nil {
-		var file, err = os.OpenFile(Config.Cache.CachePath+"/ncache", os.O_RDWR, 0644)
+	if _, err := os.Stat(mainconfig.Cache.CachePath + "/ncache"); err == nil {
+		var file, err = os.OpenFile(mainconfig.Cache.CachePath+"/ncache", os.O_RDWR, 0644)
 		if err == nil {
-			s.handler.Cache.Load(file, false)
+			s.handler.Cache.load(file, false)
 		}
 
 	}
 
 	tcpHandler := dns.NewServeMux()
-	tcpHandler.HandleFunc(".", s.handler.DoTCP)
+	tcpHandler.HandleFunc(".", s.handler.doTCP)
 	tcpServer := &dns.Server{Addr: s.Addr(),
 		Net:     "tcp",
 		Handler: tcpHandler}
 	go s.start(tcpServer)
 
 	udpHandler := dns.NewServeMux()
-	udpHandler.HandleFunc(".", s.handler.DoUDP)
+	udpHandler.HandleFunc(".", s.handler.doUDP)
 
 	udpServer := &dns.Server{Addr: s.Addr(),
 		Net:     "udp",
@@ -85,26 +85,26 @@ func (s *Server) Run() {
 
 	err := util.DropPrivilege(s.user, s.group)
 	if err != nil {
-		logger.Error("Dropping privileges failed %s", err.Error())
+		logger.error("Dropping privileges failed %s", err.Error())
 	}
 }
 
-func (s *Server) start(ds *dns.Server) {
-	logger.Info("Start %s listener", ds.Net)
+func (s *server) start(ds *dns.Server) {
+	logger.info("Start %s listener", ds.Net)
 	err := ds.ListenAndServe()
 	if err != nil {
-		logger.Fatal("Start %s listener failed:%s", ds.Net, err.Error())
+		logger.fatal("Start %s listener failed:%s", ds.Net, err.Error())
 	}
 }
 
-func (s *Server) ShutDown() {
-	logger.Info("Shutdown called.")
+func (s *server) shutDown() {
+	logger.info("Shutdown called.")
 }
 
-func (s *Server) startCacheDumping() {
-	interval := Config.Cache.DumpInterval
+func (s *server) startCacheDumping() {
+	interval := mainconfig.Cache.DumpInterval
 	for {
 		<-time.After(time.Duration(interval) * time.Second)
-		go s.DumpCache()
+		go s.dumpCache()
 	}
 }

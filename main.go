@@ -7,9 +7,10 @@ import (
 )
 
 var (
-	logger *GnoccoLogger
-	// Version and BuildTime are filled in during build by the Makefile
-	Version   = "N/A"
+	logger *gnoccoLogger
+	//Version contains the git hashtag injected by make
+	Version = "N/A"
+	//BuildTime contains the build timestamp injected by make
 	BuildTime = "N/A"
 )
 
@@ -17,7 +18,7 @@ func main() {
 	cf := loadConfig()
 	initLogger()
 
-	server := &Server{
+	aserver := &server{
 		host:       cf.Listen.Host,
 		port:       cf.Listen.Port,
 		user:       cf.User,
@@ -26,7 +27,7 @@ func main() {
 		maxqueries: cf.MaxQueries,
 	}
 
-	server.Run()
+	aserver.run()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan)
@@ -35,31 +36,31 @@ func main() {
 		sign := <-signalChan
 		switch sign {
 		case syscall.SIGTERM:
-			server.ShutDown()
-			logger.Fatal("Got SIGTERM, stoping as requested")
+			aserver.shutDown()
+			logger.fatal("Got SIGTERM, stoping as requested")
 		case syscall.SIGINT:
-			server.ShutDown()
-			logger.Fatal("Got SIGINT, stoping as requested")
+			aserver.shutDown()
+			logger.fatal("Got SIGINT, stoping as requested")
 		case syscall.SIGUSR2:
-			logger.Info("Got SIGUSR2, dumping cache")
-			server.DumpCache()
+			logger.info("Got SIGUSR2, dumping cache")
+			aserver.dumpCache()
 		default:
-			logger.Warn("I received %s signal", sign)
+			logger.warn("I received %s signal", sign)
 		}
 	}
 }
 
 func initLogger() {
-	logger = NewLogger()
+	logger = newLogger()
 
-	if Config.Log.Stdout {
-		logger.SetLogger("console", nil)
+	if mainconfig.Log.Stdout {
+		logger.setLogger("console", nil)
 	}
 
-	if Config.Log.File != "" {
-		cfg := map[string]interface{}{"file": Config.Log.File}
-		logger.SetLogger("file", cfg)
-		logger.Info("Logger started")
+	if mainconfig.Log.File != "" {
+		cfg := map[string]interface{}{"file": mainconfig.Log.File}
+		logger.setLogger("file", cfg)
+		logger.info("Logger started")
 	}
 
 }

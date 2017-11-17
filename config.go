@@ -36,18 +36,18 @@ type cfg struct {
 		CachePath    string
 	}
 
-	Hosts HostsCfg
+	hosts hostsCfg
 }
 
-type HostsCfg struct {
-	Enable           bool
-	Hosts_File       string
-	Refresh_Interval uint
+type hostsCfg struct {
+	Enable          bool
+	HostsFile       string
+	RefreshInterval uint
 }
 
 var (
-	Config   cfg
-	confFile string
+	mainconfig cfg
+	confFile   string
 )
 
 func loadConfig() cfg {
@@ -63,11 +63,11 @@ func loadConfig() cfg {
 
 	buf, err := ioutil.ReadAll(file)
 	if err != nil {
-		logger.Fatal("Error %s occurred.", err)
+		logger.fatal("Error %s occurred.", err)
 	}
 
-	if err := toml.Unmarshal(buf, &Config); err != nil {
-		logger.Fatal("Error %s occurred.", err)
+	if err := toml.Unmarshal(buf, &mainconfig); err != nil {
+		logger.fatal("Error %s occurred.", err)
 	}
-	return Config
+	return mainconfig
 }

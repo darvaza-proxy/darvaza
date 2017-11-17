@@ -6,33 +6,33 @@ import (
 	"github.com/miekg/dns"
 )
 
-type Question struct {
+type question struct {
 	qname  string
 	qtype  string
 	qclass string
 }
 
-func (q *Question) String() string {
+func (q *question) String() string {
 	return q.qname + " " + q.qclass + " " + q.qtype
 }
 
-type GnoccoHandler struct {
-	Cache    *Cache
-	Resolver *Resolver
+type gnoccoHandler struct {
+	Cache    *cache
+	Resolver *resolver
 	MaxJobs  int
 	Jobs     int
 }
 
-func NewHandler(m int) *GnoccoHandler {
-	c := NewCache(int64(Config.Cache.MaxCount), int32(Config.Cache.Expire))
+func newHandler(m int) *gnoccoHandler {
+	c := newCache(int64(mainconfig.Cache.MaxCount), int32(mainconfig.Cache.Expire))
 	r := initResolver()
-	return &GnoccoHandler{c, r, m, 0}
+	return &gnoccoHandler{c, r, m, 0}
 }
 
-func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
+func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	if h.Jobs < h.MaxJobs {
 		q := req.Question[0]
-		Q := Question{q.Name, dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
+		Q := question{q.Name, dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
 
 		var remote net.IP
 		if Net == "tcp" {
@@ -41,11 +41,11 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 			remote = w.RemoteAddr().(*net.UDPAddr).IP
 		}
 
-		logger.Info("%s lookup　%s", remote, Q.String())
+		logger.info("%s lookup　%s", remote, Q.String())
 		h.Jobs++
 		switch {
 		case Q.qclass == "IN":
-			if recs, err := h.Cache.Get(h.Cache.MakeKey(Q.qname, Q.qtype)); err == nil {
+			if recs, err := h.Cache.get(h.Cache.makeKey(Q.qname, Q.qtype)); err == nil {
 				//we have an answer now construct a dns.Msg
 				result := new(dns.Msg)
 				result.SetReply(req)
@@ -55,14 +55,14 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 				}
 				w.WriteMsg(result)
 			} else {
-				if rcs, err := h.Cache.Get(h.Cache.MakeKey(Q.qname, "CNAME")); err == nil {
-					logger.Info("Found CNAME %s", rcs.String())
+				if rcs, err := h.Cache.get(h.Cache.makeKey(Q.qname, "CNAME")); err == nil {
+					logger.info("Found CNAME %s", rcs.String())
 					result := new(dns.Msg)
 					result.SetReply(req)
 					for _, z := range rcs.Value {
 						rc, _ := dns.NewRR(dns.Fqdn(Q.qname) + " " + "CNAME" + " " + z)
 						result.Answer = append(result.Answer, rc)
-						if rt, err := h.Cache.Get(h.Cache.MakeKey(z, Q.qtype)); err == nil {
+						if rt, err := h.Cache.get(h.Cache.makeKey(z, Q.qtype)); err == nil {
 							for _, ey := range rt.Value {
 								gg, _ := dns.NewRR(z + " " + Q.qtype + " " + ey)
 								result.Answer = append(result.Answer, gg)
@@ -101,10 +101,10 @@ func (h *GnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	}
 }
 
-func (h *GnoccoHandler) DoTCP(w dns.ResponseWriter, req *dns.Msg) {
+func (h *gnoccoHandler) doTCP(w dns.ResponseWriter, req *dns.Msg) {
 	h.do("tcp", w, req)
 }
 
-func (h *GnoccoHandler) DoUDP(w dns.ResponseWriter, req *dns.Msg) {
+func (h *gnoccoHandler) doUDP(w dns.ResponseWriter, req *dns.Msg) {
 	h.do("udp", w, req)
 }

@@ -8,38 +8,38 @@ import (
 	"github.com/miekg/dns"
 )
 
-var emptyZone = NSZone{}
+var emptyZone = nsZone{}
 
-type NSZone struct {
+type nsZone struct {
 	Name   string
 	Nslist map[string][]string
 }
 
-func (z *NSZone) isEmpty() bool {
+func (z *nsZone) isEmpty() bool {
 	if z.Name == "" && len(z.Nslist) == 0 {
 		return true
 	}
 	return false
 }
 
-func (z *NSZone) addNs(ns string, ip string) {
+func (z *nsZone) addNs(ns string, ip string) {
 	s := net.ParseIP(ip)
 	if s != nil && ns != "" && !z.isEmpty() {
 		z.Nslist[ns] = append(z.Nslist[ns], ip)
 	}
 }
 
-func initNSZone() NSZone {
-	var result NSZone
+func initNSZone() nsZone {
+	var result nsZone
 	result.Nslist = make(map[string][]string)
 	return result
 }
 
-func makeNsZone(msg *dns.Msg) NSZone {
+func makeNsZone(msg *dns.Msg) nsZone {
 	if msg != nil {
 		rs := mdRRtoRRs(msg.Ns)
 
-		result := NSZone{msg.Ns[0].Header().Name, make(map[string][]string)}
+		result := nsZone{msg.Ns[0].Header().Name, make(map[string][]string)}
 		for _, r := range rs {
 			result.Nslist[r.Value] = make([]string, 0)
 		}
@@ -54,7 +54,7 @@ func makeNsZone(msg *dns.Msg) NSZone {
 	return emptyZone
 }
 
-func getRandomNsIpFromZone(zn NSZone) []string {
+func getRandomNsIPFromZone(zn nsZone) []string {
 	rand.Seed(time.Now().UnixNano())
 	var result []string
 	i := int(float32(len(zn.Nslist)) * rand.Float32())

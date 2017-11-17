@@ -8,7 +8,7 @@ import (
 
 func clientOK(ip net.IP) bool {
 	result := false
-	permdir := Config.PermissionsDir
+	permdir := mainconfig.PermissionsDir
 	// if we do not have the permissions directory than
 	// everybody is allowed
 	if _, err := os.Stat(permdir); os.IsNotExist(err) {

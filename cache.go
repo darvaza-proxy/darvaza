@@ -14,74 +14,74 @@ import (
 	"github.com/miekg/dns"
 )
 
-type Crecord struct {
+type crecord struct {
 	Value  []string
-	Ttl    int
-	Rtt    int
+	TTL    int
+	RTT    int
 	Stored int
 }
 
-func (r *Crecord) Expired() bool {
-	ttl := r.Ttl - int(time.Now().Unix()-int64(r.Stored))
+func (c *crecord) expired() bool {
+	ttl := c.TTL - int(time.Now().Unix()-int64(c.Stored))
 	return ttl < 0
 }
 
-type Cache struct {
-	pcache map[string]Crecord
+type cache struct {
+	pcache map[string]crecord
 	pcap   int64
 	pttl   int32
 
-	ncache map[string]Crecord
+	ncache map[string]crecord
 	ncap   int64
 	nttl   int32
 	sync.RWMutex
 }
 
-func (c *Crecord) IsEmpty() bool {
-	if c.Ttl == 0 && c.Rtt == 0 && c.Stored == 0 && len(c.Value) == 0 {
+func (c *crecord) isEmpty() bool {
+	if c.TTL == 0 && c.RTT == 0 && c.Stored == 0 && len(c.Value) == 0 {
 		return true
 	}
 	return false
 }
 
-func (c *Crecord) String() string {
+func (c *crecord) String() string {
 	var result string
 	result = "Value: "
 	for _, z := range c.Value {
 		result = result + z
 	}
-	result = result + " Ttl: " + strconv.Itoa(c.Ttl)
-	result = result + " Rtt: " + strconv.Itoa(c.Rtt)
+	result = result + " TTL: " + strconv.Itoa(c.TTL)
+	result = result + " RTT: " + strconv.Itoa(c.RTT)
 	result = result + " Stored: " + time.Unix(int64(c.Stored), 0).String()
 	return result
 }
 
-func NewCache(size int64, exp int32) *Cache {
-	c := new(Cache)
-	c.pcache = make(map[string]Crecord)
+func newCache(size int64, exp int32) *cache {
+	c := new(cache)
+	c.pcache = make(map[string]crecord)
 	c.pcap = size
 	c.pttl = exp
-	c.ncache = make(map[string]Crecord)
+	c.ncache = make(map[string]crecord)
 	c.ncap = size
 	c.nttl = 60
-	c.LoadRoots()
+	c.loadRoots()
 	return c
 }
 
-func (c *Cache) Dump(w io.Writer, what bool) error {
+func (c *cache) dump(w io.Writer, what bool) error {
 	//what bool is true for pcache and false for ncache
 	if w != os.Stdout {
 		encoder := gob.NewEncoder(w)
 		if what {
 			errp := encoder.Encode(c.pcache)
 			if errp != nil {
-				logger.Error("cache %s", errp)
+				logger.error("cache %s", errp)
 			}
 
 		} else {
 			errn := encoder.Encode(c.ncache)
 			if errn != nil {
-				logger.Error("negative cache %s", errn)
+				logger.error("negative cache %s", errn)
 			}
 
 		}
@@ -93,7 +93,7 @@ func (c *Cache) Dump(w io.Writer, what bool) error {
 	return nil
 }
 
-func (c *Cache) Get(key string) (Crecord, error) {
+func (c *cache) get(key string) (crecord, error) {
 	c.RLock()
 	centry, ok := c.ncache[key]
 	c.RUnlock()
@@ -103,23 +103,23 @@ func (c *Cache) Get(key string) (Crecord, error) {
 		centry, ok = c.pcache[key]
 		c.RUnlock()
 		if !ok {
-			return Crecord{}, fmt.Errorf("Key %q, not found.", key)
+			return crecord{}, fmt.Errorf("key %q, not found", key)
 		}
 	}
 
-	if centry.Expired() {
-		c.Delete(key)
-		return Crecord{}, fmt.Errorf("Key %q, expired.", key)
+	if centry.expired() {
+		c.delete(key)
+		return crecord{}, fmt.Errorf("key %q, expired", key)
 	}
 
 	return centry, nil
 }
 
-func (c *Cache) SetVal(key string, mtype string, ttl int, val string) {
-	mk := c.MakeKey(key, mtype)
-	var mrec Crecord
+func (c *cache) setVal(key string, mtype string, ttl int, val string) {
+	mk := c.makeKey(key, mtype)
+	var mrec crecord
 	mrec.Stored = int(time.Now().Unix())
-	mrec.Ttl = ttl
+	mrec.TTL = ttl
 	mrec.Value = append(mrec.Value, val)
 	c.Lock()
 	c.pcache[mk] = mrec
@@ -127,17 +127,17 @@ func (c *Cache) SetVal(key string, mtype string, ttl int, val string) {
 
 }
 
-func (c *Cache) Set(key string, mtype string, d *dns.Msg) {
-	mk := c.MakeKey(key, mtype)
+func (c *cache) set(key string, mtype string, d *dns.Msg) {
+	mk := c.makeKey(key, mtype)
 	var sk string
 	switch {
 	case mtype == "NS":
-		var mrec Crecord
-		var srec Crecord
+		var mrec crecord
+		var srec crecord
 		for _, q := range d.Ns {
 			u, _ := dRRtoRR(q)
 			mrec.Stored = int(time.Now().Unix())
-			mrec.Ttl = u.Ttl
+			mrec.TTL = u.TTL
 			mrec.Value = append(mrec.Value, u.Value)
 			if len(d.Extra) > 1 {
 				for _, s := range d.Extra {
@@ -146,9 +146,9 @@ func (c *Cache) Set(key string, mtype string, d *dns.Msg) {
 						if y.Type == "A" || y.Type == "AAAA" {
 							srec.Value = []string{}
 							srec.Stored = int(time.Now().Unix())
-							srec.Ttl = y.Ttl
+							srec.TTL = y.TTL
 							srec.Value = append(srec.Value, y.Value)
-							sk = c.MakeKey(dns.Fqdn(u.Value), y.Type)
+							sk = c.makeKey(dns.Fqdn(u.Value), y.Type)
 							c.Lock()
 							c.pcache[sk] = srec
 							c.Unlock()
@@ -161,11 +161,11 @@ func (c *Cache) Set(key string, mtype string, d *dns.Msg) {
 			c.Unlock()
 		}
 	case mtype == "A", mtype == "AAAA", mtype == "CNAME":
-		var rec Crecord
+		var rec crecord
 		for _, t := range d.Answer {
 			v, _ := dRRtoRR(t)
 			rec.Stored = int(time.Now().Unix())
-			rec.Ttl = v.Ttl
+			rec.TTL = v.TTL
 			rec.Value = append(rec.Value, v.Value)
 
 		}
@@ -173,11 +173,11 @@ func (c *Cache) Set(key string, mtype string, d *dns.Msg) {
 		c.pcache[mk] = rec
 		c.Unlock()
 	default:
-		logger.Info("%v", mtype)
+		logger.info("%v", mtype)
 	}
 }
 
-func (c *Cache) Load(r io.Reader, what bool) error {
+func (c *cache) load(r io.Reader, what bool) error {
 	//what bool is true for pcache and false for ncache
 	var err error
 	decoder := gob.NewDecoder(r)
@@ -193,35 +193,35 @@ func (c *Cache) Load(r io.Reader, what bool) error {
 	return err
 }
 
-func (c *Cache) Delete(key string) {
+func (c *cache) delete(key string) {
 	c.Lock()
 	delete(c.pcache, key)
 	delete(c.ncache, key)
 	c.Unlock()
 }
 
-func (c *Cache) Size() int {
+func (c *cache) size() int {
 	return len(c.pcache)
 }
 
-func (c *Cache) LoadRoots() {
+func (c *cache) loadRoots() {
 
-	if Config.RootsFile == "" {
-		logger.Fatal("Config.RootsFile is empty :(")
+	if mainconfig.RootsFile == "" {
+		logger.fatal("Config.RootsFile is empty :(")
 	}
 
-	fl, err := os.Open(Config.RootsFile)
+	fl, err := os.Open(mainconfig.RootsFile)
 	defer fl.Close()
 
 	if err != nil {
-		logger.Fatal("Error %s", err)
+		logger.fatal("Error %s", err)
 	}
 
 	reader := bufio.NewReader(fl)
-	var nstmp Crecord
+	var nstmp crecord
 	//keep root records for one year.....
 	nstmp.Stored = int(time.Now().AddDate(1, 0, 0).Unix())
-	nstmp.Ttl = 518400
+	nstmp.TTL = 518400
 	for {
 		line, err := reader.ReadString('\n')
 		if err == io.EOF {
@@ -241,10 +241,10 @@ func (c *Cache) LoadRoots() {
 			break
 		}
 
-		var v, q Crecord
+		var v, q crecord
 		//keep root records for one year.....
 		v.Stored, q.Stored = int(time.Now().AddDate(1, 0, 0).Unix()), int(time.Now().AddDate(1, 0, 0).Unix())
-		v.Ttl, q.Ttl = 518400, 518400
+		v.TTL, q.TTL = 518400, 518400
 		fields := strings.Fields(line)
 		v.Value = append(v.Value, fields[1])
 		c.Lock()
@@ -260,6 +260,6 @@ func (c *Cache) LoadRoots() {
 	}
 }
 
-func (c *Cache) MakeKey(a string, b string) string {
+func (c *cache) makeKey(a string, b string) string {
 	return dns.Fqdn(a) + "/" + b
 }

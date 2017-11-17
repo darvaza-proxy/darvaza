@@ -5,18 +5,18 @@ import (
 	"sync"
 )
 
-type Stack struct {
+type stack struct {
 	data []string
 	size int
 	sync.Mutex
 }
 
-func NewStack() *Stack {
-	stk := new(Stack)
+func newStack() *stack {
+	stk := new(stack)
 	return stk
 }
 
-func (s *Stack) Push(t string, tt string) {
+func (s *stack) push(t string, tt string) {
 	if !s.hasData(t, tt) {
 		s.Lock()
 		s.data = append(s.data, t+"/"+tt)
@@ -25,7 +25,7 @@ func (s *Stack) Push(t string, tt string) {
 	}
 }
 
-func (s *Stack) hasData(t string, tt string) bool {
+func (s *stack) hasData(t string, tt string) bool {
 	for _, v := range s.data {
 		if v == t+"/"+tt {
 			return true
@@ -34,7 +34,7 @@ func (s *Stack) hasData(t string, tt string) bool {
 	return false
 }
 
-func (s *Stack) PopFor(t string, tt string) {
+func (s *stack) popFor(t string, tt string) {
 	s.Lock()
 	for i, v := range s.data {
 		if v == t+"/"+tt {
@@ -46,18 +46,14 @@ func (s *Stack) PopFor(t string, tt string) {
 
 }
 
-func (s *Stack) Size() int {
-	return s.size
-}
-
-func (s *Stack) IsEmpty() bool {
+func (s *stack) isEmpty() bool {
 	if s.size == 0 {
 		return true
 	}
 	return false
 }
 
-func (s *Stack) Pop() (string, string) {
+func (s *stack) pop() (string, string) {
 	var x string
 	s.Lock()
 	if len(s.data) > 0 {

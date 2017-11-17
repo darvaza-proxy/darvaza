@@ -12,125 +12,124 @@ import (
 const LOG_OUTPUT_BUFFER = 1024
 
 type logMesg struct {
-	Mesg  string
-	Fatal bool
+	mesg  string
+	fatal bool
 }
 
-type LoggerHandler interface {
-	Setup(config map[string]interface{}) error
-	Write(mesg *logMesg)
+type loggerHandler interface {
+	setup(config map[string]interface{}) error
+	write(mesg *logMesg)
 }
 
-type GnoccoLogger struct {
+type gnoccoLogger struct {
 	mesgs   chan *logMesg
-	outputs map[string]LoggerHandler
+	outputs map[string]loggerHandler
 }
 
-func NewLogger() *GnoccoLogger {
-	logger := &GnoccoLogger{
+func newLogger() *gnoccoLogger {
+	logger := &gnoccoLogger{
 		mesgs:   make(chan *logMesg, LOG_OUTPUT_BUFFER),
-		outputs: make(map[string]LoggerHandler),
+		outputs: make(map[string]loggerHandler),
 	}
-	go logger.Run()
+	go logger.run()
 	return logger
 }
 
-func (l *GnoccoLogger) SetLogger(handlerType string, config map[string]interface{}) {
-	var handler LoggerHandler
+func (l *gnoccoLogger) setLogger(handlerType string, cfg map[string]interface{}) {
+	var handler loggerHandler
 	switch handlerType {
 	case "console":
-		handler = NewConsoleHandler()
+		handler = newConsoleHandler()
 	case "file":
-		handler = NewFileHandler()
+		handler = newFileHandler()
 	default:
 		panic("Unknown log handler.")
 	}
 
-	handler.Setup(config)
+	handler.setup(cfg)
 	l.outputs[handlerType] = handler
 }
 
-func (l *GnoccoLogger) Run() {
+func (l *gnoccoLogger) run() {
 	for {
 		select {
 		case mesg := <-l.mesgs:
 			for _, handler := range l.outputs {
-				handler.Write(mesg)
+				handler.write(mesg)
 			}
 		}
 	}
 }
 
-func (l *GnoccoLogger) writeMesg(mesg string, fatal bool) {
+func (l *gnoccoLogger) writeMesg(mesg string, fatal bool) {
 	lm := &logMesg{
-		Mesg:  mesg,
-		Fatal: fatal,
+		mesg:  mesg,
+		fatal: fatal,
 	}
 	l.mesgs <- lm
 }
 
-func (l *GnoccoLogger) Debug(format string, v ...interface{}) {
+func (l *gnoccoLogger) debug(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[DEBUG] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *GnoccoLogger) Info(format string, v ...interface{}) {
+func (l *gnoccoLogger) info(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[INFO] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *GnoccoLogger) Notice(format string, v ...interface{}) {
+func (l *gnoccoLogger) notice(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[NOTICE] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *GnoccoLogger) Warn(format string, v ...interface{}) {
+func (l *gnoccoLogger) warn(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[WARN] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *GnoccoLogger) Error(format string, v ...interface{}) {
+func (l *gnoccoLogger) error(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[ERROR] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *GnoccoLogger) Fatal(format string, v ...interface{}) {
+func (l *gnoccoLogger) fatal(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[FATAL] "+format, v...)
 	l.writeMesg(mesg, true)
 }
 
-type ConsoleHandler struct {
+type consoleHandler struct {
 	logger *log.Logger
 }
 
-func NewConsoleHandler() LoggerHandler {
-	return new(ConsoleHandler)
+func newConsoleHandler() loggerHandler {
+	return new(consoleHandler)
 }
 
-func (h *ConsoleHandler) Setup(config map[string]interface{}) error {
+func (h *consoleHandler) setup(cfg map[string]interface{}) error {
 	h.logger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	return nil
-
 }
 
-func (h *ConsoleHandler) Write(lm *logMesg) {
-	if !lm.Fatal {
-		h.logger.Println(lm.Mesg)
+func (h *consoleHandler) write(lm *logMesg) {
+	if !lm.fatal {
+		h.logger.Println(lm.mesg)
 	} else {
-		h.logger.Fatalln(lm.Mesg)
+		h.logger.Fatalln(lm.mesg)
 	}
 }
 
-type FileHandler struct {
+type fileHandler struct {
 	file   string
 	logger *log.Logger
 }
 
-func NewFileHandler() LoggerHandler {
-	return new(FileHandler)
+func newFileHandler() loggerHandler {
+	return new(fileHandler)
 }
 
-func (h *FileHandler) Setup(config map[string]interface{}) error {
+func (h *fileHandler) setup(config map[string]interface{}) error {
 	if file, ok := config["file"]; ok {
 		h.file = file.(string)
 		if _, err := os.Stat(h.file); os.IsNotExist(err) {
@@ -141,7 +140,7 @@ func (h *FileHandler) Setup(config map[string]interface{}) error {
 			}
 		}
 
-		usr, errU := user.Lookup(Config.User)
+		usr, errU := user.Lookup(mainconfig.User)
 		if errU != nil {
 			return errU
 		}
@@ -162,14 +161,14 @@ func (h *FileHandler) Setup(config map[string]interface{}) error {
 	return nil
 }
 
-func (h *FileHandler) Write(lm *logMesg) {
+func (h *fileHandler) write(lm *logMesg) {
 	if h.logger == nil {
 		return
 	}
 
-	if !lm.Fatal {
-		h.logger.Println(lm.Mesg)
+	if !lm.fatal {
+		h.logger.Println(lm.mesg)
 	} else {
-		h.logger.Fatalln(lm.Mesg)
+		h.logger.Fatalln(lm.mesg)
 	}
 }
