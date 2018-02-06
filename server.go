@@ -8,15 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fangdingjun/gpp/util"
 	"github.com/miekg/dns"
 )
 
 type server struct {
 	host       string
 	port       int
-	user       string
-	group      string
 	maxjobs    int
 	maxqueries int
 	handler    *gnoccoHandler
@@ -83,10 +80,6 @@ func (s *server) run() {
 
 	go s.startCacheDumping()
 
-	err := util.DropPrivilege(s.user, s.group)
-	if err != nil {
-		logger.error("Dropping privileges failed %s", err.Error())
-	}
 }
 
 func (s *server) start(ds *dns.Server) {

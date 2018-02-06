@@ -9,8 +9,6 @@ import (
 )
 
 type cfg struct {
-	User           string
-	Group          string
 	RootsFile      string
 	PermissionsDir string
 	Daemon         bool

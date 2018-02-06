@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/user"
 	"path/filepath"
-	"strconv"
 )
 
 const LOG_OUTPUT_BUFFER = 1024
@@ -139,22 +137,7 @@ func (h *fileHandler) setup(config map[string]interface{}) error {
 				}
 			}
 		}
-
-		usr, errU := user.Lookup(mainconfig.User)
-		if errU != nil {
-			return errU
-		}
-		uid, _ := strconv.Atoi(usr.Uid)
-		gid, _ := strconv.Atoi(usr.Gid)
-		output, err := os.OpenFile(h.file, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-		if err != nil {
-			return err
-		}
-
-		if errChown := os.Chown(h.file, uid, gid); errChown != nil {
-			fmt.Println(errChown)
-		}
-
+		output, _ := os.Create(h.file)
 		h.logger = log.New(output, "", log.Ldate|log.Ltime)
 	}
 
