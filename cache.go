@@ -173,7 +173,7 @@ func (c *cache) set(key string, mtype string, d *dns.Msg) {
 		c.pcache[mk] = rec
 		c.Unlock()
 	default:
-		fmt.Println("%v", mtype)
+		fmt.Printf("%v /n", mtype)
 	}
 }
 
