@@ -1,3 +1,4 @@
+// Package cblog provides a channel based logger.
 package cblog
 
 import (
@@ -7,6 +8,7 @@ import (
 	"path/filepath"
 )
 
+// LOG_OUTPUT_BUFFER is the size of the channel buffer used for logging.
 const LOG_OUTPUT_BUFFER = 1024
 
 type logMesg struct {
@@ -19,11 +21,13 @@ type loggerHandler interface {
 	write(mesg *logMesg)
 }
 
+// Logger is the logging object.
 type Logger struct {
 	messages chan *logMesg
 	outputs  map[string]loggerHandler
 }
 
+// New creates a new Logger.
 func New() *Logger {
 	l := &Logger{
 		messages: make(chan *logMesg, LOG_OUTPUT_BUFFER),
@@ -33,7 +37,9 @@ func New() *Logger {
 	return l
 }
 
+// SetLogger sets the Logger object output.
 func (l *Logger) SetLogger(handlerType string, cfg map[string]interface{}) {
+	// BUG(karasz): SetLogger should be replaced with SetOutput in order to become stdlib compatible
 	var handler loggerHandler
 	switch handlerType {
 	case "console":
@@ -67,31 +73,37 @@ func (l *Logger) writeMesg(mesg string, fatal bool) {
 	l.messages <- lm
 }
 
+// Debug calls l.writeMesg prefixing the message with [DEBUG]
 func (l *Logger) Debug(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[DEBUG] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
+// Info calls l.writeMesg prefixing the message with [INFO]
 func (l *Logger) Info(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[INFO] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
+// Notice calls l.writeMesg prefixing the message with [NOTICE]
 func (l *Logger) Notice(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[NOTICE] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
+// Warn calls l.writeMesg prefixing the message with [WARN]
 func (l *Logger) Warn(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[WARN] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
+// Error calls l.writeMesg prefixing the message with [ERROR]
 func (l *Logger) Error(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[ERROR] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
+// Fatal calls l.writeMesg prefixing the message with [FATAL]
 func (l *Logger) Fatal(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[FATAL] "+format, v...)
 	l.writeMesg(mesg, true)
