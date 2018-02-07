@@ -1,8 +1,4 @@
 [[constraint]]
-  branch = "master"
-  name = "github.com/fangdingjun/gpp"
-
-[[constraint]]
   name = "github.com/miekg/dns"
 
 [[constraint]]

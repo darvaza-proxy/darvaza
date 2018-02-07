@@ -2,15 +2,10 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/fangdingjun/gpp"
-  packages = ["util"]
-  revision = "8e16be0fef294f6af1f8b7e7ee9cbf21ca2d8cb7"
-
-[[projects]]
   name = "github.com/miekg/dns"
   packages = ["."]
-  revision = "2d7eb4f050c25a6d4401af9abd939d42ac773331"
+  revision = "5364553f1ee9cddc7ac8b62dce148309c386695b"
+  version = "v1.0.4"
 
 [[projects]]
   name = "github.com/naoina/go-stringutil"
@@ -21,11 +16,24 @@
 [[projects]]
   name = "github.com/naoina/toml"
   packages = [".","ast"]
-  revision = "7a3d4a6210ea3f8a66f704c5603ff27fb91fea8e"
+  revision = "e6f5723bf2a66af014955e0888881314cf294129"
+  version = "v0.1.1"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ed25519","ed25519/internal/edwards25519"]
+  revision = "d9133f5469342136e669e85192a26056b587f503"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["bpf","internal/iana","internal/socket","ipv4","ipv6"]
+  revision = "2fb46b16b8dda405028c50f7c7f0f9dd1fa6bfb1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dba407a6aa164dcea623a1c30e5ac2b17f7fc4e4d00425250e6d9f126128e192"
+  inputs-digest = "564bc91c2b008cabf81532ece3663ea35ec7c69117def088dc2088990b727c12"
   solver-name = "gps-cdcl"
   solver-version = 1
