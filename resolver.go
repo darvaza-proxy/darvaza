@@ -28,7 +28,7 @@ func initResolver() *resolver {
 	defer f.Close()
 
 	if err != nil {
-		logger.warn("Error %s occurred.", err)
+		logger.Warn("Error %s occurred.", err)
 	}
 
 	scan := bufio.NewScanner(f)
@@ -78,7 +78,7 @@ func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
 						}
 						w.WriteMsg(result)
 					} else {
-						logger.error("%s", err)
+						logger.Error("%s", err)
 						result.SetRcode(req, 4)
 						w.WriteMsg(result)
 					}
@@ -97,7 +97,7 @@ func (r *resolver) lookup(w dns.ResponseWriter, req *dns.Msg, ns string) {
 	response, err := dns.Exchange(req, ns)
 
 	if err != nil {
-		logger.error("Error %s", err)
+		logger.Error("Error %s", err)
 
 	} else {
 		w.WriteMsg(response)
@@ -152,7 +152,7 @@ func (r *resolver) Iterate(c *cache, qname string, qtype string, slist *stack) {
 				}
 
 			default:
-				logger.error(typify(ans))
+				logger.Error(typify(ans))
 			}
 		} else {
 			slist.push(qq, "A")
@@ -171,7 +171,7 @@ func getans(qname string, qtype string, nameserver string) (result *dns.Msg) {
 	m.Question[0] = dns.Question{qname, qqt, dns.ClassINET}
 	result, err := dns.Exchange(m, nameserver+":53")
 	if err != nil {
-		logger.error("%s", err)
+		logger.Error("%s", err)
 	}
 	return
 

@@ -75,13 +75,13 @@ func (c *cache) dump(w io.Writer, what bool) error {
 		if what {
 			errp := encoder.Encode(c.pcache)
 			if errp != nil {
-				logger.error("cache %s", errp)
+				return fmt.Errorf("cache %s", errp)
 			}
 
 		} else {
 			errn := encoder.Encode(c.ncache)
 			if errn != nil {
-				logger.error("negative cache %s", errn)
+				return fmt.Errorf("negative cache %s", errn)
 			}
 
 		}
@@ -173,7 +173,7 @@ func (c *cache) set(key string, mtype string, d *dns.Msg) {
 		c.pcache[mk] = rec
 		c.Unlock()
 	default:
-		logger.info("%v", mtype)
+		fmt.Println("%v", mtype)
 	}
 }
 
@@ -204,17 +204,17 @@ func (c *cache) size() int {
 	return len(c.pcache)
 }
 
-func (c *cache) loadRoots() {
+func (c *cache) loadRoots() error {
 
 	if mainconfig.RootsFile == "" {
-		logger.fatal("Config.RootsFile is empty :(")
+		return fmt.Errorf("Config.RootsFile is empty :(")
 	}
 
 	fl, err := os.Open(mainconfig.RootsFile)
 	defer fl.Close()
 
 	if err != nil {
-		logger.fatal("Error %s", err)
+		return fmt.Errorf("Error %s", err)
 	}
 
 	reader := bufio.NewReader(fl)
@@ -258,6 +258,7 @@ func (c *cache) loadRoots() {
 
 		}
 	}
+	return nil
 }
 
 func (c *cache) makeKey(a string, b string) string {

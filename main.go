@@ -4,10 +4,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	log "github.com/karasz/gnocco/cblog"
 )
 
 var (
-	logger *gnoccoLogger
+	logger *log.Logger
 	//Version contains the git hashtag injected by make
 	Version = "N/A"
 	//BuildTime contains the build timestamp injected by make
@@ -15,8 +17,11 @@ var (
 )
 
 func main() {
-	cf := loadConfig()
-	initLogger()
+	cf, err := loadConfig()
+	if err != nil {
+		panic(err)
+	}
+	logger = initLogger()
 
 	aserver := &server{
 		host:       cf.Listen.Host,
@@ -35,30 +40,30 @@ func main() {
 		switch sign {
 		case syscall.SIGTERM:
 			aserver.shutDown()
-			logger.fatal("Got SIGTERM, stoping as requested")
+			logger.Fatal("Got SIGTERM, stoping as requested")
 		case syscall.SIGINT:
 			aserver.shutDown()
-			logger.fatal("Got SIGINT, stoping as requested")
+			logger.Fatal("Got SIGINT, stoping as requested")
 		case syscall.SIGUSR2:
-			logger.info("Got SIGUSR2, dumping cache")
+			logger.Info("Got SIGUSR2, dumping cache")
 			aserver.dumpCache()
 		default:
-			logger.warn("I received %s signal", sign)
+			logger.Warn("I received %s signal", sign)
 		}
 	}
 }
 
-func initLogger() {
-	logger = newLogger()
+func initLogger() *log.Logger {
+	logger = log.New()
 
 	if mainconfig.Log.Stdout {
-		logger.setLogger("console", nil)
+		logger.SetLogger("console", nil)
 	}
 
 	if mainconfig.Log.File != "" {
 		cfg := map[string]interface{}{"file": mainconfig.Log.File}
-		logger.setLogger("file", cfg)
-		logger.info("Logger started")
+		logger.SetLogger("file", cfg)
+		logger.Info("Logger started")
 	}
-
+	return logger
 }

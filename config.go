@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -48,7 +49,7 @@ var (
 	confFile   string
 )
 
-func loadConfig() cfg {
+func loadConfig() (cfg, error) {
 	flag.StringVar(&confFile, "f", "/etc/gnocco/gnocco.conf", "specify the config file, defaults to /etc/gnocco/gnocco.conf.")
 
 	flag.Parse()
@@ -61,11 +62,11 @@ func loadConfig() cfg {
 
 	buf, err := ioutil.ReadAll(file)
 	if err != nil {
-		logger.fatal("Error %s occurred.", err)
+		return mainconfig, fmt.Errorf("Error %s occurred.", err)
 	}
 
 	if err := toml.Unmarshal(buf, &mainconfig); err != nil {
-		logger.fatal("Error %s occurred.", err)
+		return mainconfig, fmt.Errorf("Error %s occurred.", err)
 	}
-	return mainconfig
+	return mainconfig, nil
 }

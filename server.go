@@ -38,7 +38,7 @@ func (s *server) dumpCache() {
 			}
 
 		} else {
-			logger.error("%s", err)
+			logger.Error("%s", err)
 		}
 	}
 
@@ -83,15 +83,15 @@ func (s *server) run() {
 }
 
 func (s *server) start(ds *dns.Server) {
-	logger.info("Start %s listener", ds.Net)
+	logger.Info("Start %s listener", ds.Net)
 	err := ds.ListenAndServe()
 	if err != nil {
-		logger.fatal("Start %s listener failed:%s", ds.Net, err.Error())
+		logger.Fatal("Start %s listener failed:%s", ds.Net, err.Error())
 	}
 }
 
 func (s *server) shutDown() {
-	logger.info("Shutdown called.")
+	logger.Info("Shutdown called.")
 }
 
 func (s *server) startCacheDumping() {

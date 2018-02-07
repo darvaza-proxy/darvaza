@@ -1,4 +1,4 @@
-package main
+package cblog
 
 import (
 	"fmt"
@@ -19,21 +19,21 @@ type loggerHandler interface {
 	write(mesg *logMesg)
 }
 
-type gnoccoLogger struct {
-	mesgs   chan *logMesg
-	outputs map[string]loggerHandler
+type Logger struct {
+	messages chan *logMesg
+	outputs  map[string]loggerHandler
 }
 
-func newLogger() *gnoccoLogger {
-	logger := &gnoccoLogger{
-		mesgs:   make(chan *logMesg, LOG_OUTPUT_BUFFER),
-		outputs: make(map[string]loggerHandler),
+func New() *Logger {
+	l := &Logger{
+		messages: make(chan *logMesg, LOG_OUTPUT_BUFFER),
+		outputs:  make(map[string]loggerHandler),
 	}
-	go logger.run()
-	return logger
+	go l.run()
+	return l
 }
 
-func (l *gnoccoLogger) setLogger(handlerType string, cfg map[string]interface{}) {
+func (l *Logger) SetLogger(handlerType string, cfg map[string]interface{}) {
 	var handler loggerHandler
 	switch handlerType {
 	case "console":
@@ -48,10 +48,10 @@ func (l *gnoccoLogger) setLogger(handlerType string, cfg map[string]interface{})
 	l.outputs[handlerType] = handler
 }
 
-func (l *gnoccoLogger) run() {
+func (l *Logger) run() {
 	for {
 		select {
-		case mesg := <-l.mesgs:
+		case mesg := <-l.messages:
 			for _, handler := range l.outputs {
 				handler.write(mesg)
 			}
@@ -59,40 +59,40 @@ func (l *gnoccoLogger) run() {
 	}
 }
 
-func (l *gnoccoLogger) writeMesg(mesg string, fatal bool) {
+func (l *Logger) writeMesg(mesg string, fatal bool) {
 	lm := &logMesg{
 		mesg:  mesg,
 		fatal: fatal,
 	}
-	l.mesgs <- lm
+	l.messages <- lm
 }
 
-func (l *gnoccoLogger) debug(format string, v ...interface{}) {
+func (l *Logger) Debug(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[DEBUG] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *gnoccoLogger) info(format string, v ...interface{}) {
+func (l *Logger) Info(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[INFO] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *gnoccoLogger) notice(format string, v ...interface{}) {
+func (l *Logger) Notice(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[NOTICE] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *gnoccoLogger) warn(format string, v ...interface{}) {
+func (l *Logger) Warn(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[WARN] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *gnoccoLogger) error(format string, v ...interface{}) {
+func (l *Logger) Error(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[ERROR] "+format, v...)
 	l.writeMesg(mesg, false)
 }
 
-func (l *gnoccoLogger) fatal(format string, v ...interface{}) {
+func (l *Logger) Fatal(format string, v ...interface{}) {
 	mesg := fmt.Sprintf("[FATAL] "+format, v...)
 	l.writeMesg(mesg, true)
 }
@@ -131,12 +131,12 @@ func (h *fileHandler) setup(config map[string]interface{}) error {
 	if file, ok := config["file"]; ok {
 		h.file = file.(string)
 		if _, err := os.Stat(h.file); os.IsNotExist(err) {
+			_ = os.MkdirAll(filepath.Dir(h.file), 0755)
 			if _, err := os.Create(h.file); err != nil {
-				if errP := os.MkdirAll(filepath.Dir(h.file), 0755); errP != nil {
-					return errP
-				}
+				return err
 			}
 		}
+
 		output, _ := os.Create(h.file)
 		h.logger = log.New(output, "", log.Ldate|log.Ltime)
 	}
