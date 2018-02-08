@@ -1,5 +1,5 @@
 a.root-servers.org 198.41.0.4 2001:503:ba3e::2:30
-b.root-servers.org 192.228.79.201 2001:500:84::b
+b.root-servers.org 199.9.14.201 2001:500:200::b
 c.root-servers.org 192.33.4.12 2001:500:2::c
 d.root-servers.org 199.7.91.13 2001:500:2d::d
 e.root-servers.org 192.203.230.10 2001:500:a8::e
