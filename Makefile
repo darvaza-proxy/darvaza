@@ -68,6 +68,10 @@ format: bin/goimports .GOPATH/.ok
 	$Q find .GOPATH/src/$(IMPORT_PATH)/ -iname \*.go | grep -v \
 	    -e "^$$" $(addprefix -e ,$(IGNORED_PACKAGES)) | xargs ./bin/goimports -w
 
+generate: .GOPATH/.ok
+	@echo "Generating roots file"
+	$Q go generate $(IMPORT_PATH)
+
 ##### =====> Internals <===== #####
 
 .PHONY: setup

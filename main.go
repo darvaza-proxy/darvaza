@@ -8,6 +8,8 @@ import (
 	log "github.com/karasz/gnocco/cblog"
 )
 
+//go:generate go run genroot.go
+
 var (
 	logger *log.Logger
 	//Version contains the git hashtag injected by make
