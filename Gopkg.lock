@@ -15,25 +15,37 @@
 
 [[projects]]
   name = "github.com/naoina/toml"
-  packages = [".","ast"]
+  packages = [
+    ".",
+    "ast"
+  ]
   revision = "e6f5723bf2a66af014955e0888881314cf294129"
   version = "v0.1.1"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["ed25519","ed25519/internal/edwards25519"]
+  packages = [
+    "ed25519",
+    "ed25519/internal/edwards25519"
+  ]
   revision = "d9133f5469342136e669e85192a26056b587f503"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["bpf","internal/iana","internal/socket","ipv4","ipv6"]
+  packages = [
+    "bpf",
+    "internal/iana",
+    "internal/socket",
+    "ipv4",
+    "ipv6"
+  ]
   revision = "2fb46b16b8dda405028c50f7c7f0f9dd1fa6bfb1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "564bc91c2b008cabf81532ece3663ea35ec7c69117def088dc2088990b727c12"
+  inputs-digest = "37e80df0f2950695d4b25eb4448f18a6dc0d784d53103e4e0668d640ee235920"
   solver-name = "gps-cdcl"
   solver-version = 1

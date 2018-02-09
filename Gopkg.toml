@@ -1,5 +1,0 @@
-[[constraint]]
-  name = "github.com/miekg/dns"
-
-[[constraint]]
-  name = "github.com/naoina/toml"
