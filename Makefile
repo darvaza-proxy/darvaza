@@ -1,7 +1,10 @@
 # The import path is where your repository can be found.
 # To import subpackages, always prepend the full import path.
 # If you change this, run `make clean`. Read more: https://git.io/vM7zV
-IMPORT_PATH := github.com/karasz/gnocco
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+
+IMPORT_PATH := github.com/$(USER)/$(current_dir)
 
 # V := 1 # When V is set, print commands and build progress.
 
@@ -24,7 +27,7 @@ build: .GOPATH/.ok
 
 ##### =====> Utility targets <===== #####
 
-.PHONY: clean test list cover format
+.PHONY: clean test list cover format gen
 
 clean:
 	$Q rm -rf bin .GOPATH
@@ -68,9 +71,10 @@ format: bin/goimports .GOPATH/.ok
 	$Q find .GOPATH/src/$(IMPORT_PATH)/ -iname \*.go | grep -v \
 	    -e "^$$" $(addprefix -e ,$(IGNORED_PACKAGES)) | xargs ./bin/goimports -w
 
-generate: .GOPATH/.ok
+gen: .GOPATH/.ok
 	@echo "Generating roots file"
-	$Q go generate $(IMPORT_PATH)
+	$Q cd $(CURDIR)/.GOPATH/src/$(IMPORT_PATH) && go generate
+	@echo "Done!"
 
 ##### =====> Internals <===== #####
 
