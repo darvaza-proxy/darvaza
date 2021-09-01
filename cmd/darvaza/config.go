@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/creasty/defaults"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 )
@@ -27,6 +28,6 @@ func (c *Config) ReadInFile(filename string) error {
 
 func (c *Config) WriteTo(out io.Writer) (int64, error) {
 	f := hclwrite.NewEmptyFile()
-	// TODO: compose f from c
+	gohcl.EncodeIntoBody(c, f.Body())
 	return f.WriteTo(out)
 }
