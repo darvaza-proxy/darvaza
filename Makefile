@@ -13,7 +13,7 @@ fmt:
 
 generate:
 	@git grep -l '^//go:generate' | sed -n -e 's|\(.*\)/[^/]\+\.go$$|\1|p' | sort -u | while read d; do \
-		git grep -l '^//go:generate' "$$d" | grep '\.go$$' | xargs -r $(GO) generate $(GOGENERATE_FLAGS); \
+		git grep -l '^//go:generate' "$$d"/*.go | xargs -r $(GO) generate $(GOGENERATE_FLAGS); \
 	done
 
 build:
