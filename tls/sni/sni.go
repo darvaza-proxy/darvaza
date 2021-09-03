@@ -51,11 +51,13 @@ func GetInfo(r io.Reader) (*ClientHelloInfo, error) {
 		if extType == tlsSNIExtension {
 			chi.SNI, err = parseSNI(b[:length])
 			if err != nil {
+				chi.reset()
 				break
 			}
 		}
 		b = b[length:]
 	}
+	chi.Valid = true
 	return chi, err
 }
 
