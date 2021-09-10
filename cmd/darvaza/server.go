@@ -11,30 +11,36 @@ import (
 	"github.com/darvaza-proxy/darvaza/tls/sni"
 )
 
-type server struct {
-	ip   string
-	port int
+type Proxy struct {
+	Protocol   string   `default:"http" hcl:"protocol,label"`
+	ListenAddr []string `default:"[\":8080\"]" hcl:"listen"`
 }
 
-func newServer() *server {
-	s := new(server)
-	s.ip = ""
-	s.port = 8080
-	return s
-}
-
-func (s *server) Run() error {
-	l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.ip, s.port))
-	if err != nil {
-		return err
-	}
-
-	for {
-		conn, err := l.Accept()
+func (p *Proxy) listeners() []net.Listener {
+	ls := make([]net.Listener, 0)
+	for _, laddr := range p.ListenAddr {
+		//TODO do we want UDP/IP and or others?
+		l, err := net.Listen("tcp", laddr)
 		if err != nil {
-			return err
+			log.Printf("cannot listen on %s.\n %q\n", laddr, err)
+			continue
 		}
-		go proxy(conn)
+		ls = append(ls, l)
+	}
+	return ls
+}
+
+func (p *Proxy) Run() {
+	defer cfg.Done()
+	ls := p.listeners()
+	for {
+		for _, l := range ls {
+			conn, err := l.Accept()
+			if err != nil {
+				log.Println(err)
+			}
+			go proxy(conn)
+		}
 	}
 }
 
@@ -46,13 +52,14 @@ func proxy(conn net.Conn) {
 
 	var b bytes.Buffer
 	n, err := conn.Read(b.Bytes())
+
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	sn := sni.GetInfo(b.Bytes()[:n])
 
-	if sn.ServerName != "" {
+	if sn != nil && sn.ServerName != "" {
 		upstream, err = net.Dial("tcp", fmt.Sprintf("%s:%d", sn.ServerName, 443))
 		if err != nil {
 			// TODO: This should not be fatal, need to retry

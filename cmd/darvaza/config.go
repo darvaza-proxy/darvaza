@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"log"
+	"sync"
 
 	"github.com/creasty/defaults"
 	"github.com/hashicorp/hcl/v2/gohcl"
@@ -10,7 +11,28 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 )
 
-type Config struct{}
+type Config struct {
+	sync.WaitGroup
+	Proxies []Proxy `hcl:"proxy,block"`
+}
+
+func (c *Config) SetDefaults() {
+	defaultProxy := &Proxy{}
+	if err := defaults.Set(defaultProxy); err != nil {
+		log.Println(err)
+	}
+	if defaults.CanUpdate(c.Proxies) {
+		c.Proxies = append(c.Proxies, *defaultProxy)
+	}
+}
+
+func (c *Config) RunProxies() {
+	for i := range c.Proxies {
+		cfg.Add(1)
+		go c.Proxies[i].Run()
+	}
+	cfg.Wait()
+}
 
 func NewConfig() *Config {
 	c := &Config{}
