@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
@@ -44,34 +45,49 @@ func (p *Proxy) Run() {
 	}
 }
 
+type prefixConn struct {
+	net.Conn
+	io.Reader
+}
+
+func (c prefixConn) Read(p []byte) (int, error) {
+	return c.Reader.Read(p)
+}
+
 func proxy(conn net.Conn) {
 	defer conn.Close()
-
-	var upstream net.Conn
-	conn.SetDeadline(time.Now().Add(5 * time.Second))
-
-	var b bytes.Buffer
-	n, err := conn.Read(b.Bytes())
-
-	if err != nil {
-		fmt.Println(err)
+	conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+	var buf bytes.Buffer
+	if _, err := io.CopyN(&buf, conn, 1+2+2); err != nil {
+		log.Println(err)
 		return
 	}
-	sn := sni.GetInfo(b.Bytes()[:n])
-
+	length := binary.BigEndian.Uint16(buf.Bytes()[3:5])
+	if _, err := io.CopyN(&buf, conn, int64(length)); err != nil {
+		log.Println(err)
+		return
+	}
+	sn := sni.GetInfo(buf.Bytes())
+	//TODO Deal with non TLS connections
 	if sn != nil && sn.ServerName != "" {
-		upstream, err = net.Dial("tcp", fmt.Sprintf("%s:%d", sn.ServerName, 443))
+		c := prefixConn{
+			Conn:   conn,
+			Reader: io.MultiReader(&buf, conn),
+		}
+		conn.SetReadDeadline(time.Time{})
+		defer c.Close()
+		var upstream net.Conn
+		conn.SetDeadline(time.Now().Add(5 * time.Second))
+		//TODO after we will have backends we can drop the hardcoded 443
+		upstream, err := net.Dial("tcp", fmt.Sprintf("%s:%d", sn.ServerName, 443))
 		if err != nil {
 			// TODO: This should not be fatal, need to retry
 			log.Fatal(err)
 			return
 		}
-	} else {
-		return
+		defer upstream.Close()
+
+		go io.Copy(upstream, io.MultiReader(bytes.NewReader(buf.Bytes()), c))
+		io.Copy(c, upstream)
 	}
-
-	defer upstream.Close()
-
-	go io.Copy(upstream, io.MultiReader(bytes.NewReader(b.Bytes()), conn))
-	io.Copy(conn, upstream)
 }
