@@ -32,7 +32,6 @@ func (p *Proxy) listeners() []net.Listener {
 }
 
 func (p *Proxy) Run() {
-	defer cfg.Done()
 	ls := p.listeners()
 	for {
 		for _, l := range ls {

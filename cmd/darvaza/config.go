@@ -3,7 +3,6 @@ package main
 import (
 	"io"
 	"log"
-	"sync"
 
 	"github.com/creasty/defaults"
 	"github.com/hashicorp/hcl/v2/gohcl"
@@ -12,7 +11,6 @@ import (
 )
 
 type Config struct {
-	sync.WaitGroup
 	Proxies []Proxy `hcl:"proxy,block"`
 }
 
@@ -24,14 +22,6 @@ func (c *Config) SetDefaults() {
 	if defaults.CanUpdate(c.Proxies) {
 		c.Proxies = append(c.Proxies, *defaultProxy)
 	}
-}
-
-func (c *Config) RunProxies() {
-	for i := range c.Proxies {
-		cfg.Add(1)
-		go c.Proxies[i].Run()
-	}
-	cfg.Wait()
 }
 
 func NewConfig() *Config {
