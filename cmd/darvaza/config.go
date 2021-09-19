@@ -4,6 +4,8 @@ import (
 	"io"
 	"log"
 
+	"github.com/darvaza-proxy/darvaza/tls/server"
+
 	"github.com/creasty/defaults"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsimple"
@@ -11,11 +13,11 @@ import (
 )
 
 type Config struct {
-	Proxies []Proxy `hcl:"proxy,block"`
+	Proxies []server.Proxy `hcl:"proxy,block"`
 }
 
 func (c *Config) SetDefaults() {
-	defaultProxy := &Proxy{}
+	defaultProxy := &server.Proxy{}
 	if err := defaults.Set(defaultProxy); err != nil {
 		log.Println(err)
 	}
