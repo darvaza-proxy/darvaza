@@ -4,70 +4,55 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/spf13/cobra"
+
+	"github.com/darvaza-proxy/darvaza/types"
 )
 
 // Command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "starts serving a proxy",
-	Run: func(cmd *cobra.Command, args []string) {
-		startProxies()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		server := types.NewServer()
+
+		for i := range cfg.Proxies {
+			if z := cfg.Proxies[i].New(); z != nil {
+				server.Append(z)
+			}
+		}
+		go server.Run()
 
 		sig := make(chan os.Signal, 1)
 		signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 		defer close(sig)
-	out:
+
 		for {
 			select {
 			case signum := <-sig:
 				switch signum {
 				case syscall.SIGHUP:
 					log.Println("Reloading")
-					reloadProxies()
+					err := server.Reload()
+					if err != nil {
+						log.Println(err)
+						return err
+					}
 				case syscall.SIGINT, syscall.SIGTERM:
 					log.Println("Terminating")
-					stopProxies()
-					// TODO: replace the break out with a return while returning
-					// this to a RunE
-					break out
+					err := server.Cancel()
+					if err != nil {
+						log.Println(err)
+						return err
+					}
 				}
+			case err := <-server.Done:
+				return err
 			}
 		}
 	},
-}
-
-func reloadProxies() {
-	for i := range cfg.Proxies {
-		err := cfg.Proxies[i].Reload()
-		if err != nil {
-			log.Println(err)
-		}
-	}
-}
-
-func startProxies() {
-	var wg sync.WaitGroup
-	for i := range cfg.Proxies {
-		wg.Add(1)
-		go func(i int) {
-			defer wg.Done()
-			cfg.Proxies[i].Run()
-		}(i)
-	}
-	wg.Wait()
-}
-
-func stopProxies() {
-	for i := range cfg.Proxies {
-		err := cfg.Proxies[i].Cancel()
-		if err != nil {
-			log.Println(err)
-		}
-	}
 }
 
 // Flags

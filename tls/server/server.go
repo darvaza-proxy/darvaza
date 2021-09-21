@@ -17,13 +17,13 @@ import (
 	"github.com/darvaza-proxy/darvaza/tls/sni"
 )
 
-type Proxy struct {
+// ProxyConfig is a configuration for a TLSproxy
+type ProxyConfig struct {
 	Protocol   string   `default:"http" hcl:"protocol,label"`
 	ListenAddr []string `default:"[\":8080\"]" hcl:"listen"`
-	pp         *proxy
 }
 
-type proxy struct {
+type Proxy struct {
 	errGroup    *errgroup.Group
 	errCtx      context.Context
 	cancel      context.CancelFunc
@@ -33,11 +33,11 @@ type proxy struct {
 	activeConns map[*net.Conn]struct{}
 }
 
-func (p *proxy) shuttingDown() bool {
+func (p *Proxy) shuttingDown() bool {
 	return atomic.LoadInt32(&p.inShutdown) != 0
 }
 
-func (p *proxy) trackL(ln *net.Listener, add bool) {
+func (p *Proxy) trackL(ln *net.Listener, add bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.listeners == nil {
@@ -52,92 +52,105 @@ func (p *proxy) trackL(ln *net.Listener, add bool) {
 	}
 }
 
-func (p *proxy) trackConn(c *net.Conn, add bool) {
+func (p *Proxy) trackConn(c *net.Conn, add bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.activeConns == nil {
 		p.activeConns = make(map[*net.Conn]struct{})
 	}
 	if add {
-		p.activeConns[c] = struct{}{}
+		if !p.shuttingDown() {
+			p.activeConns[c] = struct{}{}
+		}
 	} else {
 		delete(p.activeConns, c)
 	}
 }
 
-func (p *Proxy) Run() {
-	var pi = new(proxy)
-	ctx, cancel := context.WithCancel(context.Background())
-	pi.cancel = cancel
-	pi.errGroup, pi.errCtx = errgroup.WithContext(ctx)
+func (pc *ProxyConfig) New() *Proxy {
+	var p = new(Proxy)
 
-	for _, laddr := range p.ListenAddr {
+	ctx, cancel := context.WithCancel(context.Background())
+	p.cancel = cancel
+	p.errGroup, p.errCtx = errgroup.WithContext(ctx)
+
+	for _, laddr := range pc.ListenAddr {
 		//TODO do we want UDP/IP and or others?
 		l, err := net.Listen("tcp", laddr)
 		if err != nil {
 			log.Printf("cannot listen on %s.\n %q\n", laddr, err)
 			continue
 		}
-		pi.trackL(&l, true)
+		p.trackL(&l, true)
 	}
+	return p
+}
 
-	p.pp = pi
-
-	for l := range pi.listeners {
+func (p *Proxy) Run() error {
+	for l := range p.listeners {
 		//TODO: Go(func () error{}) means no l tag
 		// https://golang.org/doc/faq#closures_and_goroutines
 		l := l
-		pi.errGroup.Go(func() error {
+		p.errGroup.Go(func() error {
 			for {
+				if p.shuttingDown() {
+					return fmt.Errorf("server shutting down")
+				}
 				conn, err := (*l).Accept()
 				if err != nil {
 					select {
-					case <-pi.errCtx.Done():
+					case <-p.errCtx.Done():
 						return fmt.Errorf("server shutting down")
 					default:
 						return err
 					}
 				}
-				pi.trackConn(&conn, true)
+				p.trackConn(&conn, true)
 				go handleConnection(conn)
 			}
 		})
 	}
-
+	return p.errGroup.Wait()
 }
 
-func (p *Proxy) Reload() error {
-	err := p.Cancel()
-	p.Run()
-	return err
-}
-
-func (p *Proxy) Cancel() error {
-	defer p.pp.cancel()
-	atomic.StoreInt32(&p.pp.inShutdown, 1)
-
-	for c := range p.pp.activeConns {
-		(*c).Close()
-		p.pp.trackConn(c, false)
-	}
-
-	err := p.pp.closeListeners()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *proxy) closeListeners() error {
+func (p *Proxy) closeListeners() error {
 	var err error
 	for ln := range p.listeners {
-		if cerr := (*ln).Close(); cerr != nil && err == nil {
-			err = cerr
+		cerr := (*ln).Close()
+		if cerr != nil && cerr.(*net.OpError).Unwrap().Error() != "use of closed network connection" {
+			if err == nil {
+				err = cerr
+			}
 		}
 		p.trackL(ln, false)
 	}
 	return err
+}
+
+func (p *Proxy) Reload() error {
+	return nil
+}
+
+func (p *Proxy) Cancel() error {
+	defer p.cancel()
+
+	atomic.StoreInt32(&p.inShutdown, 1)
+
+	for c := range p.activeConns {
+		err := (*c).Close()
+		if err != nil && err.(*net.OpError).Unwrap().Error() != "use of closed network connection" {
+			log.Println(err)
+		}
+		p.trackConn(c, false)
+	}
+
+	err := p.closeListeners()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
 }
 
 type prefixConn struct {

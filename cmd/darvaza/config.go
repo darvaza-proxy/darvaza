@@ -13,11 +13,11 @@ import (
 )
 
 type Config struct {
-	Proxies []server.Proxy `hcl:"proxy,block"`
+	Proxies []server.ProxyConfig `hcl:"proxy,block"`
 }
 
 func (c *Config) SetDefaults() {
-	defaultProxy := &server.Proxy{}
+	defaultProxy := &server.ProxyConfig{}
 	if err := defaults.Set(defaultProxy); err != nil {
 		log.Println(err)
 	}
