@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"log"
+	"net"
 	"sync"
 )
 
@@ -11,6 +12,7 @@ type Runner interface {
 	Run() error
 	Cancel() error
 	Reload() error
+	TLSHandler(func(net.Conn))
 }
 
 // Server governs a slice of Runners
@@ -22,7 +24,7 @@ type Server struct {
 
 func (s *Server) Run() error {
 	var err error
-	for k, _ := range s.Servers {
+	for k := range s.Servers {
 		s.wg.Add(1)
 		go func(k Runner) {
 			defer s.wg.Done()
@@ -56,7 +58,7 @@ func (s *Server) Run() error {
 func (s *Server) Cancel() error {
 	var err error
 	defer close(s.Done)
-	for k, _ := range s.Servers {
+	for k := range s.Servers {
 		err = k.Cancel()
 		s.Remove(k)
 		if err != nil {

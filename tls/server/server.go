@@ -31,6 +31,7 @@ type Proxy struct {
 	mu          sync.Mutex
 	listeners   map[*net.Listener]struct{}
 	activeConns map[*net.Conn]struct{}
+	tlsHandler  func(net.Conn)
 }
 
 func (p *Proxy) shuttingDown() bool {
@@ -83,6 +84,7 @@ func (pc *ProxyConfig) New() *Proxy {
 		}
 		p.trackL(&l, true)
 	}
+	p.tlsHandler = defaultTLSHandler
 	return p
 }
 
@@ -106,7 +108,7 @@ func (p *Proxy) Run() error {
 					}
 				}
 				p.trackConn(&conn, true)
-				go handleConnection(conn)
+				go p.tlsHandler(conn)
 			}
 		})
 	}
@@ -129,6 +131,10 @@ func (p *Proxy) closeListeners() error {
 
 func (p *Proxy) Reload() error {
 	return nil
+}
+
+func (p *Proxy) TLSHandler(fn func(net.Conn)) {
+	p.tlsHandler = fn
 }
 
 func (p *Proxy) Cancel() error {
@@ -162,7 +168,7 @@ func (c prefixConn) Read(p []byte) (int, error) {
 	return c.Reader.Read(p)
 }
 
-func handleConnection(conn net.Conn) {
+func defaultTLSHandler(conn net.Conn) {
 	defer conn.Close()
 	conn.SetReadDeadline(time.Now().Add(30 * time.Second))
 	var buf bytes.Buffer
