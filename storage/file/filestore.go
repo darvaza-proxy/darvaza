@@ -187,8 +187,19 @@ func (fs FileStore) fileCertFromName(name string) (string, x509.Certificate, err
 			if err != nil {
 				continue
 			}
-			if x.Subject.CommonName == name {
-				return fl, *x, nil
+			switch len(x.URIs) {
+			case 0:
+				//an "old" certificate, no SAN
+				if x.Subject.CommonName == name {
+					return fl, *x, nil
+
+				}
+			default:
+				//normal "modern" certificate uses SAN
+				err := x.VerifyHostname(name)
+				if err == nil {
+					return fl, *x, nil
+				}
 
 			}
 		}
