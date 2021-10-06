@@ -3,6 +3,7 @@ package file
 /*
 import (
 	"context"
+	"crypto/x509"
 	"fmt"
 	"testing"
 )
@@ -14,7 +15,11 @@ func Test_Get(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-	cert, err := z.Get(ctx, "www.example.com")
+	certdata, err := z.Get(ctx, "www.example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cert, err := x509.ParseCertificate(certdata)
 	if err != nil {
 		t.Fatal(err)
 	}

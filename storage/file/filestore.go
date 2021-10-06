@@ -20,15 +20,16 @@ type FileStore struct {
 	directory string
 }
 
-// Get will return the first x509 certificate and an error, the certificate having the same
-// common name as the name parameter
-func (fs *FileStore) Get(ctx context.Context, name string) (x509.Certificate, error) {
+// Get will return a byte slice containing the first x509 certificate
+// and an error, the certificate having the same common name or SAN
+// as the name parameter
+func (fs *FileStore) Get(ctx context.Context, name string) ([]byte, error) {
 	_, cert, err := fs.fileCertFromName(name)
 	return cert, err
 
 }
 
-// ForEach will walk the store and ececute the StoreIterFunc for each certificate
+// ForEach will walk the store and execute the StoreIterFunc for each certificate
 // it can decode
 func (fs *FileStore) ForEach(ctx context.Context, f storage.StoreIterFunc) error {
 	files, err := ioutil.ReadDir(fs.directory)
@@ -46,40 +47,36 @@ func (fs *FileStore) ForEach(ctx context.Context, f storage.StoreIterFunc) error
 		if err != nil {
 			return err
 		}
-		block, _ := pem.Decode(content)
-		if block == nil {
-			return fmt.Errorf("failed to decode data")
+		x, err := x509.ParseCertificate(content)
+		if err != nil {
+			return err
 		}
-		if block.Type == "CERTIFICATE" {
-			x, err := x509.ParseCertificate(block.Bytes)
-			if err != nil {
-				return err
-			}
-			err = f(*x)
-			if err != nil {
-				return err
-			}
+		err = f(*x)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
 // Put will create a file in the store with the given name and the given certificate
-// it will write in the fil eteh content of cert.Raw field
-func (fs *FileStore) Put(ctx context.Context, name string, cert x509.Certificate) error {
+func (fs *FileStore) Put(ctx context.Context, name string, data []byte) error {
 	file := filepath.Join(fs.directory, name)
 	lock := fs.fsLock(file)
 	lock.Lock()
 	defer lock.Unlock()
 
-	err := os.WriteFile(file, cert.Raw, 0666)
+	certOut, err := os.Create(file)
 	if err != nil {
+		return err
+	}
+	if err := pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: data}); err != nil {
 		return err
 	}
 	return nil
 }
 
-// Delete will delete the first certificate with the same common name as
+// Delete will delete the first certificate with the same common name or SAN as
 // the given parameter
 func (fs *FileStore) Delete(ctx context.Context, name string) error {
 	file, _, err := fs.fileCertFromName(name)
@@ -162,11 +159,10 @@ func (fs FileStore) fsLock(filename string) *sync.RWMutex {
 	return lock
 }
 
-func (fs FileStore) fileCertFromName(name string) (string, x509.Certificate, error) {
-	cert := x509.Certificate{}
+func (fs FileStore) fileCertFromName(name string) (string, []byte, error) {
 	files, err := ioutil.ReadDir(fs.directory)
 	if err != nil {
-		return "", cert, err
+		return "", []byte{}, err
 	}
 
 	for _, file := range files {
@@ -176,34 +172,35 @@ func (fs FileStore) fileCertFromName(name string) (string, x509.Certificate, err
 		content, err := os.ReadFile(fl)
 		lock.RUnlock()
 		if err != nil {
-			return "", cert, err
+			return "", []byte{}, err
 		}
+
 		block, _ := pem.Decode(content)
 		if block == nil {
-			return "", cert, fmt.Errorf("failed to decode data")
+			return "", []byte{}, fmt.Errorf("failed to decode data from %s", file)
 		}
-		if block.Type == "CERTIFICATE" {
-			x, err := x509.ParseCertificate(block.Bytes)
-			if err != nil {
-				continue
-			}
-			switch len(x.URIs) {
-			case 0:
-				//an "old" certificate, no SAN
-				if x.Subject.CommonName == name {
-					return fl, *x, nil
 
-				}
-			default:
-				//normal "modern" certificate uses SAN
-				err := x.VerifyHostname(name)
-				if err == nil {
-					return fl, *x, nil
-				}
+		x, err := x509.ParseCertificate(block.Bytes)
+		if err != nil || block.Type != "CERTIFICATE" {
+			//not a certificate
+			continue
+		}
+		switch len(x.URIs) {
+		case 0:
+			//an "old" certificate, no SAN
+			if x.Subject.CommonName == name {
+				return fl, x.Raw, nil
 
 			}
+		default:
+			//normal "modern" certificate uses SAN
+			err := x.VerifyHostname(name)
+			if err == nil {
+				return fl, x.Raw, nil
+			}
+
 		}
 	}
-	return "", cert, fmt.Errorf("certificate not found")
+	return "", []byte{}, storage.ErrStorageMiss
 
 }
