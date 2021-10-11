@@ -76,7 +76,7 @@ type ClientHelloInfo struct {
 	SupportedSignatureAlgorithmsCert []SignatureScheme
 	secureRenegotiationSupported     bool
 	secureRenegotiation              []byte
-	alpnProtocols                    []string
+	ALPNProtocols                    []string
 	scts                             bool
 	SupportedVersions                []uint16
 	cookie                           []byte
@@ -250,7 +250,7 @@ func (m *ClientHelloInfo) unmarshal(data []byte) bool {
 				if !protoList.ReadUint8LengthPrefixed(&proto) || proto.Empty() {
 					return false
 				}
-				m.alpnProtocols = append(m.alpnProtocols, string(proto))
+				m.ALPNProtocols = append(m.ALPNProtocols, string(proto))
 			}
 		case extensionSCT:
 			// RFC 6962, Section 3.3.1
