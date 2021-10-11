@@ -63,6 +63,7 @@ func Test_GetInfo12(t *testing.T) {
 	fmt.Println("Supported Algos:", SignatureAlgos(ci.SupportedSignatureAlgorithms))
 	fmt.Println("Supported Versions:", SupportedVersions(ci.SupportedVersions))
 	fmt.Println("Requested SNI:", ci.ServerName)
+	fmt.Println("ALPN:", ci.ALPNProtocols)
 	if ci.ServerName == "" || ci.ServerName != "example.ulfheim.net" {
 		t.Fatalf("decode failed, wanted example.ulfheim.net got %s", ci.ServerName)
 	}
@@ -79,6 +80,7 @@ func Test_GetInfo13(t *testing.T) {
 	fmt.Println("Supported Algos:", SignatureAlgos(ci.SupportedSignatureAlgorithms))
 	fmt.Println("Supported Versions:", SupportedVersions(ci.SupportedVersions))
 	fmt.Println("Requested SNI:", ci.ServerName)
+	fmt.Println("ALPN:", ci.ALPNProtocols)
 	if ci.ServerName == "" || ci.ServerName != "example.ulfheim.net" {
 		t.Fatalf("decode failed, wanted example.ulfheim.net got %s", ci.ServerName)
 	}
