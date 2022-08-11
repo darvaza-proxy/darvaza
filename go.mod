@@ -20,3 +20,10 @@ require (
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
+
+replace (
+	github.com/darvaza-proxy/darvaza/acme => ./acme
+	github.com/darvaza-proxy/darvaza/agent => ./agent
+	github.com/darvaza-proxy/darvaza/server => ./server
+	github.com/darvaza-proxy/darvaza/shared => ./shared
+)
