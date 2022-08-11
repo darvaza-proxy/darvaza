@@ -1,11 +1,22 @@
 module github.com/darvaza-proxy/darvaza
 
-go 1.16
+go 1.18
 
 require (
-	github.com/creasty/defaults v1.5.1
-	github.com/hashicorp/hcl/v2 v2.10.1
-	github.com/spf13/cobra v1.2.1
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	github.com/creasty/defaults v1.6.0
+	github.com/hashicorp/hcl/v2 v2.13.0
+	github.com/spf13/cobra v1.5.0
+	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+)
+
+require (
+	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/zclconf/go-cty v1.10.0 // indirect
+	golang.org/x/text v0.3.7 // indirect
 )
