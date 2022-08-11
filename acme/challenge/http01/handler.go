@@ -29,43 +29,39 @@ func (h *Http01ChallengeHandler) ServeHTTP(rw http.ResponseWriter, req *http.Req
 		token := strings.TrimPrefix(path, "/.well-known/acme-challenge")
 		if token == path {
 			// invalid prefix
-			goto skip
+			goto next
 		} else if l := len(token); l == 0 {
 			// no token
-			goto reject
+			http.NotFound(rw, req)
 		} else if token[0] != '/' {
 			// invalid prefix
-			goto skip
+			goto next
 		} else if c := h.resolver.LookupChallenge(host, token[1:]); c == nil {
 			// host,token pair not recognised
-			goto reject
+			http.NotFound(rw, req)
 		} else {
 			// host,token pair recognised, proceed
 			c.ServeHTTP(rw, req)
-			return
 		}
+
+		return
 	}
 
-skip:
+next:
+	if h.next == nil {
+		h.next = NewHttpsRedirectHandler()
+	}
 	h.next.ServeHTTP(rw, req)
-	return
-reject:
-	http.NotFound(rw, req)
 }
 
 func NewHtt01ChallengeHandler(resolver acme.Http01Resolver) *Http01ChallengeHandler {
 	return &Http01ChallengeHandler{
 		resolver: resolver,
-		next:     NewHttpsRedirectHandler(),
 	}
 }
 
 func NewHttp01ChallengeMiddleware(resolver acme.Http01Resolver) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		if next == nil {
-			next = NewHttpsRedirectHandler()
-		}
-
 		return &Http01ChallengeHandler{
 			resolver: resolver,
 			next:     next,
