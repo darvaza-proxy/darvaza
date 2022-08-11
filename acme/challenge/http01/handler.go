@@ -1,6 +1,7 @@
 package http01
 
 import (
+	"net"
 	"net/http"
 	"strings"
 
@@ -17,28 +18,32 @@ type Http01ChallengeHandler struct {
 }
 
 func (h *Http01ChallengeHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	host := req.URL.Host
+	host := req.URL.Hostname()
 	path := req.URL.Path
 
-	h.resolver.AnnounceHost(host)
+	if net.ParseIP(host) == nil {
+		// only process named hosts
 
-	token := strings.TrimPrefix(path, "/.well-known/acme-challenge")
-	if token == path {
-		// invalid prefix
-		goto skip
-	} else if l := len(token); l == 0 {
-		// no token
-		goto reject
-	} else if token[0] != '/' {
-		// invalid prefix
-		goto skip
-	} else if c := h.resolver.LookupChallenge(host, token[1:]); c == nil {
-		// host,token pair not recognised
-		goto reject
-	} else {
-		// host,token pair recognised, proceed
-		c.ServeHTTP(rw, req)
-		return
+		h.resolver.AnnounceHost(host)
+
+		token := strings.TrimPrefix(path, "/.well-known/acme-challenge")
+		if token == path {
+			// invalid prefix
+			goto skip
+		} else if l := len(token); l == 0 {
+			// no token
+			goto reject
+		} else if token[0] != '/' {
+			// invalid prefix
+			goto skip
+		} else if c := h.resolver.LookupChallenge(host, token[1:]); c == nil {
+			// host,token pair not recognised
+			goto reject
+		} else {
+			// host,token pair recognised, proceed
+			c.ServeHTTP(rw, req)
+			return
+		}
 	}
 
 skip:
