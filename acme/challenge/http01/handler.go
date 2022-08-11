@@ -13,7 +13,7 @@ var (
 )
 
 type Http01ChallengeHandler struct {
-	resolver acme.Http01Resolver
+	Resolver acme.Http01Resolver
 	next     http.Handler
 }
 
@@ -21,10 +21,10 @@ func (h *Http01ChallengeHandler) ServeHTTP(rw http.ResponseWriter, req *http.Req
 	host := req.URL.Hostname()
 	path := req.URL.Path
 
-	if net.ParseIP(host) == nil {
+	if h.Resolver != nil && net.ParseIP(host) == nil {
 		// only process named hosts
 
-		h.resolver.AnnounceHost(host)
+		h.Resolver.AnnounceHost(host)
 
 		token := strings.TrimPrefix(path, "/.well-known/acme-challenge")
 		if token == path {
@@ -36,7 +36,7 @@ func (h *Http01ChallengeHandler) ServeHTTP(rw http.ResponseWriter, req *http.Req
 		} else if token[0] != '/' {
 			// invalid prefix
 			goto next
-		} else if c := h.resolver.LookupChallenge(host, token[1:]); c == nil {
+		} else if c := h.Resolver.LookupChallenge(host, token[1:]); c == nil {
 			// host,token pair not recognised
 			http.NotFound(rw, req)
 		} else {
@@ -56,14 +56,14 @@ next:
 
 func NewHtt01ChallengeHandler(resolver acme.Http01Resolver) *Http01ChallengeHandler {
 	return &Http01ChallengeHandler{
-		resolver: resolver,
+		Resolver: resolver,
 	}
 }
 
 func NewHttp01ChallengeMiddleware(resolver acme.Http01Resolver) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return &Http01ChallengeHandler{
-			resolver: resolver,
+			Resolver: resolver,
 			next:     next,
 		}
 	}
