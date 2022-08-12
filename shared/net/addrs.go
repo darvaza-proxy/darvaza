@@ -74,3 +74,27 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 
 	return out, nil
 }
+
+// InterfaceAddresses returns the list of IP addresses of a list of network
+// interfaces
+func InterfaceAddresses(ifaces []string) ([]string, error) {
+	var out []string
+
+	for _, name := range ifaces {
+		ifi, err := net.InterfaceByName(name)
+		if err != nil {
+			return out, err
+		}
+
+		addrs, err := ifi.Addrs()
+		if err != nil {
+			return out, err
+		}
+
+		for _, addr := range addrs {
+			out = append(out, addr.String())
+		}
+	}
+
+	return out, nil
+}
