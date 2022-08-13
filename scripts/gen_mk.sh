@@ -21,7 +21,12 @@ $cmd: $all
 
 EOT
 	case "$cmd" in
-	tidy)	call="\$(GO) mod tidy || true" ;;
+	tidy)
+		call="
+\$(GO) vet ./...
+\$(GO) mod tidy
+"
+;;
 	*)      call="\$(GO) $cmd -v ./..." ;;
 	esac
 
@@ -38,7 +43,7 @@ EOT
 			cd=
 		else
 			k="$x"
-			cd="cd '$x' && "
+			cd="cd '$x' \&\& "
 		fi
 
 		if $sequential; then
@@ -49,7 +54,7 @@ EOT
 
 		cat <<EOT
 $cmd-$k:${deps:+ $(expand $cmd $deps)}
-	$cd$call
+$(echo "$call" | sed -e "/^$/d;" -e "s|^|\t$cd|")
 
 EOT
 	done

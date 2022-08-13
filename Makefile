@@ -1,4 +1,4 @@
-.PHONY: all generate fmt install
+.PHONY: all clean generate fmt install
 
 GO ?= go
 GOFMT ?= gofmt
@@ -11,10 +11,14 @@ TEMPDIR ?= .tmp
 
 all: get generate fmt build
 
+clean:
+	rm -rf $(TEMPDIR)
+
 $(TEMPDIR)/gen.mk: scripts/gen_mk.sh Makefile
-	mkdir -p $(@D)
-	$< $(PROJECTS) > $@~
-	if cmp $@ $@~ 2> /dev/null; then rm $@~; else mv $@~ $@; fi
+	@echo "$< $(PROJECTS) > $@" >&2
+	@mkdir -p $(@D)
+	@$< $(PROJECTS) > $@~
+	@if cmp $@ $@~ 2> /dev/null >&2; then rm $@~; else mv $@~ $@; fi
 
 include $(TEMPDIR)/gen.mk
 
