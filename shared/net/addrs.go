@@ -3,8 +3,24 @@ package net
 import (
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 )
+
+// SplitHostPort splits a network address into host and port,
+// validating the port in the process
+func SplitHostPort(hostport string) (string, uint16, error) {
+	host, port, err := net.SplitHostPort(hostport)
+	if err != nil {
+		return "", 0, err
+	} else if port == "" {
+		return host, 0, nil
+	} else if u, err := strconv.ParseUint(port, 10, 16); err != nil {
+		return "", 0, err
+	} else {
+		return host, uint16(u & 0xffff), nil
+	}
+}
 
 // JoinHostPort combines a given host address and a port, validating
 // the provided IP address in the process
