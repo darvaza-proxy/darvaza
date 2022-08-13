@@ -25,6 +25,13 @@ EOT
 	*)      call="\$(GO) $cmd -v ./..." ;;
 	esac
 
+	case "$cmd" in
+	build|test)
+		sequential=true ;;
+	*)
+		sequential=false ;;
+	esac
+
 	for x in . $PROJECTS; do
 		if [ "$x" = . ]; then
 			k="root"
@@ -33,7 +40,12 @@ EOT
 			k="$x"
 			cd="cd '$x' && "
 		fi
-		deps="$(sed -n -e 's|^.*=> \.\?\./\([^/]\+\).*$|\1|p' "$x/go.mod" | tr '\n' ' ')"
+
+		if $sequential; then
+			deps="$(sed -n -e 's|^.*=> \.\?\./\([^/]\+\).*$|\1|p' "$x/go.mod" | tr '\n' ' ')"
+		else
+			deps=
+		fi
 
 		cat <<EOT
 $cmd-$k:${deps:+ $(expand $cmd $deps)}
