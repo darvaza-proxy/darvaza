@@ -3,6 +3,7 @@ package net
 import (
 	"context"
 	"net"
+	"time"
 )
 
 // ListenConfig extends the standard net.ListeConfig with a central holder
@@ -12,6 +13,21 @@ type ListenConfig struct {
 
 	// Context used when registering the listeners
 	Context context.Context
+}
+
+// NewListenConfig assists creating a ListenConfig due to the two-layer definition
+// making difficult static declaration when `net` is shadowed
+func NewListenConfig(ctx context.Context, keepalive time.Duration) *ListenConfig {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	return &ListenConfig{
+		ListenConfig: net.ListenConfig{
+			KeepAlive: keepalive,
+		},
+		Context: ctx,
+	}
 }
 
 // Listen acts like the standard net.Listen but using the context.Context,
