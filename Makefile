@@ -1,4 +1,4 @@
-.PHONY: all clean generate fmt install
+.PHONY: all clean generate fmt tidy install
 
 GO ?= go
 GOFMT ?= gofmt
@@ -9,7 +9,7 @@ PROJECTS = acme agent server shared
 
 TEMPDIR ?= .tmp
 
-all: get generate fmt build
+all: get generate fmt tidy build
 
 clean:
 	rm -rf $(TEMPDIR)
@@ -22,8 +22,10 @@ $(TEMPDIR)/gen.mk: scripts/gen_mk.sh Makefile
 
 include $(TEMPDIR)/gen.mk
 
-fmt: tidy
+fmt:
 	@find . -name '*.go' | xargs -r $(GOFMT) $(GOFMT_FLAGS)
+
+tidy: fmt
 
 generate:
 	@git grep -l '^//go:generate' | sed -n -e 's|\(.*\)/[^/]\+\.go$$|\1|p' | sort -u | while read d; do \
