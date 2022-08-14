@@ -1,0 +1,8 @@
+{
+    "files.exclude": {
+        "acme": true,
+        "agent": true,
+        "shared": true,
+        "server": true
+    }
+}
