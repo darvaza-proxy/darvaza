@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "acme"
+		},
+		{
+			"path": "agent"
+		},
+		{
+			"path": "server"
+		},
+		{
+			"path": "shared"
+		},
+		{
+			"path": "."
+		}
+	]
+}
