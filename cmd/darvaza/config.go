@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 
-	"github.com/darvaza-proxy/darvaza/tls/server"
+	"github.com/darvaza-proxy/darvaza/shared/tls/server"
 )
 
 type Config struct {
