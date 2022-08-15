@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/creasty/defaults v1.6.0
+	github.com/darvaza-proxy/darvaza/server v0.0.0-20220815113152-dfebb9141d43
 	github.com/darvaza-proxy/darvaza/shared v0.0.0-00010101000000-000000000000
 	github.com/hashicorp/hcl/v2 v2.13.0
 	github.com/spf13/cobra v1.5.0
@@ -12,7 +13,6 @@ require (
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
-	github.com/darvaza-proxy/darvaza/server v0.0.0-20220815113152-dfebb9141d43 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
