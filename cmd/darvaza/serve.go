@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/darvaza-proxy/darvaza/types"
+	"github.com/darvaza-proxy/darvaza/server"
 )
 
 // Command
@@ -16,7 +16,7 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "starts serving a proxy",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		server := types.NewServer()
+		server := darvaza.NewServer()
 		for i := range cfg.Proxies {
 			if z := cfg.Proxies[i].New(); z != nil {
 				server.Append(z)
