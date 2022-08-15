@@ -4,10 +4,9 @@ go 1.18
 
 require (
 	github.com/creasty/defaults v1.6.0
+	github.com/darvaza-proxy/darvaza/shared v0.0.0-00010101000000-000000000000
 	github.com/hashicorp/hcl/v2 v2.13.0
 	github.com/spf13/cobra v1.5.0
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 )
 
 require (
@@ -18,6 +17,8 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
+	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
 

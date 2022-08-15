@@ -14,7 +14,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/darvaza-proxy/darvaza/tls/sni"
+	"github.com/darvaza-proxy/darvaza/shared/tls/sni"
 )
 
 // ProxyConfig is a configuration for a TLSproxy
