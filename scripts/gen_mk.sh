@@ -22,13 +22,16 @@ $cmd: $all
 EOT
 	case "$cmd" in
 	tidy)
-		call="
+		call="$(cat <<EOT | sed -e '/^$/d;'
 \$(GO) vet ./...
 \$(GO) mod tidy
-"
-;;
+EOT
+)"
+		;;
 	*)      call="\$(GO) $cmd -v ./..." ;;
 	esac
+
+	# tidy up call
 
 	case "$cmd" in
 	build|test)
@@ -46,6 +49,12 @@ EOT
 			cd="cd '$x' \&\& "
 		fi
 
+		if [ "$k" = root -a "$cmd" = build ]; then
+			callx="\$(GO) $cmd -o \$(TMPDIR)/ -v ./..."
+		else
+			callx="$call"
+		fi
+
 		if $sequential; then
 			deps="$(sed -n -e 's|^.*=> \.\?\./\([^/]\+\).*$|\1|p' "$x/go.mod" | tr '\n' ' ')"
 		else
@@ -54,7 +63,7 @@ EOT
 
 		cat <<EOT
 $cmd-$k:${deps:+ $(expand $cmd $deps)}
-$(echo "$call" | sed -e "/^$/d;" -e "s|^|\t$cd|")
+$(echo "$callx" | sed -e "/^$/d;" -e "s|^|\t$cd|")
 
 EOT
 	done
