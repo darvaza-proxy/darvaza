@@ -12,6 +12,7 @@ require (
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
+	github.com/darvaza-proxy/darvaza/server v0.0.0-20220815113152-dfebb9141d43 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
