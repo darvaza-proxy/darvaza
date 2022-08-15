@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/creasty/defaults v1.6.0
 	github.com/darvaza-proxy/darvaza/server v0.0.0-20220815113152-dfebb9141d43
-	github.com/darvaza-proxy/darvaza/shared v0.0.0-00010101000000-000000000000
+	github.com/darvaza-proxy/darvaza/shared v0.0.0-20220815153810-886eb2ae5f7a
 	github.com/hashicorp/hcl/v2 v2.13.0
 	github.com/spf13/cobra v1.5.0
 )
