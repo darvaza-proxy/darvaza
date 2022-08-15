@@ -7,20 +7,20 @@ GOGENERATE_FLAGS = -v
 
 PROJECTS = acme agent server shared
 
-TEMPDIR ?= .tmp
+TMPDIR ?= .tmp
 
 all: get generate fmt tidy build
 
 clean:
-	rm -rf $(TEMPDIR)
+	rm -rf $(TMPDIR)
 
-$(TEMPDIR)/gen.mk: scripts/gen_mk.sh Makefile
+$(TMPDIR)/gen.mk: scripts/gen_mk.sh Makefile
 	@echo "$< $(PROJECTS) > $@" >&2
 	@mkdir -p $(@D)
 	@$< $(PROJECTS) > $@~
 	@if cmp $@ $@~ 2> /dev/null >&2; then rm $@~; else mv $@~ $@; fi
 
-include $(TEMPDIR)/gen.mk
+include $(TMPDIR)/gen.mk
 
 fmt:
 	@find . -name '*.go' | xargs -r $(GOFMT) $(GOFMT_FLAGS)
