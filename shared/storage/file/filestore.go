@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/darvaza-proxy/darvaza/storage"
+	"github.com/darvaza-proxy/darvaza/shared/storage"
 )
 
 // FileStore is a darvaza Storage implementation for storing x509 certificates as files
