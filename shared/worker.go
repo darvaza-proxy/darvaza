@@ -71,7 +71,15 @@ func (s *WorkGroup) Cancel() error {
 }
 
 func (s *WorkGroup) Reload() error {
-	return nil
+	var err error
+	for k := range s.workers {
+		if w, ok := k.(Reloader); ok {
+			if e := w.Reload(); e != nil {
+				err = e
+			}
+		}
+	}
+	return err
 }
 
 func NewWorkGroup() *WorkGroup {
