@@ -163,10 +163,9 @@ func (fs FileStore) fsLock(filename string) *sync.RWMutex {
 }
 
 func (fs FileStore) fileCertFromName(name string) (string, *x509.Certificate, error) {
-	cert := x509.Certificate{}
 	files, err := ioutil.ReadDir(fs.directory)
 	if err != nil {
-		return "", &cert, err
+		return "", nil, err
 	}
 
 	for _, file := range files {
@@ -176,34 +175,34 @@ func (fs FileStore) fileCertFromName(name string) (string, *x509.Certificate, er
 		content, err := os.ReadFile(fl)
 		lock.RUnlock()
 		if err != nil {
-			return "", &cert, err
+			return "", nil, err
 		}
 		block, _ := pem.Decode(content)
 		if block == nil {
-			return "", &cert, fmt.Errorf("failed to decode data")
+			return "", nil, fmt.Errorf("failed to decode data")
 		}
 		if block.Type == "CERTIFICATE" {
-			x, err := x509.ParseCertificate(block.Bytes)
+			cert, err := x509.ParseCertificate(block.Bytes)
 			if err != nil {
 				continue
 			}
-			switch len(x.URIs) {
+			switch len(cert.URIs) {
 			case 0:
 				//an "old" certificate, no SAN
-				if x.Subject.CommonName == name {
-					return fl, x, nil
+				if cert.Subject.CommonName == name {
+					return fl, cert, nil
 
 				}
 			default:
 				//normal "modern" certificate uses SAN
-				err := x.VerifyHostname(name)
+				err := cert.VerifyHostname(name)
 				if err == nil {
-					return fl, x, nil
+					return fl, cert, nil
 				}
 
 			}
 		}
 	}
-	return "", &cert, fmt.Errorf("certificate not found")
+	return "", nil, fmt.Errorf("certificate not found")
 
 }
