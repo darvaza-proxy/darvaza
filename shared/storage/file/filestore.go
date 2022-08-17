@@ -22,7 +22,7 @@ type FileStore struct {
 
 // Get will return the first x509 certificate and an error, the certificate having the same
 // common name as the name parameter
-func (fs *FileStore) Get(ctx context.Context, name string) (x509.Certificate, error) {
+func (fs *FileStore) Get(ctx context.Context, name string) (*x509.Certificate, error) {
 	_, cert, err := fs.fileCertFromName(name)
 	return cert, err
 
@@ -55,7 +55,7 @@ func (fs *FileStore) ForEach(ctx context.Context, f storage.StoreIterFunc) error
 			if err != nil {
 				return err
 			}
-			err = f(*x)
+			err = f(x)
 			if err != nil {
 				return err
 			}
@@ -66,7 +66,7 @@ func (fs *FileStore) ForEach(ctx context.Context, f storage.StoreIterFunc) error
 
 // Put will create a file in the store with the given name and the given certificate
 // it will write in the fil eteh content of cert.Raw field
-func (fs *FileStore) Put(ctx context.Context, name string, cert x509.Certificate) error {
+func (fs *FileStore) Put(ctx context.Context, name string, cert *x509.Certificate) error {
 	file := filepath.Join(fs.directory, name)
 	lock := fs.fsLock(file)
 	lock.Lock()
@@ -98,7 +98,7 @@ func (fs *FileStore) Delete(ctx context.Context, name string) error {
 }
 
 // DeleteCert will delete from the store the certificate given as parameter
-func (fs *FileStore) DeleteCert(ctx context.Context, cert x509.Certificate) error {
+func (fs *FileStore) DeleteCert(ctx context.Context, cert *x509.Certificate) error {
 	name := cert.Subject.CommonName
 	file, _, err := fs.fileCertFromName(name)
 	if err != nil {
@@ -162,11 +162,10 @@ func (fs FileStore) fsLock(filename string) *sync.RWMutex {
 	return lock
 }
 
-func (fs FileStore) fileCertFromName(name string) (string, x509.Certificate, error) {
-	cert := x509.Certificate{}
+func (fs FileStore) fileCertFromName(name string) (string, *x509.Certificate, error) {
 	files, err := ioutil.ReadDir(fs.directory)
 	if err != nil {
-		return "", cert, err
+		return "", nil, err
 	}
 
 	for _, file := range files {
@@ -176,34 +175,34 @@ func (fs FileStore) fileCertFromName(name string) (string, x509.Certificate, err
 		content, err := os.ReadFile(fl)
 		lock.RUnlock()
 		if err != nil {
-			return "", cert, err
+			return "", nil, err
 		}
 		block, _ := pem.Decode(content)
 		if block == nil {
-			return "", cert, fmt.Errorf("failed to decode data")
+			return "", nil, fmt.Errorf("failed to decode data")
 		}
 		if block.Type == "CERTIFICATE" {
-			x, err := x509.ParseCertificate(block.Bytes)
+			cert, err := x509.ParseCertificate(block.Bytes)
 			if err != nil {
 				continue
 			}
-			switch len(x.URIs) {
+			switch len(cert.URIs) {
 			case 0:
 				//an "old" certificate, no SAN
-				if x.Subject.CommonName == name {
-					return fl, *x, nil
+				if cert.Subject.CommonName == name {
+					return fl, cert, nil
 
 				}
 			default:
 				//normal "modern" certificate uses SAN
-				err := x.VerifyHostname(name)
+				err := cert.VerifyHostname(name)
 				if err == nil {
-					return fl, *x, nil
+					return fl, cert, nil
 				}
 
 			}
 		}
 	}
-	return "", cert, fmt.Errorf("certificate not found")
+	return "", nil, fmt.Errorf("certificate not found")
 
 }
