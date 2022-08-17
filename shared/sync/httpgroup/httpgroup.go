@@ -57,6 +57,7 @@ type Group struct {
 	ctx       context.Context
 	cancel    context.CancelFunc
 	cancelled int32
+	count     int32
 
 	wg core.WaitGroup
 }
@@ -132,16 +133,29 @@ func (heg *Group) Go(srv Server, lsn net.Listener) error {
 		Listener: lsn,
 	}
 
+	atomic.AddInt32(&heg.count, 1)
+
 	heg.wg.Go(func() error {
 		return w.Run()
 	})
 
 	heg.wg.Go(func() error {
+		defer atomic.AddInt32(&heg.count, -1)
+
 		<-heg.ctx.Done()
 		return w.Shutdown(context.Background())
 	})
 
 	return nil
+}
+
+// Count returns how many servers are running in the Group
+func (heg *Group) Count() uint {
+	count := atomic.LoadInt32(&heg.count)
+	if count > 0 {
+		return uint(count)
+	}
+	return 0
 }
 
 // Wait blocks until all servers have shut down
