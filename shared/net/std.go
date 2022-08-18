@@ -5,6 +5,8 @@ import (
 )
 
 type (
+	// Addr is an alias of the standard net.Addr type
+	Addr = net.Addr
 	// Conn is an alias of the standard net.Conn type
 	Conn = net.Conn
 	// IP is an alias of the stadnard net.IP type
