@@ -7,6 +7,7 @@ import (
 // Flock implements a simple wrapper around syscall.Flock
 type Flock struct {
 	filename string
+	opener   func(string) (int, error)
 	fd       int
 }
 
@@ -29,10 +30,23 @@ func Lock(filename string) (*Flock, error) {
 }
 
 func (lock *Flock) open() error {
+	var fd int
+	var err error
+
 	if lock.fd >= 0 {
 		// already open
 		return syscall.EBUSY
-	} else if fd, err := syscall.Open(lock.filename, syscall.O_RDONLY, 0); err != nil {
+	}
+
+	if lock.opener != nil {
+		// use given opener
+		fd, err = lock.opener(lock.filename)
+	} else {
+		// default opener
+		fd, err = syscall.Open(lock.filename, syscall.O_RDONLY, 0)
+	}
+
+	if err != nil {
 		// failed to open
 		return err
 	} else {
