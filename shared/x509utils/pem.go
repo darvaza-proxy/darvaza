@@ -3,8 +3,9 @@ package x509utils
 import (
 	"encoding/pem"
 	"io/fs"
-	"os"
 	"path/filepath"
+
+	"github.com/darvaza-proxy/darvaza/shared/os"
 )
 
 // DecodePEMBlockFunc is called for each PEM block coded. it returns true
@@ -59,7 +60,7 @@ func readPEM(filename string, block *pem.Block, rest []byte, cb DecodePEMBlockFu
 }
 
 func dirReadPEM(dirname string, cb DecodePEMBlockFunc) (bool, error) {
-	files, err := os.ReadDir(dirname)
+	files, err := os.ReadDirWithLock(dirname)
 	if err != nil {
 		return false, err
 	}
@@ -90,7 +91,7 @@ func dirReadPEM(dirname string, cb DecodePEMBlockFunc) (bool, error) {
 }
 
 func fileReadPEM(filename string, cb DecodePEMBlockFunc) (bool, error) {
-	if b, err := os.ReadFile(filename); err != nil {
+	if b, err := os.ReadFileWithLock(filename); err != nil {
 		// read error
 		return false, err
 	} else if len(b) > 0 {
