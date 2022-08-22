@@ -13,6 +13,11 @@ import (
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
+var (
+	_ x509utils.ReadStore  = (*FileStore)(nil)
+	_ x509utils.WriteStore = (*FileStore)(nil)
+)
+
 // FileStore is a darvaza Storage implementation for storing x509 certificates as files
 type FileStore struct {
 	locksLock *sync.Mutex
