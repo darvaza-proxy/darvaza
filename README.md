@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="assets/logo/DARVAZA_wd_text_right.svg" width="80%">
+</p>
+
 Darvaza, TLS Reverse Proxy
 ==========================
 
