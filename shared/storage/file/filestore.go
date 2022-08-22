@@ -6,11 +6,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"sync"
+	"io/fs"
 
+	"github.com/darvaza-proxy/darvaza/shared/os"
+	"github.com/darvaza-proxy/darvaza/shared/os/flock"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
@@ -21,9 +20,7 @@ var (
 
 // Store is a darvaza Storage implementation for storing x509 certificates as files
 type Store struct {
-	locksLock *sync.Mutex
-	fileLocks map[string]*sync.RWMutex
-	directory string
+	fl flock.Options
 }
 
 // Get will return the first x509 certificate and an error, the certificate having the same
@@ -37,52 +34,26 @@ func (fs *Store) Get(ctx context.Context, name string) (*x509.Certificate, error
 // ForEach will walk the store and ececute the StoreIterFunc for each certificate
 // it can decode
 func (fs *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
-	files, err := ioutil.ReadDir(fs.directory)
-	if err != nil {
-		return err
-	}
-	fs.locksLock.Lock()
-	defer fs.locksLock.Unlock()
-	for _, file := range files {
-		fl := filepath.Join(fs.directory, file.Name())
-		lock := fs.fsLock(fl)
-		lock.RLock()
-		content, err := os.ReadFile(fl)
-		lock.RUnlock()
-		if err != nil {
-			return err
-		}
-		block, _ := pem.Decode(content)
-		if block == nil {
-			return fmt.Errorf("failed to decode data")
-		}
+	fn := func(filename string, block *pem.Block) bool {
 		if block.Type == "CERTIFICATE" {
-			x, err := x509.ParseCertificate(block.Bytes)
-			if err != nil {
-				return err
-			}
-			err = f(x)
-			if err != nil {
-				return err
+			if cert, err := x509.ParseCertificate(block.Bytes); err == nil {
+				if err = f(cert); err != nil {
+					// TODO: terminate or just continue?
+					return true
+				}
 			}
 		}
+		// next
+		return false
 	}
-	return nil
+
+	return x509utils.ReadPEM(fs.fl.Base, fn)
 }
 
 // Put will create a file in the store with the given name and the given certificate
 // it will write in the fil eteh content of cert.Raw field
 func (fs *Store) Put(ctx context.Context, name string, cert *x509.Certificate) error {
-	file := filepath.Join(fs.directory, name)
-	lock := fs.fsLock(file)
-	lock.Lock()
-	defer lock.Unlock()
-
-	err := os.WriteFile(file, cert.Raw, 0666)
-	if err != nil {
-		return err
-	}
-	return nil
+	return fs.fl.WriteFile(name, cert.Raw, 0666)
 }
 
 // Delete will delete the first certificate with the same common name as
@@ -92,15 +63,12 @@ func (fs *Store) Delete(ctx context.Context, name string) error {
 	if err != nil {
 		return err
 	}
-	lock := fs.fsLock(file)
-	lock.Lock()
-	defer lock.Unlock()
+
 	err = os.Remove(file)
-	if os.IsNotExist(err) {
+	if err == nil || os.IsNotExist(err) {
 		return nil
 	}
 	return err
-
 }
 
 // DeleteCert will delete from the store the certificate given as parameter
@@ -110,11 +78,9 @@ func (fs *Store) DeleteCert(ctx context.Context, cert *x509.Certificate) error {
 	if err != nil {
 		return err
 	}
-	lock := fs.fsLock(file)
-	lock.Lock()
-	defer lock.Unlock()
+
 	err = os.Remove(file)
-	if os.IsNotExist(err) {
+	if err == nil || os.IsNotExist(err) {
 		return nil
 	}
 	return err
@@ -125,13 +91,13 @@ func (fs *Store) DeleteCert(ctx context.Context, cert *x509.Certificate) error {
 // and the file mode
 type Options struct {
 	Directory string
-	FMode     os.FileMode
+	DirMode   fs.FileMode
 }
 
 // DefaultOptions for FileStorage Options
 var DefaultOptions = Options{
 	Directory: "darvaza_store",
-	FMode:     0700,
+	DirMode:   0700,
 }
 
 // NewStore will create a new File Storage. If no options
@@ -142,73 +108,61 @@ func NewStore(options Options) (Store, error) {
 	if options.Directory == "" {
 		options.Directory = DefaultOptions.Directory
 	}
-	if options.FMode == 0 {
-		options.FMode = DefaultOptions.FMode
+
+	if options.DirMode == 0 {
+		options.DirMode = DefaultOptions.DirMode
 	}
 
-	err := os.MkdirAll(options.Directory, options.FMode)
+	fl := flock.Options{
+		Base:    options.Directory,
+		Create:  true,
+		DirMode: options.DirMode,
+	}
+
+	err := fl.MkdirBase(0)
 	if err != nil {
 		return result, err
 	}
 
-	result.directory = options.Directory
-	result.locksLock = new(sync.Mutex)
-	result.fileLocks = make(map[string]*sync.RWMutex)
+	result.fl = fl
 	return result, nil
 }
 
-func (fs Store) fsLock(filename string) *sync.RWMutex {
-	fs.locksLock.Lock()
-	lock, found := fs.fileLocks[filename]
-	if !found {
-		lock = new(sync.RWMutex)
-		fs.fileLocks[filename] = lock
-	}
-	fs.locksLock.Unlock()
-	return lock
-}
-
 func (fs Store) fileCertFromName(name string) (string, *x509.Certificate, error) {
-	files, err := ioutil.ReadDir(fs.directory)
-	if err != nil {
-		return "", nil, err
+	var match *x509.Certificate
+	var filename string
+
+	fn := func(fl string, block *pem.Block) bool {
+		var term bool
+
+		if block.Type == "CERTIFICATE" {
+			if cert, err := x509.ParseCertificate(block.Bytes); err == nil {
+				switch len(cert.URIs) {
+				case 0:
+					//an "old" certificate, no SAN
+					if cert.Subject.CommonName == name {
+						match = cert
+					}
+				default:
+					//normal "modern" certificate uses SAN
+					if err := cert.VerifyHostname(name); err == nil {
+						match = cert
+					}
+				}
+
+				if match != nil {
+					filename = fl
+					term = true
+				}
+			}
+		}
+
+		return term
 	}
 
-	for _, file := range files {
-		fl := filepath.Join(fs.directory, file.Name())
-		lock := fs.fsLock(fl)
-		lock.RLock()
-		content, err := os.ReadFile(fl)
-		lock.RUnlock()
-		if err != nil {
-			return "", nil, err
-		}
-		block, _ := pem.Decode(content)
-		if block == nil {
-			return "", nil, fmt.Errorf("failed to decode data")
-		}
-		if block.Type == "CERTIFICATE" {
-			cert, err := x509.ParseCertificate(block.Bytes)
-			if err != nil {
-				continue
-			}
-			switch len(cert.URIs) {
-			case 0:
-				//an "old" certificate, no SAN
-				if cert.Subject.CommonName == name {
-					return fl, cert, nil
-
-				}
-			default:
-				//normal "modern" certificate uses SAN
-				err := cert.VerifyHostname(name)
-				if err == nil {
-					return fl, cert, nil
-				}
-
-			}
-		}
+	x509utils.ReadPEM(fs.fl.Base, fn)
+	if match != nil {
+		return filename, match, nil
 	}
 	return "", nil, fmt.Errorf("certificate not found")
-
 }
