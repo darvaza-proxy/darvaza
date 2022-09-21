@@ -3,7 +3,7 @@
 set -eu
 
 PROJECTS="$*"
-COMMANDS="tidy get build test"
+COMMANDS="tidy get build test up"
 
 expand() {
 	local prefix="$1" x=
@@ -28,7 +28,12 @@ EOT
 EOT
 )"
 		;;
-	*)      call="\$(GO) $cmd -v ./..." ;;
+	up)
+		call="\$(GO) get -u -v ./..."
+		;;
+	*)
+		call="\$(GO) $cmd -v ./..."
+		;;
 	esac
 
 	# tidy up call
