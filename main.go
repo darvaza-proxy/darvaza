@@ -49,8 +49,9 @@ func main() {
 		case syscall.SIGUSR2:
 			logger.Info("Got SIGUSR2, dumping cache")
 			aserver.dumpCache()
+		case syscall.SIGURG:
 		default:
-			logger.Warn("I received %s signal", sign)
+			logger.Warn("I received %v signal", sign)
 		}
 	}
 }
