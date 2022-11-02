@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 )
 
-// LOG_OUTPUT_BUFFER is the size of the channel buffer used for logging.
-const LOG_OUTPUT_BUFFER = 1024
+// LogOutputBuffer is the size of the channel buffer used for logging.
+const LogOutputBuffer = 1024
 
 type logMesg struct {
 	mesg  string
@@ -30,7 +30,7 @@ type Logger struct {
 // New creates a new Logger.
 func New() *Logger {
 	l := &Logger{
-		messages: make(chan *logMesg, LOG_OUTPUT_BUFFER),
+		messages: make(chan *logMesg, LogOutputBuffer),
 		outputs:  make(map[string]loggerHandler),
 	}
 	go l.run()

@@ -1,3 +1,4 @@
+// Gnocco is a little cache of goodness
 package main
 
 import (

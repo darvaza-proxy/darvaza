@@ -1,3 +1,4 @@
+// Gnocco is a little cache of goodness
 package main
 
 import (
@@ -62,11 +63,11 @@ func loadConfig() (cfg, error) {
 
 	buf, err := ioutil.ReadAll(file)
 	if err != nil {
-		return mainconfig, fmt.Errorf("Error %s occurred.", err)
+		return mainconfig, fmt.Errorf("error %s occurred", err)
 	}
 
 	if err := toml.Unmarshal(buf, &mainconfig); err != nil {
-		return mainconfig, fmt.Errorf("Error %s occurred.", err)
+		return mainconfig, fmt.Errorf("error %s occurred", err)
 	}
 	return mainconfig, nil
 }
