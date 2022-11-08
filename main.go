@@ -2,6 +2,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,12 +17,23 @@ var (
 	logger *log.Logger
 	//Version contains the git hashtag injected by make
 	Version = "N/A"
-	//BuildTime contains the build timestamp injected by make
-	BuildTime = "N/A"
+	//BuildDate contains the build timestamp injected by make
+	BuildDate = "N/A"
 )
 
 func main() {
-	cf, err := loadConfig()
+	var confFile string
+	var vrs bool
+	flag.StringVar(&confFile, "f", "/etc/gnocco/gnocco.conf", "specify the config file, defaults to /etc/gnocco/gnocco.conf.")
+	flag.BoolVar(&vrs, "v", false, "program version")
+	flag.Parse()
+
+	if vrs {
+		fmt.Fprintf(os.Stdout, "Gnocco version %s, build date %s\n", Version, BuildDate)
+		os.Exit(0)
+	}
+
+	cf, err := loadConfig(confFile)
 	if err != nil {
 		panic(err)
 	}

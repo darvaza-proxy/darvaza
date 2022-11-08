@@ -18,7 +18,7 @@ GENERATED = doc/roots # List of generated files
 all: fmt lint $(GENERATED) | $(BIN) ; $(info $(M) building executable…) @ ## Build program binary
 	$Q $(GO) build \
 		-tags release \
-		-ldflags '-X $(MODULE)/main.Version=$(VERSION) -X $(MODULE)/main.BuildDate=$(DATE)' \
+		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
 		-o $(BIN)/$(basename $(MODULE))
 
 # Tools

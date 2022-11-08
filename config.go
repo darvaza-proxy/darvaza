@@ -2,7 +2,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -45,19 +44,13 @@ type hostsCfg struct {
 	RefreshInterval uint
 }
 
-var (
-	mainconfig cfg
-	confFile   string
-)
+var mainconfig cfg
 
-func loadConfig() (cfg, error) {
-	flag.StringVar(&confFile, "f", "/etc/gnocco/gnocco.conf", "specify the config file, defaults to /etc/gnocco/gnocco.conf.")
+func loadConfig(f string) (cfg, error) {
 
-	flag.Parse()
-
-	file, err := os.Open(confFile)
+	file, err := os.Open(f)
 	if err != nil {
-		panic(err)
+		return mainconfig, fmt.Errorf("error %s occurred", err)
 	}
 	defer file.Close()
 
