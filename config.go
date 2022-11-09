@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/naoina/toml"
 )
@@ -48,6 +49,19 @@ var mainconfig cfg
 
 func loadConfig(f string) (cfg, error) {
 
+	if f == "" {
+		ex, err := os.Executable()
+		if err != nil {
+			return mainconfig, fmt.Errorf("error %s occurred", err)
+		}
+		confPath := filepath.Dir(ex) + "/gnocco.conf"
+		if _, err := os.Stat("/etc/gnocco/gnocco.conf"); err == nil {
+			f = "/etc/gnocco/gnocco.conf"
+		}
+		if _, err := os.Stat(confPath); err == nil {
+			f = confPath
+		}
+	}
 	file, err := os.Open(f)
 	if err != nil {
 		return mainconfig, fmt.Errorf("error %s occurred", err)

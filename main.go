@@ -24,7 +24,7 @@ var (
 func main() {
 	var confFile string
 	var vrs bool
-	flag.StringVar(&confFile, "f", "/etc/gnocco/gnocco.conf", "specify the config file, defaults to /etc/gnocco/gnocco.conf.")
+	flag.StringVar(&confFile, "f", "", "specify the config file, if empty will try gnocco.conf and /etc/gnocco/gnocco.conf.")
 	flag.BoolVar(&vrs, "v", false, "program version")
 	flag.Parse()
 
