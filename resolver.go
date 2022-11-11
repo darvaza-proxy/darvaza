@@ -11,18 +11,14 @@ import (
 	"github.com/miekg/dns"
 )
 
-type reser struct {
-	ip string //net.IP
-}
-
 type resolver struct {
-	Resolvers map[int]reser
+	Resolvers []net.IP
 	Iterative bool
 }
 
 func initResolver() *resolver {
 	resolver := new(resolver)
-	resolvers := make(map[int]reser)
+	resolvers := make([]net.IP, 0)
 
 	f, err := os.Open("/etc/resolv.conf")
 	defer f.Close()
@@ -33,17 +29,19 @@ func initResolver() *resolver {
 
 	scan := bufio.NewScanner(f)
 
-	i := 0
 	for scan.Scan() {
-		var re reser
-		fields := strings.Fields(scan.Text())
-		if len(fields) > 0 && fields[0] == "nameserver" {
-			re.ip = net.ParseIP(fields[1]).String()
-			i++
-			resolvers[i] = re
+		line := scan.Text()
+		line = strings.TrimSpace(line)
+		if len(line) > 0 && line[1] != '#' {
+			fields := strings.Fields(line)
+			if len(fields) > 0 && fields[0] == "nameserver" {
+				myIP := net.ParseIP(fields[1])
+				if myIP != nil {
+					resolvers = append(resolvers, myIP)
+				}
+			}
 		}
 	}
-
 	resolver.Resolvers = resolvers
 	resolver.Iterative = mainconfig.IterateResolv
 	return resolver
@@ -86,8 +84,13 @@ func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
 			}
 		}
 	} else {
-		ip := r.Resolvers[randint(len(r.Resolvers))].ip
-		r.lookup(w, req, net.JoinHostPort(ip, "53"))
+		var ip net.IP
+		if len(r.Resolvers) > 1 {
+			ip = r.Resolvers[randint(len(r.Resolvers))]
+		} else {
+			ip = r.Resolvers[0]
+		}
+		r.lookup(w, req, net.JoinHostPort(ip.String(), "53"))
 	}
 
 }
