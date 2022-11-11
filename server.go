@@ -24,6 +24,7 @@ func (s *server) Addr() string {
 }
 
 func (s *server) dumpCache() {
+	logger.Info("Dumping cache at %v", time.Now())
 	files := []string{mainconfig.Cache.CachePath + "/pcache", mainconfig.Cache.CachePath + "/ncache"}
 
 	for _, file := range files {
@@ -96,8 +97,7 @@ func (s *server) shutDown() {
 
 func (s *server) startCacheDumping() {
 	interval := mainconfig.Cache.DumpInterval
-	for {
-		<-time.After(time.Duration(interval) * time.Second)
-		go s.dumpCache()
+	for _ = range time.Tick(time.Duration(interval) * time.Second) {
+		s.dumpCache()
 	}
 }
