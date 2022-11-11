@@ -90,20 +90,12 @@ func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
 		} else {
 			ip = r.Resolvers[0]
 		}
-		r.lookup(w, req, net.JoinHostPort(ip.String(), "53"))
-	}
-
-}
-
-func (r *resolver) lookup(w dns.ResponseWriter, req *dns.Msg, ns string) {
-
-	response, err := dns.Exchange(req, ns)
-
-	if err != nil {
-		logger.Error("Error %s", err)
-
-	} else {
-		w.WriteMsg(response)
+		resp, err := dns.Exchange(req, net.JoinHostPort(ip.String(), "53"))
+		if err != nil {
+			logger.Error("%s", err)
+		} else {
+			w.WriteMsg(resp)
+		}
 	}
 }
 
