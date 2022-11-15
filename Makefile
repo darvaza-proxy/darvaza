@@ -11,11 +11,9 @@ V = 0
 Q = $(if $(filter 1,$V),,@)
 M = $(shell if [ "$$(tput colors 2> /dev/null || echo 0)" -ge 8 ]; then printf "\033[34;1m▶\033[0m"; else printf "▶"; fi)
 
-GENERATED = doc/roots # List of generated files
-
 .SUFFIXES:
 .PHONY: all
-all: fmt lint $(GENERATED) | $(BIN) ; $(info $(M) building executable…) @ ## Build program binary
+all: fmt lint gen | $(BIN) ; $(info $(M) building executable…) @ ## Build program binary
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
@@ -56,4 +54,8 @@ help:
 .PHONY: version
 version:
 	@echo $(VERSION)
+
+.PHONY: gen
+gen: ; $(info $(M) generating roots file…) @ ## Generate roots file
+	$Q $(GO) generate
 

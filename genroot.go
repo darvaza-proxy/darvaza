@@ -1,3 +1,4 @@
+//go:build ignore
 // +build ignore
 
 // This program generates docs/roots. It can be invoked by running
@@ -41,10 +42,13 @@ func main() {
 	defer rsp.Body.Close()
 
 	xroots, _ := ioutil.ReadAll(rsp.Body)
-	for t := range dns.ParseZone(strings.NewReader(string(xroots)), "", "") {
-		dom := trimDot(strings.ToLower(t.RR.Header().Name))
+
+	zp := dns.NewZoneParser(strings.NewReader(string(xroots)), "", "")
+
+	for rr, ok := zp.Next(); ok; rr, ok = zp.Next() {
+		dom := trimDot(strings.ToLower(rr.Header().Name))
 		if dom != "" {
-			switch tt := t.RR.(type) {
+			switch tt := rr.(type) {
 			case *dns.A:
 				z4, ok := myroots[dom]
 				if !ok {
