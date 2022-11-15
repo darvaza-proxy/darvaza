@@ -64,7 +64,10 @@ func newCache(size int64, exp int32) *cache {
 	c.ncache = make(map[string]crecord)
 	c.ncap = size
 	c.nttl = 60
-	c.loadRoots()
+	err := c.loadRoots()
+	if err != nil {
+		logger.Warn("%s", err)
+	}
 	return c
 }
 
