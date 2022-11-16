@@ -8,24 +8,22 @@ import (
 	"github.com/miekg/dns"
 )
 
-var emptyZone = nsZone{}
-
 type nsZone struct {
 	Name   string
 	Nslist map[string][]string
 }
 
-func (z *nsZone) isEmpty() bool {
-	if z.Name == "" && len(z.Nslist) == 0 {
+func (zn *nsZone) isEmpty() bool {
+	if zn.Name == "" && len(zn.Nslist) == 0 {
 		return true
 	}
 	return false
 }
 
-func (z *nsZone) addNs(ns string, ip string) {
+func (zn *nsZone) addNs(ns string, ip string) {
 	s := net.ParseIP(ip)
-	if s != nil && ns != "" && !z.isEmpty() {
-		z.Nslist[ns] = append(z.Nslist[ns], ip)
+	if s != nil && ns != "" && !zn.isEmpty() {
+		zn.Nslist[ns] = append(zn.Nslist[ns], ip)
 	}
 }
 
@@ -51,7 +49,7 @@ func makeNsZone(msg *dns.Msg) nsZone {
 		}
 		return result
 	}
-	return emptyZone
+	return nsZone{}
 }
 
 func getRandomNsIPFromZone(zn nsZone) []string {
