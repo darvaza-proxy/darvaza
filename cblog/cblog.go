@@ -11,26 +11,26 @@ import (
 // LogOutputBuffer is the size of the channel buffer used for logging.
 const LogOutputBuffer = 1024
 
-type logMesg struct {
-	mesg  string
+type logMsg struct {
+	msg   string
 	fatal bool
 }
 
 type loggerHandler interface {
 	setup(config map[string]interface{}) error
-	write(mesg *logMesg)
+	write(msg *logMsg)
 }
 
 // Logger is the logging object.
 type Logger struct {
-	messages chan *logMesg
+	messages chan *logMsg
 	outputs  map[string]loggerHandler
 }
 
 // New creates a new Logger.
 func New() *Logger {
 	l := &Logger{
-		messages: make(chan *logMesg, LogOutputBuffer),
+		messages: make(chan *logMsg, LogOutputBuffer),
 		outputs:  make(map[string]loggerHandler),
 	}
 	go l.run()
@@ -57,56 +57,56 @@ func (l *Logger) SetLogger(handlerType string, cfg map[string]interface{}) {
 func (l *Logger) run() {
 	for {
 		select {
-		case mesg := <-l.messages:
+		case msg := <-l.messages:
 			for _, handler := range l.outputs {
-				handler.write(mesg)
+				handler.write(msg)
 			}
 		}
 	}
 }
 
-func (l *Logger) writeMesg(mesg string, fatal bool) {
-	lm := &logMesg{
-		mesg:  mesg,
+func (l *Logger) writeMsg(msg string, fatal bool) {
+	lm := &logMsg{
+		msg:   msg,
 		fatal: fatal,
 	}
 	l.messages <- lm
 }
 
-// Debug calls l.writeMesg prefixing the message with [DEBUG]
+// Debug calls l.writeMsg prefixing the message with [DEBUG]
 func (l *Logger) Debug(format string, v ...interface{}) {
-	mesg := fmt.Sprintf("[DEBUG] "+format, v...)
-	l.writeMesg(mesg, false)
+	msg := fmt.Sprintf("[DEBUG] "+format, v...)
+	l.writeMsg(msg, false)
 }
 
-// Info calls l.writeMesg prefixing the message with [INFO]
+// Info calls l.writeMsg prefixing the message with [INFO]
 func (l *Logger) Info(format string, v ...interface{}) {
-	mesg := fmt.Sprintf("[INFO] "+format, v...)
-	l.writeMesg(mesg, false)
+	msg := fmt.Sprintf("[INFO] "+format, v...)
+	l.writeMsg(msg, false)
 }
 
-// Notice calls l.writeMesg prefixing the message with [NOTICE]
+// Notice calls l.writeMsg prefixing the message with [NOTICE]
 func (l *Logger) Notice(format string, v ...interface{}) {
-	mesg := fmt.Sprintf("[NOTICE] "+format, v...)
-	l.writeMesg(mesg, false)
+	msg := fmt.Sprintf("[NOTICE] "+format, v...)
+	l.writeMsg(msg, false)
 }
 
-// Warn calls l.writeMesg prefixing the message with [WARN]
+// Warn calls l.writeMsg prefixing the message with [WARN]
 func (l *Logger) Warn(format string, v ...interface{}) {
-	mesg := fmt.Sprintf("[WARN] "+format, v...)
-	l.writeMesg(mesg, false)
+	msg := fmt.Sprintf("[WARN] "+format, v...)
+	l.writeMsg(msg, false)
 }
 
-// Error calls l.writeMesg prefixing the message with [ERROR]
+// Error calls l.writeMsg prefixing the message with [ERROR]
 func (l *Logger) Error(format string, v ...interface{}) {
-	mesg := fmt.Sprintf("[ERROR] "+format, v...)
-	l.writeMesg(mesg, false)
+	msg := fmt.Sprintf("[ERROR] "+format, v...)
+	l.writeMsg(msg, false)
 }
 
-// Fatal calls l.writeMesg prefixing the message with [FATAL]
+// Fatal calls l.writeMsg prefixing the message with [FATAL]
 func (l *Logger) Fatal(format string, v ...interface{}) {
-	mesg := fmt.Sprintf("[FATAL] "+format, v...)
-	l.writeMesg(mesg, true)
+	msg := fmt.Sprintf("[FATAL] "+format, v...)
+	l.writeMsg(msg, true)
 }
 
 type consoleHandler struct {
@@ -122,11 +122,11 @@ func (h *consoleHandler) setup(cfg map[string]interface{}) error {
 	return nil
 }
 
-func (h *consoleHandler) write(lm *logMesg) {
+func (h *consoleHandler) write(lm *logMsg) {
 	if !lm.fatal {
-		h.logger.Println(lm.mesg)
+		h.logger.Println(lm.msg)
 	} else {
-		h.logger.Fatalln(lm.mesg)
+		h.logger.Fatalln(lm.msg)
 	}
 }
 
@@ -156,14 +156,14 @@ func (h *fileHandler) setup(config map[string]interface{}) error {
 	return nil
 }
 
-func (h *fileHandler) write(lm *logMesg) {
+func (h *fileHandler) write(lm *logMsg) {
 	if h.logger == nil {
 		return
 	}
 
 	if !lm.fatal {
-		h.logger.Println(lm.mesg)
+		h.logger.Println(lm.msg)
 	} else {
-		h.logger.Fatalln(lm.mesg)
+		h.logger.Fatalln(lm.msg)
 	}
 }
