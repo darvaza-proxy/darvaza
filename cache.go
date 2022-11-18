@@ -22,8 +22,7 @@ type crecord struct {
 }
 
 func (c *crecord) expired() bool {
-	ttl := c.TTL - int(time.Now().Unix()-int64(c.Stored))
-	return ttl < 0
+	return c.TTL < int(time.Now().Unix()-int64(c.Stored))
 }
 
 type cache struct {
@@ -45,8 +44,7 @@ func (c *crecord) isEmpty() bool {
 }
 
 func (c *crecord) String() string {
-	var result string
-	result = "Value: "
+	result := "Value: "
 	for _, z := range c.Value {
 		result = result + z
 	}
@@ -71,11 +69,10 @@ func newCache(size int64, exp int32) *cache {
 	return c
 }
 
-func (c *cache) dump(w io.Writer, what bool) error {
-	//what bool is true for pcache and false for ncache
+func (c *cache) dump(w io.Writer, positiveCache bool) error {
 	if w != os.Stdout {
 		encoder := gob.NewEncoder(w)
-		if what {
+		if positiveCache {
 			errp := encoder.Encode(c.pcache)
 			if errp != nil {
 				return fmt.Errorf("cache %s", errp)
@@ -180,11 +177,10 @@ func (c *cache) set(key string, mtype string, d *dns.Msg) {
 	}
 }
 
-func (c *cache) load(r io.Reader, what bool) error {
-	//what bool is true for pcache and false for ncache
+func (c *cache) load(r io.Reader, positiveCache bool) error {
 	var err error
 	decoder := gob.NewDecoder(r)
-	if what {
+	if positiveCache {
 		c.Lock()
 		err = decoder.Decode(c.pcache)
 		c.Unlock()
