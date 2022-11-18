@@ -79,15 +79,15 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 			m.SetReply(req)
 			hdr := dns.RR_Header{Name: Q.qname, Rrtype: dns.TypeTXT, Class: dns.ClassCHAOS, Ttl: 0}
 			switch Q.qname {
-			default:
-				m.SetRcode(req, 4)
-				w.WriteMsg(m)
 			case "authors.bind.":
 				m.Answer = append(m.Answer, &dns.TXT{Hdr: hdr, Txt: []string{"Nagy Karoly Gabriel <k@jpi.io>"}})
 			case "version.bind.", "version.server.":
 				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"Version " + Version + " built on " + BuildDate}}}
 			case "hostname.bind.", "id.server.":
 				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"localhost"}}}
+			default:
+				m.SetRcode(req, dns.RcodeNotImplemented)
+				w.WriteMsg(m)
 			}
 			w.WriteMsg(m)
 
@@ -96,7 +96,7 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 		h.Jobs--
 	} else {
 		m := new(dns.Msg)
-		m.SetRcode(req, 2)
+		m.SetRcode(req, dns.RcodeServerFailure)
 		w.WriteMsg(m)
 	}
 }
