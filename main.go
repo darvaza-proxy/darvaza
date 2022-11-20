@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	log "github.com/karasz/gnocco/cblog"
+	log "github.com/darvaza-proxy/gnocco/cblog"
 )
 
 //go:generate go run genroot.go

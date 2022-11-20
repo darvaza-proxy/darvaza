@@ -1,9 +1,8 @@
-module gnocco
+module github.com/darvaza-proxy/gnocco
 
 go 1.19
 
 require (
-	github.com/karasz/gnocco v0.0.0-20221101123707-bc831b8987de
 	github.com/miekg/dns v1.1.50
 	github.com/naoina/toml v0.1.1
 )
