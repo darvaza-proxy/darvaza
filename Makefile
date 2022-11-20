@@ -57,5 +57,5 @@ version:
 
 .PHONY: gen
 gen: ; $(info $(M) generating roots file…) @ ## Generate roots file
-	$Q $(GO) generate
+	$Q $(GO) run github.com/darvaza-proxy/gnocco/cmd/genroot
 

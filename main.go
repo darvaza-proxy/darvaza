@@ -11,8 +11,6 @@ import (
 	log "github.com/darvaza-proxy/gnocco/cblog"
 )
 
-//go:generate go run genroot.go
-
 var (
 	logger *log.Logger
 	//Version contains the git hashtag injected by make

@@ -1,9 +1,5 @@
-//go:build ignore
-// +build ignore
-
 // This program generates docs/roots. It can be invoked by running
 // go generate
-
 package main
 
 import (
