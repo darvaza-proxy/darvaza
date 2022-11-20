@@ -17,7 +17,7 @@ all: fmt lint gen | $(BIN) ; $(info $(M) building executable…) @ ## Build prog
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
-		-o $(BIN)/$(basename $(MODULE))
+		-o $(BIN)/$(notdir $(MODULE)) ./cmd/$(notdir $(MODULE))
 
 # Tools
 
