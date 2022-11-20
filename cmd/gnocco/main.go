@@ -8,8 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/darvaza-proxy/gnocco/cblog"
 	"github.com/darvaza-proxy/slog"
+
+	"github.com/darvaza-proxy/gnocco/shared/cblog"
 )
 
 var (
