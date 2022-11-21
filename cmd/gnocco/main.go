@@ -8,14 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/darvaza-proxy/slog"
-
-	"github.com/darvaza-proxy/gnocco/shared/cblog"
 	"github.com/darvaza-proxy/gnocco/shared/version"
-)
-
-var (
-	logger slog.Logger
 )
 
 func main() {
@@ -34,7 +27,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	logger = initLogger()
+
+	logger := cf.Logger()
 
 	aserver := &server{
 		host:       cf.Listen.Host,
@@ -65,19 +59,4 @@ func main() {
 			logger.Warn().Printf("I received %v signal", sign)
 		}
 	}
-}
-
-func initLogger() slog.Logger {
-	logger := cblog.New()
-
-	if mainconfig.Log.Stdout {
-		logger.SetLogger("console", nil)
-	}
-
-	if mainconfig.Log.File != "" {
-		cfg := map[string]interface{}{"file": mainconfig.Log.File}
-		logger.SetLogger("file", cfg)
-		logger.Info().Print("Logger started")
-	}
-	return logger
 }

@@ -1,4 +1,3 @@
-// Gnocco is a little cache of goodness
 package main
 
 import (
@@ -8,9 +7,12 @@ import (
 	"path/filepath"
 
 	"github.com/naoina/toml"
+
+	log "github.com/darvaza-proxy/slog"
 )
 
-type cfg struct {
+// Gnocco is the configuration representing the dns-resolver
+type Gnocco struct {
 	RootsFile      string
 	PermissionsDir string
 	Daemon         bool
@@ -36,7 +38,8 @@ type cfg struct {
 		CachePath    string
 	}
 
-	hosts hostsCfg
+	hosts  hostsCfg
+	logger log.Logger
 }
 
 type hostsCfg struct {
@@ -45,14 +48,13 @@ type hostsCfg struct {
 	RefreshInterval uint
 }
 
-var mainconfig cfg
-
-func loadConfig(f string) (cfg, error) {
+func loadConfig(f string) (*Gnocco, error) {
+	var cf Gnocco
 
 	if f == "" {
 		ex, err := os.Executable()
 		if err != nil {
-			return mainconfig, fmt.Errorf("error %s occurred", err)
+			return nil, fmt.Errorf("error %s occurred", err)
 		}
 		confPath := filepath.Dir(ex) + "/gnocco.conf"
 		if _, err := os.Stat("/etc/gnocco/gnocco.conf"); err == nil {
@@ -64,17 +66,19 @@ func loadConfig(f string) (cfg, error) {
 	}
 	file, err := os.Open(f)
 	if err != nil {
-		return mainconfig, fmt.Errorf("error %s occurred", err)
+		return nil, fmt.Errorf("error %s occurred", err)
 	}
 	defer file.Close()
 
 	buf, err := ioutil.ReadAll(file)
 	if err != nil {
-		return mainconfig, fmt.Errorf("error %s occurred", err)
+		return nil, fmt.Errorf("error %s occurred", err)
 	}
 
-	if err := toml.Unmarshal(buf, &mainconfig); err != nil {
-		return mainconfig, fmt.Errorf("error %s occurred", err)
+	if err := toml.Unmarshal(buf, &cf); err != nil {
+		return nil, fmt.Errorf("error %s occurred", err)
 	}
-	return mainconfig, nil
+
+	cf.logger = newLogger(&cf)
+	return &cf, nil
 }

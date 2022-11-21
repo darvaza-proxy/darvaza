@@ -54,7 +54,7 @@ func (c *crecord) String() string {
 	return result
 }
 
-func newCache(size int64, exp int32) *cache {
+func (cf *Gnocco) newCache(size int64, exp int32) *cache {
 	c := new(cache)
 	c.pcache = make(map[string]crecord)
 	c.pcap = size
@@ -62,9 +62,9 @@ func newCache(size int64, exp int32) *cache {
 	c.ncache = make(map[string]crecord)
 	c.ncap = size
 	c.nttl = 60
-	err := c.loadRoots()
+	err := c.loadRoots(cf)
 	if err != nil {
-		logger.Warn().Print(err)
+		cf.logger.Warn().Print(err)
 	}
 	return c
 }
@@ -203,13 +203,13 @@ func (c *cache) size() int {
 	return len(c.pcache)
 }
 
-func (c *cache) loadRoots() error {
+func (c *cache) loadRoots(cf *Gnocco) error {
 
-	if mainconfig.RootsFile == "" {
+	if cf.RootsFile == "" {
 		return fmt.Errorf("Config.RootsFile is empty :(")
 	}
 
-	fl, err := os.Open(mainconfig.RootsFile)
+	fl, err := os.Open(cf.RootsFile)
 	defer fl.Close()
 
 	if err != nil {

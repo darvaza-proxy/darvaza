@@ -16,6 +16,7 @@ type server struct {
 	maxjobs    int
 	maxqueries int
 	handler    *gnoccoHandler
+	cf         *Gnocco
 }
 
 func (s *server) Addr() string {
@@ -23,6 +24,9 @@ func (s *server) Addr() string {
 }
 
 func (s *server) dumpCache() {
+	logger := s.cf.logger
+	mainconfig := s.cf
+
 	logger.Info().Printf("Dumping cache at %v", time.Now())
 	files := []string{mainconfig.Cache.CachePath + "/pcache", mainconfig.Cache.CachePath + "/ncache"}
 
@@ -44,9 +48,14 @@ func (s *server) dumpCache() {
 
 }
 
-func (s *server) run() {
+func (s *server) newHandler() *gnoccoHandler {
+	return s.cf.newHandler(s.maxjobs)
+}
 
-	s.handler = newHandler(s.maxjobs)
+func (s *server) run() {
+	mainconfig := s.cf
+
+	s.handler = s.newHandler()
 	if _, err := os.Stat(mainconfig.Cache.CachePath + "/pcache"); err == nil {
 		var file, err = os.OpenFile(mainconfig.Cache.CachePath+"/pcache", os.O_RDWR, 0644)
 		if err == nil {
@@ -83,6 +92,7 @@ func (s *server) run() {
 }
 
 func (s *server) start(ds *dns.Server) {
+	logger := s.cf.logger
 	logger.Info().Printf("Start %s listener on %s", ds.Net, ds.Addr)
 	err := ds.ListenAndServe()
 	if err != nil {
@@ -91,10 +101,13 @@ func (s *server) start(ds *dns.Server) {
 }
 
 func (s *server) shutDown() {
+	logger := s.cf.logger
 	logger.Info().Print("Shutdown called.")
 }
 
 func (s *server) startCacheDumping() {
+	mainconfig := s.cf
+
 	interval := mainconfig.Cache.DumpInterval
 	for _ = range time.Tick(time.Duration(interval) * time.Second) {
 		s.dumpCache()
