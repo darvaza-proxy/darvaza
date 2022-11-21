@@ -1,4 +1,4 @@
-package main
+package gnocco
 
 import (
 	"fmt"
@@ -48,7 +48,7 @@ type hostsCfg struct {
 	RefreshInterval uint
 }
 
-func loadConfig(f string) (*Gnocco, error) {
+func NewFromFilename(f string) (*Gnocco, error) {
 	var cf Gnocco
 
 	if f == "" {

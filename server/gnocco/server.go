@@ -1,4 +1,4 @@
-package main
+package gnocco
 
 import (
 	"net"
@@ -10,20 +10,20 @@ import (
 	"github.com/miekg/dns"
 )
 
-type server struct {
-	host       string
-	port       int
-	maxjobs    int
-	maxqueries int
+type GnoccoServer struct {
+	Host       string
+	Port       int
+	MaxJobs    int
+	MaxQueries int
 	handler    *gnoccoHandler
 	cf         *Gnocco
 }
 
-func (s *server) Addr() string {
-	return net.JoinHostPort(s.host, strconv.Itoa(s.port))
+func (s *GnoccoServer) Addr() string {
+	return net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
 }
 
-func (s *server) dumpCache() {
+func (s *GnoccoServer) DumpCache() {
 	logger := s.cf.logger
 	mainconfig := s.cf
 
@@ -48,11 +48,11 @@ func (s *server) dumpCache() {
 
 }
 
-func (s *server) newHandler() *gnoccoHandler {
-	return s.cf.newHandler(s.maxjobs)
+func (s *GnoccoServer) newHandler() *gnoccoHandler {
+	return s.cf.newHandler(s.MaxJobs)
 }
 
-func (s *server) run() {
+func (s *GnoccoServer) Run() {
 	mainconfig := s.cf
 
 	s.handler = s.newHandler()
@@ -91,7 +91,7 @@ func (s *server) run() {
 
 }
 
-func (s *server) start(ds *dns.Server) {
+func (s *GnoccoServer) start(ds *dns.Server) {
 	logger := s.cf.logger
 	logger.Info().Printf("Start %s listener on %s", ds.Net, ds.Addr)
 	err := ds.ListenAndServe()
@@ -100,16 +100,16 @@ func (s *server) start(ds *dns.Server) {
 	}
 }
 
-func (s *server) shutDown() {
+func (s *GnoccoServer) ShutDown() {
 	logger := s.cf.logger
 	logger.Info().Print("Shutdown called.")
 }
 
-func (s *server) startCacheDumping() {
+func (s *GnoccoServer) startCacheDumping() {
 	mainconfig := s.cf
 
 	interval := mainconfig.Cache.DumpInterval
 	for _ = range time.Tick(time.Duration(interval) * time.Second) {
-		s.dumpCache()
+		s.DumpCache()
 	}
 }

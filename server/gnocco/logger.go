@@ -1,4 +1,4 @@
-package main
+package gnocco
 
 import (
 	"github.com/darvaza-proxy/slog"

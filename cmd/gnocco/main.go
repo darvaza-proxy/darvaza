@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/darvaza-proxy/gnocco/server/gnocco"
 	"github.com/darvaza-proxy/gnocco/shared/version"
 )
 
@@ -23,21 +24,21 @@ func main() {
 		os.Exit(0)
 	}
 
-	cf, err := loadConfig(confFile)
+	cf, err := gnocco.NewFromFilename(confFile)
 	if err != nil {
 		panic(err)
 	}
 
 	logger := cf.Logger()
 
-	aserver := &server{
-		host:       cf.Listen.Host,
-		port:       cf.Listen.Port,
-		maxjobs:    cf.MaxJobs,
-		maxqueries: cf.MaxQueries,
+	aserver := &gnocco.GnoccoServer{
+		Host:       cf.Listen.Host,
+		Port:       cf.Listen.Port,
+		MaxJobs:    cf.MaxJobs,
+		MaxQueries: cf.MaxQueries,
 	}
 
-	aserver.run()
+	aserver.Run()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan)
@@ -46,14 +47,14 @@ func main() {
 		sign := <-signalChan
 		switch sign {
 		case syscall.SIGTERM:
-			aserver.shutDown()
+			aserver.ShutDown()
 			logger.Fatal().Print("Got SIGTERM, stoping as requested")
 		case syscall.SIGINT:
-			aserver.shutDown()
+			aserver.ShutDown()
 			logger.Fatal().Print("Got SIGINT, stoping as requested")
 		case syscall.SIGUSR2:
 			logger.Info().Print("Got SIGUSR2, dumping cache")
-			aserver.dumpCache()
+			aserver.DumpCache()
 		case syscall.SIGURG:
 		default:
 			logger.Warn().Printf("I received %v signal", sign)
