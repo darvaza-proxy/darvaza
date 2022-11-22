@@ -16,7 +16,7 @@ M = $(shell if [ "$$(tput colors 2> /dev/null || echo 0)" -ge 8 ]; then printf "
 all: fmt lint gen | $(BIN) ; $(info $(M) building executable…) @ ## Build program binary
 	$Q $(GO) build \
 		-tags release \
-		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
+		-ldflags '-X $(MODULE)/shared/version.Version=$(VERSION) -X $(MODULE)/shared/version.BuildDate=$(DATE)' \
 		-o $(BIN)/$(notdir $(MODULE)) ./cmd/$(notdir $(MODULE))
 
 # Tools

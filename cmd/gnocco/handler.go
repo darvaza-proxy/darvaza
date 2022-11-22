@@ -4,6 +4,8 @@ import (
 	"net"
 
 	"github.com/miekg/dns"
+
+	"github.com/darvaza-proxy/gnocco/shared/version"
 )
 
 type question struct {
@@ -82,7 +84,7 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 			case "authors.bind.":
 				m.Answer = append(m.Answer, &dns.TXT{Hdr: hdr, Txt: []string{"Nagy Karoly Gabriel <k@jpi.io>"}})
 			case "version.bind.", "version.server.":
-				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"Version " + Version + " built on " + BuildDate}}}
+				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"Version " + version.Version + " built on " + version.BuildDate}}}
 			case "hostname.bind.", "id.server.":
 				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"localhost"}}}
 			default:
