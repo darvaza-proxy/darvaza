@@ -15,18 +15,23 @@ expand() {
 
 for cmd in $COMMANDS; do
 	all="$(expand $cmd root $PROJECTS)"
+	depsx=
+
 	cat <<EOT
 .PHONY: $cmd $all
 $cmd: $all
 
 EOT
+
 	case "$cmd" in
 	tidy)
 		call="$(cat <<EOT | sed -e '/^$/d;'
-\$(GO) vet ./...
 \$(GO) mod tidy
+\$(GO) vet ./...
+\$(REVIVE) \$(REVIVE_RUN_ARGS) ./...
 EOT
 )"
+		depsx="\$(REVIVE)"
 		;;
 	up)
 		call="\$(GO) get -u -v ./..."
@@ -54,10 +59,31 @@ EOT
 			cd="cd '$x' \&\& "
 		fi
 
-		if [ "$k" = root -a "$cmd" = build ]; then
-			callx="\$(GO) $cmd -o \$(TMPDIR)/ -v ./..."
-		else
-			callx="$call"
+		callx="$call"
+
+		if [ "$k" = root ]; then
+			# special case
+
+			case "$cmd" in
+			build)
+				cmdx="$cmd -o \$(TMPDIR)/"
+				;;
+			get|up)
+				cmdx="get -tags tools"
+				;;
+			*)
+				cmdx=
+				;;
+			esac
+
+			[ -z "$cmdx" ] || cmdx="\$(GO) $cmdx -v ./..."
+
+			if [ "up" = "$cmd" ]; then
+				callx="$cmdx
+\$(GO) install -v \$(REVIVE_INSTALL_URL)"
+			elif [ -n "$cmdx" ]; then
+				callx="$cmdx"
+			fi
 		fi
 
 		if $sequential; then
@@ -67,7 +93,7 @@ EOT
 		fi
 
 		cat <<EOT
-$cmd-$k:${deps:+ $(expand $cmd $deps)}
+$cmd-$k:${depsx:+ $depsx}${deps:+ $(expand $cmd $deps)}
 $(echo "$callx" | sed -e "/^$/d;" -e "s|^|\t$cd|")
 
 EOT

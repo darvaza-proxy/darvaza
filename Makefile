@@ -5,6 +5,12 @@ GOFMT ?= gofmt
 GOFMT_FLAGS = -w -l -s
 GOGENERATE_FLAGS = -v
 
+GOBIN ?= $(GOPATH)/bin
+
+REVIVE ?= $(GOBIN)/revive
+REVIVE_FLAGS ?= -formatter friendly
+REVIVE_INSTALL_URL ?= github.com/mgechev/revive
+
 PROJECTS = acme agent server shared
 
 TMPDIR ?= .tmp
@@ -31,6 +37,9 @@ generate:
 	@git grep -l '^//go:generate' | sed -n -e 's|\(.*\)/[^/]\+\.go$$|\1|p' | sort -u | while read d; do \
 		git grep -l '^//go:generate' "$$d"/*.go | xargs -r $(GO) generate $(GOGENERATE_FLAGS); \
 	done
+
+$(REVIVE):
+	$(GO) install -v $(REVIVE_INSTALL_URL)
 
 install:
 	$(GO) install -v ./...
