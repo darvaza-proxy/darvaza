@@ -1,4 +1,4 @@
-package darvaza
+package shared
 
 import (
 	"fmt"

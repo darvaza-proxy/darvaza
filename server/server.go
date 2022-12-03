@@ -1,9 +1,9 @@
-package darvaza
+package server
 
 import (
 	"net"
 
-	"github.com/darvaza-proxy/darvaza/shared"
+	darvaza "github.com/darvaza-proxy/darvaza/shared"
 )
 
 // Runner is an interface which is implemented by all proxies

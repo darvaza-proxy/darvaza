@@ -1,4 +1,4 @@
-package darvaza
+package shared
 
 // Reloader identifies a service or worker that allows
 // its internal configuration to be reloaded on runtime

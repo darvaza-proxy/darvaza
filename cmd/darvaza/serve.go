@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/darvaza-proxy/darvaza/server"
+	darvaza "github.com/darvaza-proxy/darvaza/server"
 )
 
 // Command
