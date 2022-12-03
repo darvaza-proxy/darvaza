@@ -14,7 +14,7 @@ all: get generate fmt tidy build
 clean:
 	rm -rf $(TMPDIR)
 
-$(TMPDIR)/gen.mk: scripts/gen_mk.sh Makefile
+$(TMPDIR)/gen.mk: tools/gen_mk.sh Makefile
 	@echo "$< $(PROJECTS) > $@" >&2
 	@mkdir -p $(@D)
 	@$< $(PROJECTS) > $@~
