@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/creasty/defaults v1.6.0
 	github.com/darvaza-proxy/darvaza/server v0.0.0-20220815113152-dfebb9141d43
-	github.com/darvaza-proxy/darvaza/shared v0.0.0-20220815153810-886eb2ae5f7a
+	github.com/darvaza-proxy/darvaza/shared v0.0.0-20221205213623-f4393c3041a6
 	github.com/hashicorp/hcl/v2 v2.13.0
 	github.com/mgechev/revive v1.2.4
 	github.com/spf13/cobra v1.5.0
@@ -30,10 +30,10 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/zclconf/go-cty v1.10.0 // indirect
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/crypto v0.4.0 // indirect
+	golang.org/x/sync v0.1.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 )
 
