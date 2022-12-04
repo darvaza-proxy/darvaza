@@ -1,3 +1,4 @@
+// Package file provides a Storage implementation for storing x509 certificates as files
 package file
 
 import (
@@ -14,12 +15,12 @@ import (
 )
 
 var (
-	_ x509utils.ReadStore  = (*FileStore)(nil)
-	_ x509utils.WriteStore = (*FileStore)(nil)
+	_ x509utils.ReadStore  = (*Store)(nil)
+	_ x509utils.WriteStore = (*Store)(nil)
 )
 
-// FileStore is a darvaza Storage implementation for storing x509 certificates as files
-type FileStore struct {
+// Store is a darvaza Storage implementation for storing x509 certificates as files
+type Store struct {
 	locksLock *sync.Mutex
 	fileLocks map[string]*sync.RWMutex
 	directory string
@@ -27,7 +28,7 @@ type FileStore struct {
 
 // Get will return the first x509 certificate and an error, the certificate having the same
 // common name as the name parameter
-func (fs *FileStore) Get(ctx context.Context, name string) (*x509.Certificate, error) {
+func (fs *Store) Get(ctx context.Context, name string) (*x509.Certificate, error) {
 	_, cert, err := fs.fileCertFromName(name)
 	return cert, err
 
@@ -35,7 +36,7 @@ func (fs *FileStore) Get(ctx context.Context, name string) (*x509.Certificate, e
 
 // ForEach will walk the store and ececute the StoreIterFunc for each certificate
 // it can decode
-func (fs *FileStore) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
+func (fs *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
 	files, err := ioutil.ReadDir(fs.directory)
 	if err != nil {
 		return err
@@ -71,7 +72,7 @@ func (fs *FileStore) ForEach(ctx context.Context, f x509utils.StoreIterFunc) err
 
 // Put will create a file in the store with the given name and the given certificate
 // it will write in the fil eteh content of cert.Raw field
-func (fs *FileStore) Put(ctx context.Context, name string, cert *x509.Certificate) error {
+func (fs *Store) Put(ctx context.Context, name string, cert *x509.Certificate) error {
 	file := filepath.Join(fs.directory, name)
 	lock := fs.fsLock(file)
 	lock.Lock()
@@ -86,7 +87,7 @@ func (fs *FileStore) Put(ctx context.Context, name string, cert *x509.Certificat
 
 // Delete will delete the first certificate with the same common name as
 // the given parameter
-func (fs *FileStore) Delete(ctx context.Context, name string) error {
+func (fs *Store) Delete(ctx context.Context, name string) error {
 	file, _, err := fs.fileCertFromName(name)
 	if err != nil {
 		return err
@@ -103,7 +104,7 @@ func (fs *FileStore) Delete(ctx context.Context, name string) error {
 }
 
 // DeleteCert will delete from the store the certificate given as parameter
-func (fs *FileStore) DeleteCert(ctx context.Context, cert *x509.Certificate) error {
+func (fs *Store) DeleteCert(ctx context.Context, cert *x509.Certificate) error {
 	name := cert.Subject.CommonName
 	file, _, err := fs.fileCertFromName(name)
 	if err != nil {
@@ -135,8 +136,8 @@ var DefaultOptions = Options{
 
 // NewStore will create a new File Storage. If no options
 // are given it will use the DefaultOptions
-func NewStore(options Options) (FileStore, error) {
-	result := FileStore{}
+func NewStore(options Options) (Store, error) {
+	result := Store{}
 
 	if options.Directory == "" {
 		options.Directory = DefaultOptions.Directory
@@ -156,7 +157,7 @@ func NewStore(options Options) (FileStore, error) {
 	return result, nil
 }
 
-func (fs FileStore) fsLock(filename string) *sync.RWMutex {
+func (fs Store) fsLock(filename string) *sync.RWMutex {
 	fs.locksLock.Lock()
 	lock, found := fs.fileLocks[filename]
 	if !found {
@@ -167,7 +168,7 @@ func (fs FileStore) fsLock(filename string) *sync.RWMutex {
 	return lock
 }
 
-func (fs FileStore) fileCertFromName(name string) (string, *x509.Certificate, error) {
+func (fs Store) fileCertFromName(name string) (string, *x509.Certificate, error) {
 	files, err := ioutil.ReadDir(fs.directory)
 	if err != nil {
 		return "", nil, err
