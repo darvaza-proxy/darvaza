@@ -1,3 +1,4 @@
+// Package shared represents the core library of darvaza
 package shared
 
 // Reloader identifies a service or worker that allows

@@ -19,6 +19,7 @@ type WorkGroup struct {
 	Done    chan error
 }
 
+// Run invokes all Workers and waits for them to finish
 func (s *WorkGroup) Run() error {
 	var err error
 	for k := range s.workers {
@@ -52,6 +53,7 @@ func (s *WorkGroup) Run() error {
 	return err
 }
 
+// Cancel interrupts the execution of all workers
 func (s *WorkGroup) Cancel() error {
 	var err error
 	defer close(s.Done)
@@ -70,6 +72,7 @@ func (s *WorkGroup) Cancel() error {
 	return err
 }
 
+// Reload calls Reload() on all workers that support it
 func (s *WorkGroup) Reload() error {
 	var err error
 	for k := range s.workers {
@@ -82,6 +85,7 @@ func (s *WorkGroup) Reload() error {
 	return err
 }
 
+// NewWorkGroup creates a new empty group of workers
 func NewWorkGroup() *WorkGroup {
 	s := make(map[Worker]struct{})
 	d := make(chan error)
@@ -91,12 +95,14 @@ func NewWorkGroup() *WorkGroup {
 	}
 }
 
+// Append adds a worker to the group
 func (s *WorkGroup) Append(r Worker) {
 	if s.workers != nil {
 		s.workers[r] = struct{}{}
 	}
 }
 
+// Remove removes a worker from the group
 func (s *WorkGroup) Remove(r Worker) {
 	delete(s.workers, r)
 }

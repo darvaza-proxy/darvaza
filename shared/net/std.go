@@ -5,8 +5,8 @@ import (
 )
 
 type (
-	// Alias of the standard net.Conn
+	// Conn is an alias of the standard net.Conn type
 	Conn = net.Conn
-	// Alias of the standard net.Listener
+	// Listener is an alias of the standard net.Listener type
 	Listener = net.Listener
 )

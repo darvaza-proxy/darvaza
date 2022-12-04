@@ -52,7 +52,7 @@ func (lc ListenConfig) ListenPacket(network, addr string) (net.PacketConn, error
 	return lc.ListenConfig.ListenPacket(ctx, network, addr)
 }
 
-// ListenAllPacket acts like Listen but on a list of addresses
+// ListenAll acts like Listen but on a list of addresses
 func (lc ListenConfig) ListenAll(network string, addrs []string) ([]net.Listener, error) {
 	var out []net.Listener
 
