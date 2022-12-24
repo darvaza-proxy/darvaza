@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/darvaza-proxy/darvaza/shared/storage"
+	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
 // FileStore is a darvaza Storage implementation for storing x509 certificates as files
@@ -30,7 +30,7 @@ func (fs *FileStore) Get(ctx context.Context, name string) (*x509.Certificate, e
 
 // ForEach will walk the store and ececute the StoreIterFunc for each certificate
 // it can decode
-func (fs *FileStore) ForEach(ctx context.Context, f storage.StoreIterFunc) error {
+func (fs *FileStore) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
 	files, err := ioutil.ReadDir(fs.directory)
 	if err != nil {
 		return err
@@ -128,7 +128,7 @@ var DefaultOptions = Options{
 	FMode:     0700,
 }
 
-//NewStore will create a new File Storage. If no options
+// NewStore will create a new File Storage. If no options
 // are given it will use the DefaultOptions
 func NewStore(options Options) (FileStore, error) {
 	result := FileStore{}
