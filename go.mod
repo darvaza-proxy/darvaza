@@ -4,11 +4,11 @@ go 1.18
 
 require (
 	github.com/creasty/defaults v1.6.0
-	github.com/darvaza-proxy/darvaza/server v0.0.0-20220815113152-dfebb9141d43
-	github.com/darvaza-proxy/darvaza/shared v0.0.0-20221205213623-f4393c3041a6
-	github.com/hashicorp/hcl/v2 v2.13.0
+	github.com/darvaza-proxy/darvaza/server v0.0.0-20221226012944-12e87716fd20
+	github.com/darvaza-proxy/darvaza/shared v0.0.0-20230102145307-96b5c5ad4a61
+	github.com/hashicorp/hcl/v2 v2.15.0
 	github.com/mgechev/revive v1.2.4
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.1
 )
 
 require (
@@ -18,8 +18,8 @@ require (
 	github.com/chavacava/garif v0.0.0-20220630083739-93517212f375 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
@@ -29,7 +29,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/zclconf/go-cty v1.10.0 // indirect
+	github.com/zclconf/go-cty v1.12.1 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
