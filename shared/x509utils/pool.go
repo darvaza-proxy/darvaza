@@ -25,6 +25,10 @@ func (pool *CertPool) Pool() *x509.CertPool {
 	return pool.getPool()
 }
 
+func (pool *CertPool) addCert(filename string, cert *x509.Certificate) {
+	pool.pool.AddCert(cert)
+}
+
 func (pool *CertPool) addCertPEM(filename string, block *pem.Block) bool {
 
 	if block.Type == "CERTIFICATE" {
@@ -32,14 +36,19 @@ func (pool *CertPool) addCertPEM(filename string, block *pem.Block) bool {
 		certBytes := block.Bytes
 		cert, err := x509.ParseCertificate(certBytes)
 		if err == nil {
-			pool.pool.AddCert(cert)
+			pool.addCert(filename, cert)
 		}
 	}
 
 	return false
 }
 
-func (pool *CertPool) AddCert(s string) error {
+func (pool *CertPool) Add(s string) error {
 	pool.getPool()
 	return ReadPEM(s, pool.addCertPEM)
+}
+
+func (pool *CertPool) AddCert(cert *x509.Certificate) {
+	pool.getPool()
+	pool.addCert("", cert)
 }
