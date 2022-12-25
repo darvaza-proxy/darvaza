@@ -35,12 +35,10 @@ func (fs *Store) Get(ctx context.Context, name string) (*x509.Certificate, error
 // it can decode
 func (fs *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
 	fn := func(filename string, block *pem.Block) bool {
-		if block.Type == "CERTIFICATE" {
-			if cert, err := x509.ParseCertificate(block.Bytes); err == nil {
-				if err = f(cert); err != nil {
-					// TODO: terminate or just continue?
-					return true
-				}
+		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
+			if err := f(cert); err != nil {
+				// TODO: terminate or just continue?
+				return true
 			}
 		}
 		// next
@@ -135,25 +133,23 @@ func (fs Store) fileCertFromName(name string) (string, *x509.Certificate, error)
 	fn := func(fl string, block *pem.Block) bool {
 		var term bool
 
-		if block.Type == "CERTIFICATE" {
-			if cert, err := x509.ParseCertificate(block.Bytes); err == nil {
-				switch len(cert.URIs) {
-				case 0:
-					//an "old" certificate, no SAN
-					if cert.Subject.CommonName == name {
-						match = cert
-					}
-				default:
-					//normal "modern" certificate uses SAN
-					if err := cert.VerifyHostname(name); err == nil {
-						match = cert
-					}
+		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
+			switch len(cert.URIs) {
+			case 0:
+				//an "old" certificate, no SAN
+				if cert.Subject.CommonName == name {
+					match = cert
 				}
+			default:
+				//normal "modern" certificate uses SAN
+				if err := cert.VerifyHostname(name); err == nil {
+					match = cert
+				}
+			}
 
-				if match != nil {
-					filename = fl
-					term = true
-				}
+			if match != nil {
+				filename = fl
+				term = true
 			}
 		}
 
