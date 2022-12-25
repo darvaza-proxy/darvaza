@@ -27,7 +27,7 @@ func (pool *CertPool) Pool() *x509.CertPool {
 
 func (pool *CertPool) addCertPEM(filename string, block *pem.Block) bool {
 
-	if block.Type == "CERTIFICATE" && len(block.Headers) > 0 {
+	if block.Type == "CERTIFICATE" {
 		// block is cert
 		certBytes := block.Bytes
 		cert, err := x509.ParseCertificate(certBytes)
