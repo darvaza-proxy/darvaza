@@ -77,10 +77,37 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 	return out, nil
 }
 
-// InterfaceAddresses returns the list of IP addresses of a list of network
-// interfaces
-func InterfaceAddresses(ifaces []string) ([]string, error) {
-	var out []string
+// IPAddresses returns the list of IP addresses bound to the given
+// interfaces or all if none are given
+func IPAddresses(ifaces ...string) ([]string, error) {
+	addrs, err := IPAddrs(ifaces...)
+
+	// even if IPAddrs() failed we convert whatever was returned
+	// before passing the error through
+
+	s := make([]string, len(addrs))
+	for i, v := range addrs {
+		s[i] = v.String()
+	}
+
+	return s, err
+}
+
+// IPAddrs returns the list of net.IP bound to the given
+// interfaces or all if none are given
+func IPAddrs(ifaces ...string) ([]net.IP, error) {
+	var out []net.IP
+
+	if len(ifaces) == 0 {
+		s, err := net.Interfaces()
+		if err != nil {
+			return out, err
+		}
+
+		for _, ifi := range s {
+			ifaces = append(ifaces, ifi.Name)
+		}
+	}
 
 	for _, name := range ifaces {
 		ifi, err := net.InterfaceByName(name)
@@ -94,7 +121,12 @@ func InterfaceAddresses(ifaces []string) ([]string, error) {
 		}
 
 		for _, addr := range addrs {
-			out = append(out, addr.String())
+			switch v := addr.(type) {
+			case *net.IPAddr:
+				out = append(out, v.IP)
+			case *net.IPNet:
+				out = append(out, v.IP)
+			}
 		}
 	}
 
