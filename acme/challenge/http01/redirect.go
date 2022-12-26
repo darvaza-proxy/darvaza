@@ -5,9 +5,10 @@ import (
 	"net/http"
 )
 
-type HttpsRedirectHandler struct{}
+// HTTPSRedirectHandler provides an automatic redirect to HTTPS
+type HTTPSRedirectHandler struct{}
 
-func (h *HttpsRedirectHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (h *HTTPSRedirectHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if req.URL.Scheme != "https" {
 		url := *req.URL
 		url.Scheme = "https"
@@ -22,6 +23,7 @@ func (h *HttpsRedirectHandler) ServeHTTP(rw http.ResponseWriter, req *http.Reque
 	}
 }
 
-func NewHttpsRedirectHandler() http.Handler {
-	return &HttpsRedirectHandler{}
+// NewHTTPSRedirectHandler creates a new automatic redirect to HTTPS handler
+func NewHTTPSRedirectHandler() http.Handler {
+	return &HTTPSRedirectHandler{}
 }

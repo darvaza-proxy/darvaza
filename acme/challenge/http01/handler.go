@@ -1,3 +1,4 @@
+// Package http01 provides logic regarding ACME-HTTP-01 protocol
 package http01
 
 import (
@@ -9,15 +10,17 @@ import (
 )
 
 var (
-	_ http.Handler = (*Http01ChallengeHandler)(nil)
+	_ http.Handler = (*ChallengeHandler)(nil)
 )
 
-type Http01ChallengeHandler struct {
-	Resolver acme.Http01Resolver
+// ChallengeHandler handles /.well-known/acme-challenge requests
+// against a given HTTP-01 Challenge Resolver
+type ChallengeHandler struct {
+	Resolver acme.HTTP01Resolver
 	next     http.Handler
 }
 
-func (h *Http01ChallengeHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (h *ChallengeHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	host := req.URL.Hostname()
 	path := req.URL.Path
 
@@ -49,20 +52,22 @@ func (h *Http01ChallengeHandler) ServeHTTP(rw http.ResponseWriter, req *http.Req
 
 next:
 	if h.next == nil {
-		h.next = NewHttpsRedirectHandler()
+		h.next = NewHTTPSRedirectHandler()
 	}
 	h.next.ServeHTTP(rw, req)
 }
 
-func NewHtt01ChallengeHandler(resolver acme.Http01Resolver) *Http01ChallengeHandler {
-	return &Http01ChallengeHandler{
+// NewChallengeHandler creates a handler for the provided HTTP-01 challenge resolver
+func NewChallengeHandler(resolver acme.HTTP01Resolver) *ChallengeHandler {
+	return &ChallengeHandler{
 		Resolver: resolver,
 	}
 }
 
-func NewHttp01ChallengeMiddleware(resolver acme.Http01Resolver) func(http.Handler) http.Handler {
+// NewChallengeMiddleware creates middleware using a provided HTTP-01 challenge resolver
+func NewChallengeMiddleware(resolver acme.HTTP01Resolver) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return &Http01ChallengeHandler{
+		return &ChallengeHandler{
 			Resolver: resolver,
 			next:     next,
 		}
