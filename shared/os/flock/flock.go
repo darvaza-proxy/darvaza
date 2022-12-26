@@ -1,3 +1,4 @@
+// Package flock provides a wrapper around syscall.Flock
 package flock
 
 import (
@@ -24,9 +25,8 @@ func Lock(filename string) (*Flock, error) {
 	fl := New(filename)
 	if err := fl.Lock(); err != nil {
 		return nil, err
-	} else {
-		return fl, nil
 	}
+	return fl, nil
 }
 
 func (lock *Flock) open() error {
@@ -49,11 +49,11 @@ func (lock *Flock) open() error {
 	if err != nil {
 		// failed to open
 		return err
-	} else {
-		// openned
-		lock.fd = fd
-		return nil
 	}
+
+	// openned
+	lock.fd = fd
+	return nil
 }
 
 func (lock *Flock) close() {
@@ -78,7 +78,7 @@ func (lock *Flock) Lock() error {
 	}
 }
 
-// Unlocks releases the flock
+// Unlock releases the flock
 func (lock *Flock) Unlock() {
 	lock.close()
 }

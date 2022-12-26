@@ -1,3 +1,4 @@
+// Package os provides some extensions over the standard os package
 package os
 
 import (
@@ -7,22 +8,24 @@ import (
 	"github.com/darvaza-proxy/darvaza/shared/os/flock"
 )
 
+// ReadDirWithLock reads a directory using a syscall.Flock
 func ReadDirWithLock(dirname string) ([]fs.DirEntry, error) {
-	if fl, err := flock.Lock(dirname); err != nil {
+	fl, err := flock.Lock(dirname)
+	if err != nil {
 		return nil, err
-	} else {
-		defer fl.Unlock()
 	}
+	defer fl.Unlock()
 
 	return os.ReadDir(dirname)
 }
 
+// ReadFileWithLock reads a file using a syscall.Flock
 func ReadFileWithLock(filename string) ([]byte, error) {
-	if fl, err := flock.Lock(filename); err != nil {
+	fl, err := flock.Lock(filename)
+	if err != nil {
 		return nil, err
-	} else {
-		defer fl.Unlock()
 	}
+	defer fl.Unlock()
 
 	return os.ReadFile(filename)
 }

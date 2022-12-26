@@ -9,8 +9,10 @@ import (
 )
 
 const (
+	// DefaultFileMode is the filemode used when a flock file is first created
 	DefaultFileMode = 0666
-	DefaultDirMode  = 0777
+	// DefaultDirMode is the filemode used when a directory is created
+	DefaultDirMode = 0777
 )
 
 var (
@@ -147,7 +149,7 @@ func (opt Options) Mkdir(name string, dmode fs.FileMode) error {
 	return os.Mkdir(opt.JoinName(name), dmode)
 }
 
-// Mkdir attempts to create all directories on a path within the base
+// MkdirAll attempts to create all directories on a path within the base
 func (opt Options) MkdirAll(name string, dmode fs.FileMode) error {
 	dmode = coalesceMode(opt.DirMode, DefaultDirMode)
 	return os.MkdirAll(opt.JoinName(name), dmode)
