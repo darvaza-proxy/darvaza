@@ -34,7 +34,8 @@ EOT
 		depsx="\$(REVIVE)"
 		;;
 	up)
-		call="\$(GO) get -u -v ./..."
+		call="\$(GO) get -u -v ./...
+\$(GO) mod tidy"
 		;;
 	*)
 		call="\$(GO) $cmd -v ./..."
@@ -80,6 +81,7 @@ EOT
 
 			if [ "up" = "$cmd" ]; then
 				callx="$cmdx
+\$(GO) mod tidy
 \$(GO) install -v \$(REVIVE_INSTALL_URL)"
 			elif [ -n "$cmdx" ]; then
 				callx="$cmdx"
@@ -94,7 +96,7 @@ EOT
 
 		cat <<EOT
 $cmd-$k:${depsx:+ $depsx}${deps:+ $(expand $cmd $deps)}
-$(echo "$callx" | sed -e "/^$/d;" -e "s|^|\t$cd|")
+$(echo "$callx" | sed -e "/^$/d;" -e "s|^|\t@$cd|")
 
 EOT
 	done
