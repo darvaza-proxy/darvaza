@@ -1,3 +1,4 @@
+// Package storage provides a TLS Store
 package storage
 
 import (
