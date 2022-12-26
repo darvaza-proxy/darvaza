@@ -1,11 +1,15 @@
 package x509utils
 
 import (
+	"bytes"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/pem"
 	"io/fs"
 	"path/filepath"
 
 	"github.com/darvaza-proxy/darvaza/shared/os"
+	"github.com/pkg/errors"
 )
 
 // DecodePEMBlockFunc is called for each PEM block coded. it returns true
@@ -105,4 +109,44 @@ func fileReadPEM(filename string, cb DecodePEMBlockFunc) (bool, error) {
 
 	// skip non-PEM files
 	return false, nil
+}
+
+// EncodeBytes produces a PEM encoded block
+func EncodeBytes(label string, body []byte, headers map[string]string) []byte {
+	var b bytes.Buffer
+	pem.Encode(&b, &pem.Block{
+		Type:    label,
+		Bytes:   body,
+		Headers: headers,
+	})
+	return b.Bytes()
+}
+
+// EncodePKCS1PrivateKey produces a PEM encoded RSA Private Key
+func EncodePKCS1PrivateKey(key *rsa.PrivateKey) []byte {
+	var out []byte
+	if key != nil {
+		body := x509.MarshalPKCS1PrivateKey(key)
+		out = EncodeBytes("RSA PRIVATE KEY", body, nil)
+	}
+	return out
+}
+
+// EncodePKCS8PrivateKey produces a PEM encoded Private Key
+func EncodePKCS8PrivateKey(key PrivateKey) []byte {
+	var out []byte
+	if key != nil {
+		body, err := x509.MarshalPKCS8PrivateKey(key)
+		if err != nil {
+			panic(errors.Wrap(err, "unreachable"))
+		}
+		out = EncodeBytes("PRIVATE KEY", body, nil)
+	}
+	return out
+}
+
+// EncodeCertificate produces a PEM encoded x509 Certificate
+// without optional headers
+func EncodeCertificate(der []byte) []byte {
+	return EncodeBytes("CERTIFICATE", der, nil)
 }
