@@ -5,6 +5,7 @@ import (
 	"encoding/pem"
 )
 
+// CertPool extends the standard x509.CertPool
 type CertPool struct {
 	pool *x509.CertPool
 }
@@ -21,6 +22,7 @@ func (pool *CertPool) getPool() *x509.CertPool {
 	return p
 }
 
+// Pool returns a reference to our internal x509.CertPool
 func (pool *CertPool) Pool() *x509.CertPool {
 	return pool.getPool()
 }
@@ -43,11 +45,13 @@ func (pool *CertPool) addCertPEM(filename string, block *pem.Block) bool {
 	return false
 }
 
+// Add adds certificates to the CertPool
 func (pool *CertPool) Add(s string) error {
 	pool.getPool()
 	return ReadPEM(s, pool.addCertPEM)
 }
 
+// AddCert adds parsed certificates to the CertPool
 func (pool *CertPool) AddCert(cert *x509.Certificate) {
 	pool.getPool()
 	pool.addCert("", cert)
