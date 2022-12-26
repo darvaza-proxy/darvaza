@@ -1,18 +1,20 @@
+// Package server provides logic for applications facing browsers
 package server
 
 import (
 	"net"
 
-	darvaza "github.com/darvaza-proxy/darvaza/shared"
+	"github.com/darvaza-proxy/darvaza/shared"
 )
 
 // Runner is an interface which is implemented by all proxies
 type Runner interface {
-	darvaza.Worker
+	shared.Worker
 
 	TLSHandler(func(net.Conn))
 }
 
-func NewServer() *darvaza.WorkGroup {
-	return darvaza.NewWorkGroup()
+// NewServer creates a new WorkGroup
+func NewServer() *shared.WorkGroup {
+	return shared.NewWorkGroup()
 }
