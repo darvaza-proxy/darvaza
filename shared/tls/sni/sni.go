@@ -1,3 +1,4 @@
+// Package sni provices logic to work with TLS SNI fields
 package sni
 
 import (
@@ -7,15 +8,16 @@ import (
 )
 
 // GetInfo returns a pointer to a ClientHelloInfo:
-// type ClientHelloInfo struct {
-//	Vers                             uint16
-//	CipherSuites                     []uint16
-//	CompressionMethods               []uint8
-//	ServerName                       string
-//	SupportedSignatureAlgorithms     []SignatureScheme
-//	SupportedSignatureAlgorithmsCert []SignatureScheme
-//	SupportedVersions                []uint16
-//}
+//
+//	type ClientHelloInfo struct {
+//		Vers                             uint16
+//		CipherSuites                     []uint16
+//		CompressionMethods               []uint8
+//		ServerName                       string
+//		SupportedSignatureAlgorithms     []SignatureScheme
+//		SupportedSignatureAlgorithmsCert []SignatureScheme
+//		SupportedVersions                []uint16
+//	}
 func GetInfo(buf []byte) *ClientHelloInfo {
 	n := len(buf)
 	if n <= 5 {
@@ -63,7 +65,7 @@ type ClientHelloInfo struct {
 	raw                              []byte
 	Vers                             uint16
 	random                           []byte
-	sessionId                        []byte
+	sessionID                        []byte
 	CipherSuites                     []uint16
 	CompressionMethods               []uint8
 	ServerName                       string
@@ -101,7 +103,7 @@ func (m *ClientHelloInfo) unmarshal(data []byte) bool {
 
 	if !s.Skip(4) || // message type and uint24 length field
 		!s.ReadUint16(&m.Vers) || !s.ReadBytes(&m.random, 32) ||
-		!readUint8LengthPrefixed(&s, &m.sessionId) {
+		!readUint8LengthPrefixed(&s, &m.sessionID) {
 		return false
 	}
 
