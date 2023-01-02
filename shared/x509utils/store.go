@@ -21,3 +21,14 @@ type WriteStore interface {
 	Delete(ctx context.Context, name string) error
 	DeleteCert(ctx context.Context, cert *x509.Certificate) error
 }
+
+// CertPooler represents the read-only interface of our CertPool
+type CertPooler interface {
+	Export() *x509.CertPool
+}
+
+// CertPoolWriter represents the write-only interface of our CertPool
+type CertPoolWriter interface {
+	AddCert(cert *x509.Certificate) bool
+	AppendCertsFromPEM(b []byte) bool
+}
