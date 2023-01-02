@@ -45,7 +45,7 @@ func (fs *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
 		return false
 	}
 
-	return x509utils.ReadPEM(fs.fl.Base, fn)
+	return x509utils.ReadStringPEM(fs.fl.Base, fn)
 }
 
 // Put will create a file in the store with the given name and the given certificate
@@ -156,7 +156,7 @@ func (fs Store) fileCertFromName(name string) (string, *x509.Certificate, error)
 		return term
 	}
 
-	x509utils.ReadPEM(fs.fl.Base, fn)
+	x509utils.ReadStringPEM(fs.fl.Base, fn)
 	if match != nil {
 		return filename, match, nil
 	}

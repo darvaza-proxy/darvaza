@@ -43,7 +43,7 @@ func (pool *CertPool) addCertPEM(filename string, block *pem.Block) bool {
 // Add adds certificates to the CertPool
 func (pool *CertPool) Add(s string) error {
 	pool.getPool()
-	return ReadPEM(s, pool.addCertPEM)
+	return ReadStringPEM(s, pool.addCertPEM)
 }
 
 // AddCert adds parsed certificates to the CertPool

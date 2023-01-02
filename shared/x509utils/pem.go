@@ -17,14 +17,26 @@ import (
 type DecodePEMBlockFunc func(filename string, block *pem.Block) bool
 
 // ReadPEM invoques a callback for each PEM block found
-// it can receive raw PEM data, a filename or a directory to scan
-func ReadPEM(s string, cb DecodePEMBlockFunc) error {
-	if s == "" {
+// it can receive raw PEM data
+func ReadPEM(b []byte, cb DecodePEMBlockFunc) error {
+	if len(b) == 0 {
 		// empty
 		return nil
-	} else if block, rest := pem.Decode([]byte(s)); block != nil {
+	} else if block, rest := pem.Decode(b); block != nil {
 		// PEM chain
 		_ = readPEM("", block, rest, cb)
+		return nil
+	} else {
+		// Not PEM
+		return fs.ErrInvalid
+	}
+}
+
+// ReadStringPEM invoques a callback for each PEM block found
+// it can receive raw PEM data, a filename or a directory to scan
+func ReadStringPEM(s string, cb DecodePEMBlockFunc) error {
+	if ReadPEM([]byte(s), cb) == nil {
+		// done
 		return nil
 	} else if st, err := os.Stat(s); err != nil {
 		// Unknown
