@@ -26,6 +26,7 @@ type WriteStore interface {
 type CertPooler interface {
 	ReadStore
 
+	Clone() CertPooler
 	Export() *x509.CertPool
 }
 

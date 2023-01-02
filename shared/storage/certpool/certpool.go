@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"sync"
 
+	"github.com/darvaza-proxy/darvaza/shared/data"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
@@ -40,6 +41,37 @@ func (s *CertPool) init() {
 	s.names = make(map[string]*list.List)
 	s.patterns = make(map[string]*list.List)
 	s.subjects = make(map[string]*list.List)
+}
+
+// Clone creates a copy of the CertPool
+func (s *CertPool) Clone() x509utils.CertPooler {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	clone := &CertPool{
+		cached:   s.exportUnlocked(),
+		hashed:   make(map[Hash]*certPoolEntry, len(s.hashed)),
+		names:    data.CloneMapList(s.names),
+		patterns: data.CloneMapList(s.patterns),
+		subjects: data.CloneMapList(s.subjects),
+	}
+
+	for hash, d := range s.hashed {
+		names := make([]string, len(d.names))
+		patterns := make([]string, len(d.patterns))
+
+		copy(names, d.names)
+		copy(patterns, d.patterns)
+
+		clone.hashed[hash] = &certPoolEntry{
+			hash:     hash,
+			cert:     d.cert,
+			names:    names,
+			patterns: patterns,
+		}
+	}
+
+	return clone
 }
 
 // Export produces a standard *x509.CertPool containing the
