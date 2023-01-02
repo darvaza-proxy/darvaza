@@ -1,8 +1,11 @@
-package x509utils
+// Package certpool provides a x509 Certificates store from ground up
+package certpool
 
 import (
 	"crypto/x509"
 	"encoding/pem"
+
+	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
 // CertPool extends the standard x509.CertPool
@@ -32,7 +35,7 @@ func (pool *CertPool) addCert(_ string, cert *x509.Certificate) {
 }
 
 func (pool *CertPool) addCertPEM(filename string, block *pem.Block) bool {
-	if cert, _ := BlockToCertificate(block); cert != nil {
+	if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
 		pool.addCert(filename, cert)
 	}
 	return false
@@ -41,7 +44,7 @@ func (pool *CertPool) addCertPEM(filename string, block *pem.Block) bool {
 // Add adds certificates to the CertPool
 func (pool *CertPool) Add(s string) error {
 	pool.getPool()
-	return ReadStringPEM(s, pool.addCertPEM)
+	return x509utils.ReadStringPEM(s, pool.addCertPEM)
 }
 
 //revive:disable:confusing-naming
