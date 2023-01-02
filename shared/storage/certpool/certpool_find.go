@@ -56,6 +56,41 @@ func nameAsSuffix(name string) (string, bool) {
 }
 
 // revive:disable:cognitive-complexity
+func (s *CertPool) getFirstByName(name string) *certPoolEntry {
+	name, ok := x509utils.SanitiseName(name)
+	if !ok {
+		return nil
+	}
+
+	// IP
+	if ip, ok := nameAsIP(name); ok {
+		if l, ok := s.names[ip]; ok {
+			return getFirstInList(l)
+		}
+		return nil
+	}
+
+	// exact
+	if l, ok := s.names[name]; ok {
+		out := getFirstInList(l)
+		if out != nil {
+			return out
+		}
+	}
+
+	// wildcard
+	if suffix, ok := nameAsSuffix(name); ok {
+		if l, ok := s.patterns[suffix]; ok {
+			out := getFirstInList(l)
+			if out != nil {
+				return out
+			}
+		}
+	}
+
+	return nil
+}
+
 func (s *CertPool) getEntriesByName(name string) (out []*certPoolEntry, found bool) {
 	name, ok := x509utils.SanitiseName(name)
 	if !ok {

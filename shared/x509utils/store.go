@@ -24,6 +24,8 @@ type WriteStore interface {
 
 // CertPooler represents the read-only interface of our CertPool
 type CertPooler interface {
+	ReadStore
+
 	Export() *x509.CertPool
 }
 
