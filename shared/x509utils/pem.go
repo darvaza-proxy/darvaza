@@ -1,11 +1,15 @@
 package x509utils
 
 import (
+	"bytes"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/pem"
 	"io/fs"
 	"path/filepath"
 
 	"github.com/darvaza-proxy/darvaza/shared/os"
+	"github.com/pkg/errors"
 )
 
 // DecodePEMBlockFunc is called for each PEM block coded. it returns true
@@ -13,14 +17,26 @@ import (
 type DecodePEMBlockFunc func(filename string, block *pem.Block) bool
 
 // ReadPEM invoques a callback for each PEM block found
-// it can receive raw PEM data, a filename or a directory to scan
-func ReadPEM(s string, cb DecodePEMBlockFunc) error {
-	if s == "" {
+// it can receive raw PEM data
+func ReadPEM(b []byte, cb DecodePEMBlockFunc) error {
+	if len(b) == 0 {
 		// empty
 		return nil
-	} else if block, rest := pem.Decode([]byte(s)); block != nil {
+	} else if block, rest := pem.Decode(b); block != nil {
 		// PEM chain
 		_ = readPEM("", block, rest, cb)
+		return nil
+	} else {
+		// Not PEM
+		return fs.ErrInvalid
+	}
+}
+
+// ReadStringPEM invoques a callback for each PEM block found
+// it can receive raw PEM data, a filename or a directory to scan
+func ReadStringPEM(s string, cb DecodePEMBlockFunc) error {
+	if ReadPEM([]byte(s), cb) == nil {
+		// done
 		return nil
 	} else if st, err := os.Stat(s); err != nil {
 		// Unknown
@@ -105,4 +121,44 @@ func fileReadPEM(filename string, cb DecodePEMBlockFunc) (bool, error) {
 
 	// skip non-PEM files
 	return false, nil
+}
+
+// EncodeBytes produces a PEM encoded block
+func EncodeBytes(label string, body []byte, headers map[string]string) []byte {
+	var b bytes.Buffer
+	pem.Encode(&b, &pem.Block{
+		Type:    label,
+		Bytes:   body,
+		Headers: headers,
+	})
+	return b.Bytes()
+}
+
+// EncodePKCS1PrivateKey produces a PEM encoded RSA Private Key
+func EncodePKCS1PrivateKey(key *rsa.PrivateKey) []byte {
+	var out []byte
+	if key != nil {
+		body := x509.MarshalPKCS1PrivateKey(key)
+		out = EncodeBytes("RSA PRIVATE KEY", body, nil)
+	}
+	return out
+}
+
+// EncodePKCS8PrivateKey produces a PEM encoded Private Key
+func EncodePKCS8PrivateKey(key PrivateKey) []byte {
+	var out []byte
+	if key != nil {
+		body, err := x509.MarshalPKCS8PrivateKey(key)
+		if err != nil {
+			panic(errors.Wrap(err, "unreachable"))
+		}
+		out = EncodeBytes("PRIVATE KEY", body, nil)
+	}
+	return out
+}
+
+// EncodeCertificate produces a PEM encoded x509 Certificate
+// without optional headers
+func EncodeCertificate(der []byte) []byte {
+	return EncodeBytes("CERTIFICATE", der, nil)
 }
