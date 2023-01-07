@@ -64,7 +64,7 @@ func newCache(size int64, exp int32) *cache {
 	c.nttl = 60
 	err := c.loadRoots()
 	if err != nil {
-		logger.Warn("%s", err)
+		logger.Warn().Print(err)
 	}
 	return c
 }

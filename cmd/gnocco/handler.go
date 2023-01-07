@@ -41,7 +41,7 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 			remote = w.RemoteAddr().(*net.UDPAddr).IP
 		}
 
-		logger.Info("%s lookup　%s", remote, Q.String())
+		logger.Info().Printf("%s lookup　%s", remote, Q.String())
 		h.Jobs++
 		switch {
 		case Q.qclass == "IN":
@@ -56,7 +56,7 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 				w.WriteMsg(result)
 			} else {
 				if rcs, err := h.Cache.get(h.Cache.makeKey(Q.qname, "CNAME")); err == nil {
-					logger.Info("Found CNAME %s", rcs.String())
+					logger.Info().Printf("Found CNAME %s", rcs.String())
 					result := new(dns.Msg)
 					result.SetReply(req)
 					for _, z := range rcs.Value {

@@ -1,3 +1,7 @@
+github.com/darvaza-proxy/slog v0.0.2 h1:bdVvOC9LzIOVelZugMPDfKpe5FlAI5JGm1ZZ2+YGOeU=
+github.com/darvaza-proxy/slog v0.0.2/go.mod h1:EDgV3ucYoTaqXW90/XDRfieJXohfoU698s/mg2/QxNE=
+github.com/darvaza-proxy/slog/cblog v0.0.0-20230111183638-87efe9955987 h1:eTNU5bXSbiGPQsZQ1vbhM9FOT0E6IyjSbnuWiDLCCaM=
+github.com/darvaza-proxy/slog/cblog v0.0.0-20230111183638-87efe9955987/go.mod h1:DgLHQYXPZXXWgdid6tnv5HCcsd2res++nQ1O1IAg4C4=
 github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0SNc=
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/miekg/dns v1.1.50 h1:DQUfb9uc6smULcREF09Uc+/Gd46YWqJd5DbpPE9xkcA=
