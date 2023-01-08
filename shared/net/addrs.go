@@ -5,6 +5,7 @@ package net
 import (
 	"fmt"
 	"net"
+	"net/netip"
 	"strconv"
 	"strings"
 )
@@ -80,9 +81,9 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 // IPAddresses returns the list of IP addresses bound to the given
 // interfaces or all if none are given
 func IPAddresses(ifaces ...string) ([]string, error) {
-	addrs, err := IPAddrs(ifaces...)
+	addrs, err := GetIPAddresses(ifaces...)
 
-	// even if IPAddrs() failed we convert whatever was returned
+	// even if GetIPAddresses() failed we convert whatever was returned
 	// before passing the error through
 
 	s := make([]string, len(addrs))
@@ -93,16 +94,15 @@ func IPAddresses(ifaces ...string) ([]string, error) {
 	return s, err
 }
 
-// IPAddrs returns the list of net.IP bound to the given
+// GetIPAddresses returns the list of netip.Addr bound to the given
 // interfaces or all if none are given
-func IPAddrs(ifaces ...string) ([]net.IP, error) {
-	var out []net.IP
+func GetIPAddresses(ifaces ...string) ([]netip.Addr, error) {
+	var out []netip.Addr
 
 	if len(ifaces) == 0 {
 		var err error
 
 		ifaces, err = GetInterfacesNames()
-
 		if err != nil {
 			return out, err
 		}
@@ -120,11 +120,17 @@ func IPAddrs(ifaces ...string) ([]net.IP, error) {
 		}
 
 		for _, addr := range addrs {
+			var s []byte
+
 			switch v := addr.(type) {
 			case *net.IPAddr:
-				out = append(out, v.IP)
+				s = v.IP
 			case *net.IPNet:
-				out = append(out, v.IP)
+				s = v.IP
+			}
+
+			if ip, ok := netip.AddrFromSlice(s); ok {
+				out = append(out, ip)
 			}
 		}
 	}
