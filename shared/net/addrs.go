@@ -78,9 +78,9 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 	return out, nil
 }
 
-// IPAddresses returns the list of IP addresses bound to the given
+// GetStringIPAddresses returns the list of IP addresses bound to the given
 // interfaces or all if none are given
-func IPAddresses(ifaces ...string) ([]string, error) {
+func GetStringIPAddresses(ifaces ...string) ([]string, error) {
 	addrs, err := GetIPAddresses(ifaces...)
 
 	// even if GetIPAddresses() failed we convert whatever was returned
