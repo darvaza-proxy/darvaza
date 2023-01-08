@@ -99,13 +99,12 @@ func IPAddrs(ifaces ...string) ([]net.IP, error) {
 	var out []net.IP
 
 	if len(ifaces) == 0 {
-		s, err := net.Interfaces()
+		var err error
+
+		ifaces, err = GetInterfacesNames()
+
 		if err != nil {
 			return out, err
-		}
-
-		for _, ifi := range s {
-			ifaces = append(ifaces, ifi.Name)
 		}
 	}
 
@@ -127,6 +126,34 @@ func IPAddrs(ifaces ...string) ([]net.IP, error) {
 			case *net.IPNet:
 				out = append(out, v.IP)
 			}
+		}
+	}
+
+	return out, nil
+}
+
+// GetInterfacesNames returns the list of interfaces,
+// considering an optional exclusion list
+func GetInterfacesNames(except ...string) ([]string, error) {
+	var out []string
+
+	s, err := net.Interfaces()
+	if err != nil {
+		return out, err
+	}
+
+	for _, ifi := range s {
+		name := ifi.Name
+
+		for _, nope := range except {
+			if name == nope {
+				name = ""
+				break
+			}
+		}
+
+		if name != "" {
+			out = append(out, name)
 		}
 	}
 
