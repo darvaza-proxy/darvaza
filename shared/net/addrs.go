@@ -5,6 +5,7 @@ package net
 import (
 	"fmt"
 	"net"
+	"net/netip"
 	"strconv"
 	"strings"
 )
@@ -77,12 +78,12 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 	return out, nil
 }
 
-// IPAddresses returns the list of IP addresses bound to the given
+// GetStringIPAddresses returns the list of IP addresses bound to the given
 // interfaces or all if none are given
-func IPAddresses(ifaces ...string) ([]string, error) {
-	addrs, err := IPAddrs(ifaces...)
+func GetStringIPAddresses(ifaces ...string) ([]string, error) {
+	addrs, err := GetIPAddresses(ifaces...)
 
-	// even if IPAddrs() failed we convert whatever was returned
+	// even if GetIPAddresses() failed we convert whatever was returned
 	// before passing the error through
 
 	s := make([]string, len(addrs))
@@ -93,19 +94,17 @@ func IPAddresses(ifaces ...string) ([]string, error) {
 	return s, err
 }
 
-// IPAddrs returns the list of net.IP bound to the given
+// GetIPAddresses returns the list of netip.Addr bound to the given
 // interfaces or all if none are given
-func IPAddrs(ifaces ...string) ([]net.IP, error) {
-	var out []net.IP
+func GetIPAddresses(ifaces ...string) ([]netip.Addr, error) {
+	var out []netip.Addr
 
 	if len(ifaces) == 0 {
-		s, err := net.Interfaces()
+		var err error
+
+		ifaces, err = GetInterfacesNames()
 		if err != nil {
 			return out, err
-		}
-
-		for _, ifi := range s {
-			ifaces = append(ifaces, ifi.Name)
 		}
 	}
 
@@ -121,12 +120,46 @@ func IPAddrs(ifaces ...string) ([]net.IP, error) {
 		}
 
 		for _, addr := range addrs {
+			var s []byte
+
 			switch v := addr.(type) {
 			case *net.IPAddr:
-				out = append(out, v.IP)
+				s = v.IP
 			case *net.IPNet:
-				out = append(out, v.IP)
+				s = v.IP
 			}
+
+			if ip, ok := netip.AddrFromSlice(s); ok {
+				out = append(out, ip)
+			}
+		}
+	}
+
+	return out, nil
+}
+
+// GetInterfacesNames returns the list of interfaces,
+// considering an optional exclusion list
+func GetInterfacesNames(except ...string) ([]string, error) {
+	var out []string
+
+	s, err := net.Interfaces()
+	if err != nil {
+		return out, err
+	}
+
+	for _, ifi := range s {
+		name := ifi.Name
+
+		for _, nope := range except {
+			if name == nope {
+				name = ""
+				break
+			}
+		}
+
+		if name != "" {
+			out = append(out, name)
 		}
 	}
 
