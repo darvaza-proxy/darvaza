@@ -107,3 +107,15 @@ $(echo "$callx" | sed -e "/^$/d;" -e "s|^|\t@$cd|")
 EOT
 	done
 done
+
+for x in $PROJECTS; do
+	all=
+	for cmd in get build tidy; do
+		all="${all:+$all }$cmd-$x"
+	done
+
+	cat <<EOT
+$x: $all
+
+EOT
+done
