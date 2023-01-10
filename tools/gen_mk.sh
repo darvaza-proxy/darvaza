@@ -83,6 +83,12 @@ EOT
 				callx="$cmdx
 \$(GO) mod tidy
 \$(GO) install -v \$(REVIVE_INSTALL_URL)"
+			elif [ "tidy" = "$cmd" ]; then
+				exclude=
+				for x in $PROJECTS; do
+					exclude="${exclude:+$exclude }-exclude ./$x/..."
+				done
+				callx=$(echo "$callx" | sed -e "s;\(REVIVE)\);\1 $exclude;")
 			elif [ -n "$cmdx" ]; then
 				callx="$cmdx"
 			fi
