@@ -11,7 +11,7 @@ REVIVE ?= $(GOBIN)/revive
 REVIVE_FLAGS ?= -formatter friendly
 REVIVE_INSTALL_URL ?= github.com/mgechev/revive
 
-PROJECTS = acme agent server shared
+PROJECTS = shared acme agent server
 
 TMPDIR ?= .tmp
 

@@ -14,7 +14,7 @@ expand() {
 }
 
 for cmd in $COMMANDS; do
-	all="$(expand $cmd root $PROJECTS)"
+	all="$(expand $cmd $PROJECTS root)"
 	depsx=
 
 	cat <<EOT
@@ -51,7 +51,7 @@ EOT
 		sequential=false ;;
 	esac
 
-	for x in . $PROJECTS; do
+	for x in $PROJECTS .; do
 		if [ "$x" = . ]; then
 			k="root"
 			cd=
