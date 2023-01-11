@@ -14,7 +14,7 @@ expand() {
 }
 
 for cmd in $COMMANDS; do
-	all="$(expand $cmd root $PROJECTS)"
+	all="$(expand $cmd $PROJECTS root)"
 	depsx=
 
 	cat <<EOT
@@ -51,7 +51,7 @@ EOT
 		sequential=false ;;
 	esac
 
-	for x in . $PROJECTS; do
+	for x in $PROJECTS .; do
 		if [ "$x" = . ]; then
 			k="root"
 			cd=
@@ -83,6 +83,12 @@ EOT
 				callx="$cmdx
 \$(GO) mod tidy
 \$(GO) install -v \$(REVIVE_INSTALL_URL)"
+			elif [ "tidy" = "$cmd" ]; then
+				exclude=
+				for x in $PROJECTS; do
+					exclude="${exclude:+$exclude }-exclude ./$x/..."
+				done
+				callx=$(echo "$callx" | sed -e "s;\(REVIVE)\);\1 $exclude;")
 			elif [ -n "$cmdx" ]; then
 				callx="$cmdx"
 			fi
@@ -100,4 +106,16 @@ $(echo "$callx" | sed -e "/^$/d;" -e "s|^|\t@$cd|")
 
 EOT
 	done
+done
+
+for x in $PROJECTS; do
+	all=
+	for cmd in get build tidy; do
+		all="${all:+$all }$cmd-$x"
+	done
+
+	cat <<EOT
+$x: $all
+
+EOT
 done
