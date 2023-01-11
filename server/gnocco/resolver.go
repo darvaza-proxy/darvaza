@@ -1,4 +1,4 @@
-package main
+package gnocco
 
 import (
 	"bufio"
@@ -8,23 +8,25 @@ import (
 	"strings"
 	"time"
 
+	"github.com/darvaza-proxy/slog"
 	"github.com/miekg/dns"
 )
 
 type resolver struct {
 	Resolvers []net.IP
 	Iterative bool
+
+	Logger slog.Logger
 }
 
-func initResolver() *resolver {
-	resolver := new(resolver)
+func (cf *Gnocco) newResolver() *resolver {
 	resolvers := make([]net.IP, 0)
 
 	f, err := os.Open("/etc/resolv.conf")
 	defer f.Close()
 
 	if err != nil {
-		logger.Warn().Printf("Error %s occurred.", err)
+		cf.logger.Warn().Printf("Error %s occurred.", err)
 	}
 
 	scan := bufio.NewScanner(f)
@@ -42,10 +44,13 @@ func initResolver() *resolver {
 			}
 		}
 	}
-	resolver.Resolvers = resolvers
-	resolver.Iterative = mainconfig.IterateResolv
-	return resolver
 
+	resolver := &resolver{
+		Resolvers: resolvers,
+		Iterative: cf.IterateResolv,
+		Logger:    cf.logger,
+	}
+	return resolver
 }
 
 func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
@@ -76,7 +81,7 @@ func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
 						}
 						w.WriteMsg(result)
 					} else {
-						logger.Error().Print(err)
+						r.Logger.Error().Print(err)
 						result.SetRcode(req, 4)
 						w.WriteMsg(result)
 					}
@@ -92,7 +97,7 @@ func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
 		}
 		resp, err := dns.Exchange(req, net.JoinHostPort(ip.String(), "53"))
 		if err != nil {
-			logger.Error().Print(err)
+			r.Logger.Error().Print(err)
 		} else {
 			w.WriteMsg(resp)
 		}
@@ -108,7 +113,7 @@ func (r *resolver) Iterate(c *cache, qname string, qtype string, slist *stack) {
 	if nstoask, ancerr := c.get(ancestor + "/NS"); ancerr == nil {
 		qq := randomfromslice(nstoask.Value)
 		if ns, nserr := c.get(dns.Fqdn(qq) + "/A"); nserr == nil {
-			ans := getans(qname, qtype, ns.Value[0])
+			ans := r.getans(qname, qtype, ns.Value[0])
 
 			switch typify(ans) {
 			case "Delegation":
@@ -147,7 +152,7 @@ func (r *resolver) Iterate(c *cache, qname string, qtype string, slist *stack) {
 				}
 
 			default:
-				logger.Error().Print(typify(ans))
+				r.Logger.Error().Print(typify(ans))
 			}
 		} else {
 			slist.push(qq, "A")
@@ -157,7 +162,7 @@ func (r *resolver) Iterate(c *cache, qname string, qtype string, slist *stack) {
 
 }
 
-func getans(qname string, qtype string, nameserver string) (result *dns.Msg) {
+func (r *resolver) getans(qname string, qtype string, nameserver string) (result *dns.Msg) {
 	m := new(dns.Msg)
 	m.Id = dns.Id()
 	m.RecursionDesired = false
@@ -166,7 +171,7 @@ func getans(qname string, qtype string, nameserver string) (result *dns.Msg) {
 	m.Question[0] = dns.Question{qname, qqt, dns.ClassINET}
 	result, err := dns.Exchange(m, nameserver+":53")
 	if err != nil {
-		logger.Error().Print(err)
+		r.Logger.Error().Print(err)
 	}
 	return
 
