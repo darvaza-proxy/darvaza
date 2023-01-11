@@ -29,8 +29,6 @@ func main() {
 		panic(err)
 	}
 
-	logger := cf.Logger()
-
 	aserver := &gnocco.GnoccoServer{
 		Host:       cf.Listen.Host,
 		Port:       cf.Listen.Port,
@@ -48,16 +46,16 @@ func main() {
 		switch sign {
 		case syscall.SIGTERM:
 			aserver.ShutDown()
-			logger.Fatal().Print("Got SIGTERM, stoping as requested")
+			cf.Logger().Fatal().Print("Got SIGTERM, stoping as requested")
 		case syscall.SIGINT:
 			aserver.ShutDown()
-			logger.Fatal().Print("Got SIGINT, stoping as requested")
+			cf.Logger().Fatal().Print("Got SIGINT, stoping as requested")
 		case syscall.SIGUSR2:
-			logger.Info().Print("Got SIGUSR2, dumping cache")
+			cf.Logger().Info().Print("Got SIGUSR2, dumping cache")
 			aserver.DumpCache()
 		case syscall.SIGURG:
 		default:
-			logger.Warn().Printf("I received %v signal", sign)
+			cf.Logger().Warn().Printf("I received %v signal", sign)
 		}
 	}
 }

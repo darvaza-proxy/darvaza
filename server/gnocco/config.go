@@ -8,7 +8,7 @@ import (
 
 	"github.com/naoina/toml"
 
-	log "github.com/darvaza-proxy/slog"
+	"github.com/darvaza-proxy/slog"
 )
 
 // Gnocco is the configuration representing the dns-resolver
@@ -39,7 +39,7 @@ type Gnocco struct {
 	}
 
 	hosts  hostsCfg
-	logger log.Logger
+	logger slog.Logger
 }
 
 type hostsCfg struct {

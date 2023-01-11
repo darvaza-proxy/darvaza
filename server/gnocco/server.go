@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/darvaza-proxy/slog"
 	"github.com/miekg/dns"
 )
 
@@ -23,15 +24,18 @@ func (s *GnoccoServer) Addr() string {
 	return net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
 }
 
-func (s *GnoccoServer) DumpCache() {
-	logger := s.cf.logger
-	mainconfig := s.cf
+func (s *GnoccoServer) Logger() slog.Logger {
+	return s.cf.logger
+}
 
-	logger.Info().Printf("Dumping cache at %v", time.Now())
-	files := []string{mainconfig.Cache.CachePath + "/pcache", mainconfig.Cache.CachePath + "/ncache"}
+func (s *GnoccoServer) DumpCache() {
+	cache := &s.cf.Cache
+
+	s.Logger().Info().Printf("Dumping cache at %v", time.Now())
+	files := []string{cache.CachePath + "/pcache", cache.CachePath + "/ncache"}
 
 	for _, file := range files {
-		_ = os.MkdirAll(mainconfig.Cache.CachePath, 0755)
+		_ = os.MkdirAll(cache.CachePath, 0755)
 		if fl, err := os.Create(file); err == nil {
 
 			defer fl.Close()
@@ -42,7 +46,7 @@ func (s *GnoccoServer) DumpCache() {
 			}
 
 		} else {
-			logger.Error().Print(err)
+			s.Logger().Error().Print(err)
 		}
 	}
 
@@ -53,17 +57,17 @@ func (s *GnoccoServer) newHandler() *gnoccoHandler {
 }
 
 func (s *GnoccoServer) Run() {
-	mainconfig := s.cf
+	cache := &s.cf.Cache
 
 	s.handler = s.newHandler()
-	if _, err := os.Stat(mainconfig.Cache.CachePath + "/pcache"); err == nil {
-		var file, err = os.OpenFile(mainconfig.Cache.CachePath+"/pcache", os.O_RDWR, 0644)
+	if _, err := os.Stat(cache.CachePath + "/pcache"); err == nil {
+		var file, err = os.OpenFile(cache.CachePath+"/pcache", os.O_RDWR, 0644)
 		if err == nil {
 			s.handler.Cache.load(file, true)
 		}
 	}
-	if _, err := os.Stat(mainconfig.Cache.CachePath + "/ncache"); err == nil {
-		var file, err = os.OpenFile(mainconfig.Cache.CachePath+"/ncache", os.O_RDWR, 0644)
+	if _, err := os.Stat(cache.CachePath + "/ncache"); err == nil {
+		var file, err = os.OpenFile(cache.CachePath+"/ncache", os.O_RDWR, 0644)
 		if err == nil {
 			s.handler.Cache.load(file, false)
 		}
@@ -92,23 +96,20 @@ func (s *GnoccoServer) Run() {
 }
 
 func (s *GnoccoServer) start(ds *dns.Server) {
-	logger := s.cf.logger
-	logger.Info().Printf("Start %s listener on %s", ds.Net, ds.Addr)
+	s.Logger().Info().Printf("Start %s listener on %s", ds.Net, ds.Addr)
 	err := ds.ListenAndServe()
 	if err != nil {
-		logger.Fatal().Printf("Start %s listener on %s failed:%s", ds.Net, ds.Addr, err.Error())
+		s.Logger().Fatal().Printf("Start %s listener on %s failed:%s", ds.Net, ds.Addr, err.Error())
 	}
 }
 
 func (s *GnoccoServer) ShutDown() {
-	logger := s.cf.logger
-	logger.Info().Print("Shutdown called.")
+	s.Logger().Info().Print("Shutdown called.")
 }
 
 func (s *GnoccoServer) startCacheDumping() {
-	mainconfig := s.cf
+	interval := s.cf.Cache.DumpInterval
 
-	interval := mainconfig.Cache.DumpInterval
 	for _ = range time.Tick(time.Duration(interval) * time.Second) {
 		s.DumpCache()
 	}

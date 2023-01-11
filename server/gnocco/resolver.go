@@ -20,15 +20,13 @@ type resolver struct {
 }
 
 func (cf *Gnocco) newResolver() *resolver {
-	logger := cf.Logger()
-
 	resolvers := make([]net.IP, 0)
 
 	f, err := os.Open("/etc/resolv.conf")
 	defer f.Close()
 
 	if err != nil {
-		logger.Warn().Printf("Error %s occurred.", err)
+		cf.logger.Warn().Printf("Error %s occurred.", err)
 	}
 
 	scan := bufio.NewScanner(f)
@@ -50,14 +48,12 @@ func (cf *Gnocco) newResolver() *resolver {
 	resolver := &resolver{
 		Resolvers: resolvers,
 		Iterative: cf.IterateResolv,
-		Logger:    logger,
+		Logger:    cf.logger,
 	}
 	return resolver
 }
 
 func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
-	logger := r.Logger
-
 	if r.Iterative {
 		qn := req.Question[0].Name
 		qt := dns.TypeToString[req.Question[0].Qtype]
@@ -85,7 +81,7 @@ func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
 						}
 						w.WriteMsg(result)
 					} else {
-						logger.Error().Print(err)
+						r.Logger.Error().Print(err)
 						result.SetRcode(req, 4)
 						w.WriteMsg(result)
 					}
@@ -101,7 +97,7 @@ func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
 		}
 		resp, err := dns.Exchange(req, net.JoinHostPort(ip.String(), "53"))
 		if err != nil {
-			logger.Error().Print(err)
+			r.Logger.Error().Print(err)
 		} else {
 			w.WriteMsg(resp)
 		}
