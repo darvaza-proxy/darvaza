@@ -8,17 +8,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	log "github.com/darvaza-proxy/gnocco/cblog"
+	"github.com/darvaza-proxy/slog"
+
+	"github.com/darvaza-proxy/gnocco/shared/cblog"
+	"github.com/darvaza-proxy/gnocco/shared/version"
 )
 
-//go:generate go run genroot.go
-
 var (
-	logger *log.Logger
-	//Version contains the git hashtag injected by make
-	Version = "N/A"
-	//BuildDate contains the build timestamp injected by make
-	BuildDate = "N/A"
+	logger slog.Logger
 )
 
 func main() {
@@ -29,7 +26,7 @@ func main() {
 	flag.Parse()
 
 	if vrs {
-		fmt.Fprintf(os.Stdout, "Gnocco version %s, build date %s\n", Version, BuildDate)
+		fmt.Fprintf(os.Stdout, "Gnocco version %s, build date %s\n", version.Version, version.BuildDate)
 		os.Exit(0)
 	}
 
@@ -56,22 +53,22 @@ func main() {
 		switch sign {
 		case syscall.SIGTERM:
 			aserver.shutDown()
-			logger.Fatal("Got SIGTERM, stoping as requested")
+			logger.Fatal().Print("Got SIGTERM, stoping as requested")
 		case syscall.SIGINT:
 			aserver.shutDown()
-			logger.Fatal("Got SIGINT, stoping as requested")
+			logger.Fatal().Print("Got SIGINT, stoping as requested")
 		case syscall.SIGUSR2:
-			logger.Info("Got SIGUSR2, dumping cache")
+			logger.Info().Print("Got SIGUSR2, dumping cache")
 			aserver.dumpCache()
 		case syscall.SIGURG:
 		default:
-			logger.Warn("I received %v signal", sign)
+			logger.Warn().Printf("I received %v signal", sign)
 		}
 	}
 }
 
-func initLogger() *log.Logger {
-	logger = log.New()
+func initLogger() slog.Logger {
+	logger := cblog.New()
 
 	if mainconfig.Log.Stdout {
 		logger.SetLogger("console", nil)
@@ -80,7 +77,7 @@ func initLogger() *log.Logger {
 	if mainconfig.Log.File != "" {
 		cfg := map[string]interface{}{"file": mainconfig.Log.File}
 		logger.SetLogger("file", cfg)
-		logger.Info("Logger started")
+		logger.Info().Print("Logger started")
 	}
 	return logger
 }

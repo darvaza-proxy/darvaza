@@ -23,7 +23,7 @@ func (s *server) Addr() string {
 }
 
 func (s *server) dumpCache() {
-	logger.Info("Dumping cache at %v", time.Now())
+	logger.Info().Printf("Dumping cache at %v", time.Now())
 	files := []string{mainconfig.Cache.CachePath + "/pcache", mainconfig.Cache.CachePath + "/ncache"}
 
 	for _, file := range files {
@@ -38,7 +38,7 @@ func (s *server) dumpCache() {
 			}
 
 		} else {
-			logger.Error("%s", err)
+			logger.Error().Print(err)
 		}
 	}
 
@@ -83,15 +83,15 @@ func (s *server) run() {
 }
 
 func (s *server) start(ds *dns.Server) {
-	logger.Info("Start %s listener on %s", ds.Net, ds.Addr)
+	logger.Info().Printf("Start %s listener on %s", ds.Net, ds.Addr)
 	err := ds.ListenAndServe()
 	if err != nil {
-		logger.Fatal("Start %s listener on %s failed:%s", ds.Net, ds.Addr, err.Error())
+		logger.Fatal().Printf("Start %s listener on %s failed:%s", ds.Net, ds.Addr, err.Error())
 	}
 }
 
 func (s *server) shutDown() {
-	logger.Info("Shutdown called.")
+	logger.Info().Print("Shutdown called.")
 }
 
 func (s *server) startCacheDumping() {

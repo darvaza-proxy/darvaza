@@ -16,8 +16,8 @@ M = $(shell if [ "$$(tput colors 2> /dev/null || echo 0)" -ge 8 ]; then printf "
 all: fmt lint gen | $(BIN) ; $(info $(M) building executable…) @ ## Build program binary
 	$Q $(GO) build \
 		-tags release \
-		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
-		-o $(BIN)/$(basename $(MODULE))
+		-ldflags '-X $(MODULE)/shared/version.Version=$(VERSION) -X $(MODULE)/shared/version.BuildDate=$(DATE)' \
+		-o $(BIN)/$(notdir $(MODULE)) ./cmd/$(notdir $(MODULE))
 
 # Tools
 
@@ -57,5 +57,5 @@ version:
 
 .PHONY: gen
 gen: ; $(info $(M) generating roots file…) @ ## Generate roots file
-	$Q $(GO) generate
+	$Q $(GO) run github.com/darvaza-proxy/gnocco/cmd/genroot
 

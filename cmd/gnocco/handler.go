@@ -4,6 +4,8 @@ import (
 	"net"
 
 	"github.com/miekg/dns"
+
+	"github.com/darvaza-proxy/gnocco/shared/version"
 )
 
 type question struct {
@@ -41,7 +43,7 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 			remote = w.RemoteAddr().(*net.UDPAddr).IP
 		}
 
-		logger.Info("%s lookup　%s", remote, Q.String())
+		logger.Info().Printf("%s lookup　%s", remote, Q.String())
 		h.Jobs++
 		switch {
 		case Q.qclass == "IN":
@@ -56,7 +58,7 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 				w.WriteMsg(result)
 			} else {
 				if rcs, err := h.Cache.get(h.Cache.makeKey(Q.qname, "CNAME")); err == nil {
-					logger.Info("Found CNAME %s", rcs.String())
+					logger.Info().Printf("Found CNAME %s", rcs.String())
 					result := new(dns.Msg)
 					result.SetReply(req)
 					for _, z := range rcs.Value {
@@ -82,7 +84,7 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 			case "authors.bind.":
 				m.Answer = append(m.Answer, &dns.TXT{Hdr: hdr, Txt: []string{"Nagy Karoly Gabriel <k@jpi.io>"}})
 			case "version.bind.", "version.server.":
-				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"Version " + Version + " built on " + BuildDate}}}
+				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"Version " + version.Version + " built on " + version.BuildDate}}}
 			case "hostname.bind.", "id.server.":
 				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"localhost"}}}
 			default:

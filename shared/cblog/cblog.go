@@ -6,34 +6,43 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/darvaza-proxy/slog"
+	"github.com/darvaza-proxy/slog/cblog"
+)
+
+var (
+	_ slog.Logger = (*Logger)(nil)
 )
 
 // LogOutputBuffer is the size of the channel buffer used for logging.
 const LogOutputBuffer = 1024
 
-type logMsg struct {
-	msg   string
-	fatal bool
-}
-
 type loggerHandler interface {
 	setup(config map[string]interface{}) error
-	write(msg *logMsg)
+	write(msg cblog.LogMsg)
 }
 
 // Logger is the logging object.
 type Logger struct {
-	messages chan *logMsg
+	*cblog.Logger
+
+	messages <-chan cblog.LogMsg
 	outputs  map[string]loggerHandler
 }
 
 // New creates a new Logger.
 func New() *Logger {
+	messages := make(chan cblog.LogMsg, LogOutputBuffer)
+	logger, _ := cblog.New(messages)
+
 	l := &Logger{
-		messages: make(chan *logMsg, LogOutputBuffer),
+		Logger:   logger,
+		messages: messages,
 		outputs:  make(map[string]loggerHandler),
 	}
-	go l.run()
+	go l.run(messages)
 	return l
 }
 
@@ -54,10 +63,10 @@ func (l *Logger) SetLogger(handlerType string, cfg map[string]interface{}) {
 	l.outputs[handlerType] = handler
 }
 
-func (l *Logger) run() {
+func (l *Logger) run(messages <-chan cblog.LogMsg) {
 	for {
 		select {
-		case msg := <-l.messages:
+		case msg := <-messages:
 			for _, handler := range l.outputs {
 				handler.write(msg)
 			}
@@ -65,48 +74,31 @@ func (l *Logger) run() {
 	}
 }
 
-func (l *Logger) writeMsg(msg string, fatal bool) {
-	lm := &logMsg{
-		msg:   msg,
-		fatal: fatal,
+func stringify(lm cblog.LogMsg) string {
+	var out = make([]string, 0, 1)
+	var prefix string
+
+	switch lm.Level {
+	case slog.Fatal:
+		prefix = "[FATAL]"
+	case slog.Error:
+		prefix = "[ERROR]"
+	case slog.Warn:
+		prefix = "[WARN]"
+	case slog.Info:
+		prefix = "[INFO]"
+	case slog.Debug:
+		prefix = "[DEBUG]"
+	default:
+		prefix = fmt.Sprintf("[%v]", int(lm.Level))
 	}
-	l.messages <- lm
-}
 
-// Debug calls l.writeMsg prefixing the message with [DEBUG]
-func (l *Logger) Debug(format string, v ...interface{}) {
-	msg := fmt.Sprintf("[DEBUG] "+format, v...)
-	l.writeMsg(msg, false)
-}
+	out = append(out, prefix)
+	if msg := lm.Message; len(msg) > 0 {
+		out = append(out, msg)
+	}
 
-// Info calls l.writeMsg prefixing the message with [INFO]
-func (l *Logger) Info(format string, v ...interface{}) {
-	msg := fmt.Sprintf("[INFO] "+format, v...)
-	l.writeMsg(msg, false)
-}
-
-// Notice calls l.writeMsg prefixing the message with [NOTICE]
-func (l *Logger) Notice(format string, v ...interface{}) {
-	msg := fmt.Sprintf("[NOTICE] "+format, v...)
-	l.writeMsg(msg, false)
-}
-
-// Warn calls l.writeMsg prefixing the message with [WARN]
-func (l *Logger) Warn(format string, v ...interface{}) {
-	msg := fmt.Sprintf("[WARN] "+format, v...)
-	l.writeMsg(msg, false)
-}
-
-// Error calls l.writeMsg prefixing the message with [ERROR]
-func (l *Logger) Error(format string, v ...interface{}) {
-	msg := fmt.Sprintf("[ERROR] "+format, v...)
-	l.writeMsg(msg, false)
-}
-
-// Fatal calls l.writeMsg prefixing the message with [FATAL]
-func (l *Logger) Fatal(format string, v ...interface{}) {
-	msg := fmt.Sprintf("[FATAL] "+format, v...)
-	l.writeMsg(msg, true)
+	return strings.Join(out, " ")
 }
 
 type consoleHandler struct {
@@ -122,11 +114,14 @@ func (h *consoleHandler) setup(cfg map[string]interface{}) error {
 	return nil
 }
 
-func (h *consoleHandler) write(lm *logMsg) {
-	if !lm.fatal {
-		h.logger.Println(lm.msg)
+func (h *consoleHandler) write(lm cblog.LogMsg) {
+	fatal := lm.Level == slog.Fatal
+	msg := stringify(lm)
+
+	if !fatal {
+		h.logger.Println(msg)
 	} else {
-		h.logger.Fatalln(lm.msg)
+		h.logger.Fatalln(msg)
 	}
 }
 
@@ -156,14 +151,16 @@ func (h *fileHandler) setup(config map[string]interface{}) error {
 	return nil
 }
 
-func (h *fileHandler) write(lm *logMsg) {
+func (h *fileHandler) write(lm cblog.LogMsg) {
 	if h.logger == nil {
 		return
 	}
 
-	if !lm.fatal {
-		h.logger.Println(lm.msg)
+	msg := stringify(lm)
+
+	if lm.Level != slog.Fatal {
+		h.logger.Println(msg)
 	} else {
-		h.logger.Fatalln(lm.msg)
+		h.logger.Fatalln(msg)
 	}
 }
