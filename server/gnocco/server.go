@@ -11,7 +11,7 @@ import (
 	"github.com/miekg/dns"
 )
 
-type GnoccoServer struct {
+type Resolver struct {
 	Host       string
 	Port       int
 	MaxJobs    int
@@ -20,15 +20,15 @@ type GnoccoServer struct {
 	cf         *Gnocco
 }
 
-func (s *GnoccoServer) Addr() string {
+func (s *Resolver) Addr() string {
 	return net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
 }
 
-func (s *GnoccoServer) Logger() slog.Logger {
+func (s *Resolver) Logger() slog.Logger {
 	return s.cf.logger
 }
 
-func (s *GnoccoServer) DumpCache() {
+func (s *Resolver) DumpCache() {
 	cache := &s.cf.Cache
 
 	s.Logger().Info().Printf("Dumping cache at %v", time.Now())
@@ -52,11 +52,11 @@ func (s *GnoccoServer) DumpCache() {
 
 }
 
-func (s *GnoccoServer) newHandler() *gnoccoHandler {
+func (s *Resolver) newHandler() *gnoccoHandler {
 	return s.cf.newHandler(s.MaxJobs)
 }
 
-func (s *GnoccoServer) Run() {
+func (s *Resolver) Run() {
 	cache := &s.cf.Cache
 
 	s.handler = s.newHandler()
@@ -76,26 +76,26 @@ func (s *GnoccoServer) Run() {
 
 	tcpHandler := dns.NewServeMux()
 	tcpHandler.HandleFunc(".", s.handler.doTCP)
-	tcpServer := &dns.Server{Addr: s.Addr(),
+	tcpResolver := &dns.Server{Addr: s.Addr(),
 		Net:     "tcp",
 		Handler: tcpHandler}
-	go s.start(tcpServer)
+	go s.start(tcpResolver)
 
 	udpHandler := dns.NewServeMux()
 	udpHandler.HandleFunc(".", s.handler.doUDP)
 
-	udpServer := &dns.Server{Addr: s.Addr(),
+	udpResolver := &dns.Server{Addr: s.Addr(),
 		Net:     "udp",
 		Handler: udpHandler,
 		UDPSize: 65535}
 
-	go s.start(udpServer)
+	go s.start(udpResolver)
 
 	go s.startCacheDumping()
 
 }
 
-func (s *GnoccoServer) start(ds *dns.Server) {
+func (s *Resolver) start(ds *dns.Server) {
 	s.Logger().Info().Printf("Start %s listener on %s", ds.Net, ds.Addr)
 	err := ds.ListenAndServe()
 	if err != nil {
@@ -103,11 +103,11 @@ func (s *GnoccoServer) start(ds *dns.Server) {
 	}
 }
 
-func (s *GnoccoServer) ShutDown() {
+func (s *Resolver) ShutDown() {
 	s.Logger().Info().Print("Shutdown called.")
 }
 
-func (s *GnoccoServer) startCacheDumping() {
+func (s *Resolver) startCacheDumping() {
 	interval := s.cf.Cache.DumpInterval
 
 	for _ = range time.Tick(time.Duration(interval) * time.Second) {
