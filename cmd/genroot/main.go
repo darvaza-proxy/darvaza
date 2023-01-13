@@ -3,8 +3,7 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -19,25 +18,51 @@ type ips struct {
 	ip6 net.IP
 }
 
-var myroots = map[string]*ips{}
-
-const (
-	url       = "https://www.internic.net/domain/named.root"
-	rootsfile = "doc/roots"
-)
+const url = "https://www.internic.net/domain/named.root"
 
 func trimDot(s string) string {
-	if strings.HasSuffix(s, ".") {
-		s = s[:len(s)-1]
-	}
-	return s
+	return strings.TrimSuffix(s, ".")
 }
 
 func main() {
-	rsp, _ := http.Get(url)
+	var out *os.File
+
+	if len(os.Args) > 1 && os.Args[1] != "-" {
+		var err error
+		fileName := os.Args[1]
+		out, err = os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0666)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		out = os.Stdout
+	}
+
+	getRoots(out)
+
+}
+
+func getRoots(rootsfile *os.File) {
+
+	var myroots = map[string]*ips{}
+
+	rsp, err := http.Get(url)
+
+	if err != nil {
+		panic(err)
+	}
+
 	defer rsp.Body.Close()
 
-	xroots, _ := ioutil.ReadAll(rsp.Body)
+	xroots, err := io.ReadAll(rsp.Body)
+
+	if err != nil {
+		panic(err)
+	}
+
+	if len(xroots) == 0 {
+		panic("no roots found in the download")
+	}
 
 	zp := dns.NewZoneParser(strings.NewReader(string(xroots)), "", "")
 
@@ -62,11 +87,6 @@ func main() {
 			}
 		}
 	}
-	f, err := os.Create(rootsfile)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer f.Close()
 	sortedKeys := make([]string, 0, len(myroots))
 
 	for k := range myroots {
@@ -75,7 +95,14 @@ func main() {
 	sort.Strings(sortedKeys)
 
 	for _, k := range sortedKeys {
-		f.WriteString(k + " " + myroots[k].ip4.String() + " " + myroots[k].ip6.String() + "\n")
+		_, err := rootsfile.WriteString(k + " " + myroots[k].ip4.String() + " " + myroots[k].ip6.String() + "\n")
+		if err != nil {
+			panic(err)
+		}
 	}
-	f.Sync()
+	if rootsfile.Name() != os.Stdout.Name() {
+		if err = rootsfile.Sync(); err != nil {
+			panic(err)
+		}
+	}
 }

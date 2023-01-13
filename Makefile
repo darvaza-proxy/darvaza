@@ -1,12 +1,12 @@
-MODULE   = $(shell $(GO) list -m)
-DATE    ?= $(shell date +%FT%T%z)
-VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
+MODULE    = $(shell $(GO) list -m)
+DATE     ?= $(shell date +%FT%T%z)
+VERSION  ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 			cat .version 2> /dev/null || echo v0)
-PKGS     = $(or $(PKG),$(shell $(GO) list ./...))
-BIN      = bin
-
-GO      = go
-TIMEOUT = 15
+PKGS      = $(or $(PKG),$(shell $(GO) list ./...))
+BIN       = bin
+ROOTSFILE = cmd/genroot/roots
+GO        = go
+TIMEOUT   = 15
 V = 0
 Q = $(if $(filter 1,$V),,@)
 M = $(shell if [ "$$(tput colors 2> /dev/null || echo 0)" -ge 8 ]; then printf "\033[34;1m▶\033[0m"; else printf "▶"; fi)
@@ -57,5 +57,5 @@ version:
 
 .PHONY: gen
 gen: ; $(info $(M) generating roots file…) @ ## Generate roots file
-	$Q $(GO) run github.com/darvaza-proxy/gnocco/cmd/genroot
+	$Q $(GO) run github.com/darvaza-proxy/gnocco/cmd/genroot $(ROOTSFILE)
 
