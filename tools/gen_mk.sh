@@ -101,7 +101,7 @@ EOT
 		fi
 
 		cat <<EOT
-$cmd-$k:${depsx:+ $depsx}${deps:+ $(expand $cmd $deps)}
+$cmd-$k:${depsx:+ $depsx}${deps:+ $(expand $cmd $deps)} ; \$(info \$(M) $cmd: $k)
 $(echo "$callx" | sed -e "/^$/d;" -e "s|^|\t\$(Q) $cd|")
 
 EOT
