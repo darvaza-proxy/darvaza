@@ -1,3 +1,4 @@
+// Package gnocco provides a cached DNS resolver
 package gnocco
 
 import (
@@ -11,6 +12,7 @@ import (
 	"github.com/miekg/dns"
 )
 
+// Resolver implements a cached DNS resolver
 type Resolver struct {
 	Host       string
 	Port       int
@@ -20,14 +22,17 @@ type Resolver struct {
 	cf         *Gnocco
 }
 
+// Addr returns the server's address
 func (s *Resolver) Addr() string {
 	return net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
 }
 
+// Logger returns the slog.Logger associated with the server's config
 func (s *Resolver) Logger() slog.Logger {
 	return s.cf.logger
 }
 
+// DumpCache writes the cache to disc
 func (s *Resolver) DumpCache() {
 	cache := &s.cf.Cache
 
@@ -56,6 +61,7 @@ func (s *Resolver) newHandler() *gnoccoHandler {
 	return s.cf.newHandler(s.MaxJobs)
 }
 
+// Run runs the Server according to the Gnocco config
 func (s *Resolver) Run() {
 	cache := &s.cf.Cache
 
@@ -103,6 +109,7 @@ func (s *Resolver) start(ds *dns.Server) {
 	}
 }
 
+// ShutDown pretends to shutdown the server
 func (s *Resolver) ShutDown() {
 	s.Logger().Info().Print("Shutdown called.")
 }
