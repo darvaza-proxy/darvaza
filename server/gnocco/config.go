@@ -48,7 +48,8 @@ type hostsCfg struct {
 	RefreshInterval uint
 }
 
-func NewFromFilename(f string) (*Gnocco, error) {
+// NewFromTOML creates a new Gnocco configuration from a TOML file
+func NewFromTOML(f string) (*Gnocco, error) {
 	var cf Gnocco
 
 	if f == "" {

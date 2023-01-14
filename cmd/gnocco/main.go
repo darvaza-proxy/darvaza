@@ -24,12 +24,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	cf, err := gnocco.NewFromFilename(confFile)
+	cf, err := gnocco.NewFromTOML(confFile)
 	if err != nil {
 		panic(err)
 	}
 
-	aserver := &gnocco.GnoccoServer{
+	aserver := &gnocco.Resolver{
 		Host:       cf.Listen.Host,
 		Port:       cf.Listen.Port,
 		MaxJobs:    cf.MaxJobs,
