@@ -24,7 +24,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	cf, err := gnocco.NewFromFilename(confFile)
+	cf, err := gnocco.NewFromTOML(confFile)
 	if err != nil {
 		panic(err)
 	}
