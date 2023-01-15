@@ -1,6 +1,10 @@
+github.com/darvaza-proxy/slog v0.0.3 h1:6aikLu+0bxTYmek1iPbjs417bNBVPs4lCdK3UVJil8c=
+github.com/darvaza-proxy/slog v0.0.3/go.mod h1:EDgV3ucYoTaqXW90/XDRfieJXohfoU698s/mg2/QxNE=
+github.com/darvaza-proxy/slog/cblog v0.0.0-20230114124022-1192f08eedec h1:J5lf4uM+LPADTf3e9uADvG0+eKWfq1/GyeKk7iGXHU0=
+github.com/darvaza-proxy/slog/cblog v0.0.0-20230114124022-1192f08eedec/go.mod h1:DgLHQYXPZXXWgdid6tnv5HCcsd2res++nQ1O1IAg4C4=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-golang.org/x/crypto v0.4.0 h1:UVQgzMY87xqpKNgb+kDsll2Igd33HszWHFLmpaRMq/8=
-golang.org/x/crypto v0.4.0/go.mod h1:3quD/ATkf6oY+rnes5c3ExXTbLc8mueNue5/DoinL80=
+golang.org/x/crypto v0.5.0 h1:U/0M97KRkSFvyD/3FSmdP5W5swImpNgle/EHFhOsQPE=
+golang.org/x/crypto v0.5.0/go.mod h1:NK/OQwhpMQP3MwtdjgLlYHnH9ebylxKWv3e0fK+mkQU=
 golang.org/x/sync v0.1.0 h1:wsuoTGHzEhffawBOhz5CYhcrV4IdKZbEyZjBMuTp12o=
 golang.org/x/sync v0.1.0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
