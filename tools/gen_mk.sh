@@ -68,6 +68,7 @@ EOT
 			case "$cmd" in
 			build)
 				cmdx="$cmd -o \$(TMPDIR)/"
+				cmdx="$cmdx -ldflags '-X \$(MODULE)/shared/version.Version=\$(VERSION) -X \$(MODULE)/shared/version.BuildDate=\$(DATE)'"
 				;;
 			get|up)
 				cmdx="get -tags tools"
