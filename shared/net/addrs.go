@@ -78,8 +78,8 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 	return out, nil
 }
 
-// GetStringIPAddresses returns the list of IP addresses bound to the given
-// interfaces or all if none are given
+// GetStringIPAddresses returns a list of text IP addresses bound
+// to the given interfaces or all if none are given
 func GetStringIPAddresses(ifaces ...string) ([]string, error) {
 	addrs, err := GetIPAddresses(ifaces...)
 
@@ -94,7 +94,30 @@ func GetStringIPAddresses(ifaces ...string) ([]string, error) {
 	return s, err
 }
 
-// GetIPAddresses returns the list of netip.Addr bound to the given
+// GetNetIPAddresses returns a list of net.IP addresses bound to
+// the given interfaces or all if none are given
+func GetNetIPAddresses(ifaces ...string) ([]net.IP, error) {
+	addrs, err := GetIPAddresses(ifaces...)
+
+	out := make([]net.IP, len(addrs))
+	for i, addr := range addrs {
+		var ip net.IP
+
+		if addr.Is4() || addr.Is4In6() {
+			a4 := addr.As4()
+			ip = a4[:]
+		} else {
+			a16 := addr.As16()
+			ip = a16[:]
+		}
+
+		out[i] = ip
+	}
+
+	return out, err
+}
+
+// GetIPAddresses returns a list of netip.Addr bound to the given
 // interfaces or all if none are given
 func GetIPAddresses(ifaces ...string) ([]netip.Addr, error) {
 	var out []netip.Addr
