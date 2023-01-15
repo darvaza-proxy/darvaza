@@ -182,11 +182,11 @@ func (c *cache) load(r io.Reader, positiveCache bool) error {
 	decoder := gob.NewDecoder(r)
 	if positiveCache {
 		c.Lock()
-		err = decoder.Decode(c.pcache)
+		err = decoder.Decode(&c.pcache)
 		c.Unlock()
 	} else {
 		c.Lock()
-		err = decoder.Decode(c.pcache)
+		err = decoder.Decode(&c.pcache)
 		c.Unlock()
 	}
 	return err

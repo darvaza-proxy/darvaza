@@ -167,8 +167,11 @@ func (r *resolver) getans(qname string, qtype string, nameserver string) (result
 	m.Id = dns.Id()
 	m.RecursionDesired = false
 	m.Question = make([]dns.Question, 1)
-	qqt, _ := dns.StringToType[qtype]
-	m.Question[0] = dns.Question{qname, qqt, dns.ClassINET}
+	m.Question[0] = dns.Question{
+		Name:   qname,
+		Qtype:  dns.StringToType[qtype],
+		Qclass: dns.ClassINET,
+	}
 	result, err := dns.Exchange(m, nameserver+":53")
 	if err != nil {
 		r.Logger.Error().Print(err)
