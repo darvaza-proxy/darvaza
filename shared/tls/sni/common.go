@@ -1,5 +1,7 @@
 package sni
 
+//revive:disable:var-naming
+//revive:disable:exported
 var chipersuites = map[uint16]string{
 	TLS_RSA_WITH_AES_128_CBC_SHA:                  "TLS_RSA_WITH_AES_128_CBC_SHA",
 	TLS_RSA_WITH_AES_256_CBC_SHA:                  "TLS_RSA_WITH_AES_256_CBC_SHA",
@@ -42,11 +44,14 @@ var signaturealgos = map[SignatureScheme]string{
 	PKCS1WithSHA1:          "PKCS1WithSHA1",
 	ECDSAWithSHA1:          "ECDSAWithSHA1",
 }
+
+//revive:enable:var-naming
+//revive:enable:exported
 var compressionMethods = map[uint8]string{
 	0: "Compression None",
 }
 
-// CypherSuites returns the supported Cypher suites
+// CipherSuites returns the supported Cipher suites
 func CipherSuites(u []uint16) []string {
 	result := make([]string, 0)
 	for _, k := range u {
@@ -67,7 +72,7 @@ func VersionName(u uint16) string {
 	return "Unknown"
 }
 
-// SupporterdVersions will return the names of the compression
+// SupportedVersions will return the names of the compression
 // method used. This is Compression None or Unknown
 func SupportedVersions(u []uint16) []string {
 	result := make([]string, 0)
@@ -129,6 +134,8 @@ const (
 	recordTypeApplicationData  recordType = 23
 )
 
+//revive:disable:var-naming
+//revive:disable:exported
 const (
 	VersionTLS10 = 0x0301
 	VersionTLS11 = 0x0302
@@ -141,6 +148,9 @@ const (
 )
 
 // TLS handshake message types.
+
+//revive:enable:var-naming
+//revive:enable:exported
 const (
 	typeHelloRequest        uint8 = 0
 	typeClientHello         uint8 = 1
@@ -201,6 +211,8 @@ const (
 	statusTypeOCSP uint8 = 1
 )
 
+//revive:disable:var-naming
+//revive:disable:exported
 const (
 	// TLS 1.0 - 1.2 cipher suites.
 	TLS_RSA_WITH_RC4_128_SHA                      uint16 = 0x0005
@@ -267,6 +279,8 @@ const (
 	ECDSAWithSHA1 SignatureScheme = 0x0203
 )
 
+//revive:enable:var-naming
+//revive:enable:exported
 type pskIdentity struct {
 	label               []byte
 	obfuscatedTicketAge uint32

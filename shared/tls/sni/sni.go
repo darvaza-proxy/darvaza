@@ -61,6 +61,8 @@ func GetInfo(buf []byte) *ClientHelloInfo {
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// ClientHelloInfo contains information from a ClientHello message in order to
+// guide application logic in the GetCertificate and GetConfigForClient callbacks.
 type ClientHelloInfo struct {
 	raw                              []byte
 	Vers                             uint16
