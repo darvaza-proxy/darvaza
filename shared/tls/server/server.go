@@ -1,3 +1,4 @@
+// Package server provides an implementation of a TLSProxy.
 package server
 
 import (
@@ -17,12 +18,13 @@ import (
 	"github.com/darvaza-proxy/darvaza/shared/tls/sni"
 )
 
-// ProxyConfig is a configuration for a TLSproxy
+// ProxyConfig is a configuration for a TLSproxy.
 type ProxyConfig struct {
 	Protocol   string   `default:"http" hcl:"protocol,label"`
 	ListenAddr []string `default:"[\":8080\"]" hcl:"listen"`
 }
 
+// Proxy implements a TLSproxy.
 type Proxy struct {
 	errGroup    *errgroup.Group
 	errCtx      context.Context
@@ -68,6 +70,7 @@ func (p *Proxy) trackConn(c *net.Conn, add bool) {
 	}
 }
 
+// New returns a pointer to a TLSproxy created from a TLSproxy configuration.
 func (pc *ProxyConfig) New() *Proxy {
 	var p = new(Proxy)
 
@@ -88,6 +91,7 @@ func (pc *ProxyConfig) New() *Proxy {
 	return p
 }
 
+// Run is starting a TLSproxy that accepts connections.
 func (p *Proxy) Run() error {
 	for l := range p.listeners {
 		//TODO: Go(func () error{}) means no l tag
@@ -129,14 +133,18 @@ func (p *Proxy) closeListeners() error {
 	return err
 }
 
+// Reload wil re-read the configuration of a TLSproxy and apply it.
 func (p *Proxy) Reload() error {
+	//TODO For now this is a no-op that returns nil.
 	return nil
 }
 
+// TLSHandler returns the handler function of a TLSproxy.
 func (p *Proxy) TLSHandler(fn func(net.Conn)) {
 	p.tlsHandler = fn
 }
 
+// Cancel is canceling/shutting down a TLSproxy.
 func (p *Proxy) Cancel() error {
 	defer p.cancel()
 
@@ -164,6 +172,8 @@ type prefixConn struct {
 	io.Reader
 }
 
+// Read reads data into p.
+// It returns the number of bytes read into p.
 func (c prefixConn) Read(p []byte) (int, error) {
 	return c.Reader.Read(p)
 }
@@ -192,10 +202,10 @@ func defaultTLSHandler(conn net.Conn) {
 		defer c.Close()
 		var upstream net.Conn
 		conn.SetDeadline(time.Now().Add(5 * time.Second))
-		//TODO after we will have backends we can drop the hardcoded 443
+		//TODO after we will have backends we can drop the hardcoded 443.
 		upstream, err := net.Dial("tcp", fmt.Sprintf("%s:%d", sn.ServerName, 443))
 		if err != nil {
-			// TODO: Need to retry
+			// TODO: Need to retry.
 			log.Println(err)
 			return
 		}

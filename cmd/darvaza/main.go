@@ -6,10 +6,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// revive:disable:exported
 const (
 	CmdName           = "darvaza"
 	DefaultConfigFile = CmdName + ".hcl"
 )
+
+//revive:enable:exported
 
 var (
 	cfg          = NewConfig()

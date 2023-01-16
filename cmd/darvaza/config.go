@@ -1,3 +1,4 @@
+// Package config contains funtions to deal with TLSproxy configs
 package main
 
 import (
@@ -12,10 +13,14 @@ import (
 	"github.com/darvaza-proxy/darvaza/shared/tls/server"
 )
 
+// Config is the main configuration item containig all
+// the ProxyConfigs.
 type Config struct {
 	Proxies []server.ProxyConfig `hcl:"proxy,block"`
 }
 
+// SetDefaults is calling Set to set the default values
+// in a Config.
 func (c *Config) SetDefaults() {
 	defaultProxy := &server.ProxyConfig{}
 	if err := defaults.Set(defaultProxy); err != nil {
@@ -26,6 +31,8 @@ func (c *Config) SetDefaults() {
 	}
 }
 
+// NewConfig returns a pointer to a Config with
+// defaults set
 func NewConfig() *Config {
 	c := &Config{}
 
@@ -36,10 +43,12 @@ func NewConfig() *Config {
 	return c
 }
 
+// ReadInFile fills a Config with values from a hcl file.
 func (c *Config) ReadInFile(filename string) error {
 	return hclsimple.DecodeFile(filename, nil, c)
 }
 
+// WriteTo writes a Config to a file in hcl format
 func (c *Config) WriteTo(out io.Writer) (int64, error) {
 	f := hclwrite.NewEmptyFile()
 	gohcl.EncodeIntoBody(c, f.Body())
