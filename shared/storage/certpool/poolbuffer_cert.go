@@ -50,6 +50,17 @@ func (m *pbCerts) AddCert(fn string, cert *x509.Certificate) bool {
 	return true
 }
 
+func (m *pbCerts) findByPublic(pub x509utils.PublicKey) []*pbCertData {
+	var out []*pbCertData
+
+	for _, cert := range m.certs {
+		if pub.Equal(cert.Cert.PublicKey) {
+			out = append(out, cert)
+		}
+	}
+	return out
+}
+
 func (m *pbCerts) Pool() *CertPool {
 	pool := m.pool
 	if pool == nil {
