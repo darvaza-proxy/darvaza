@@ -13,6 +13,7 @@ import (
 
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 	"github.com/darvaza-proxy/slog"
+	"github.com/grantae/certinfo"
 )
 
 // SetLogger binds a slog.Logger to the buffer
@@ -133,11 +134,29 @@ func (pb *PoolBuffer) printKey(fn string, pk x509utils.PrivateKey) error {
 }
 
 // revive:disable:cognitive-complexity
+// revive:disable:cyclomatic
 
 func (pb *PoolBuffer) printCert(fn string, cert *x509.Certificate) error {
 	// revive:enable:cognitive-complexity
+	// revive:enable:cyclomatic
 
-	if log, ok := pb.info(); !ok {
+	var log slog.Logger
+	var ok bool
+	var err error
+	var msg string
+
+	if log, ok = pb.debug(); ok {
+		msg, err = certinfo.CertificateText(cert)
+		if err != nil {
+			log = log.Error()
+		}
+	} else if log, ok = pb.info(); ok {
+		msg = "Certificate"
+	} else {
+		log = nil
+	}
+
+	if log != nil {
 		fields := slog.Fields{
 			"ca":      cert.IsCA,
 			"subject": cert.Subject.String(),
@@ -153,6 +172,10 @@ func (pb *PoolBuffer) printCert(fn string, cert *x509.Certificate) error {
 			fields["subject-id"] = hexString(cert.SubjectKeyId)
 		}
 
+		if err != nil {
+			fields[slog.ErrorFieldName] = err
+		}
+
 		names, patterns := x509utils.Names(cert)
 		for i, s := range patterns {
 			patterns[i] = "*" + s
@@ -164,8 +187,8 @@ func (pb *PoolBuffer) printCert(fn string, cert *x509.Certificate) error {
 			fields["names"] = names
 		}
 
-		log.WithFields(fields).Print("Certificate")
+		log.WithFields(fields).Print(msg)
 	}
 
-	return nil
+	return err
 }

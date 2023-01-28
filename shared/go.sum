@@ -4,6 +4,8 @@ github.com/darvaza-proxy/slog v0.4.4 h1:zopOiHIAE3deKlFjDa/qlXBT0awaJv5X5GnH1yxX
 github.com/darvaza-proxy/slog v0.4.4/go.mod h1:uW4oSt8Fs803dQxHwi0VoJK66M40JE0YNXdYmo/mmTM=
 github.com/darvaza-proxy/slog/handlers/cblog v0.2.2 h1:bm2s7dVRHgMZHL6Kclg7tksDk73AwhRtZXF1cpj3Fy4=
 github.com/darvaza-proxy/slog/handlers/cblog v0.2.2/go.mod h1:ivtbV24Rg9ceT5Ij9Hg6MqI97bDaFKnRusxkHV81PLQ=
+github.com/grantae/certinfo v0.0.0-20170412194111-59d56a35515b h1:NGgE5ELokSf2tZ/bydyDUKrvd/jP8lrAoPNeBuMOTOk=
+github.com/grantae/certinfo v0.0.0-20170412194111-59d56a35515b/go.mod h1:zT/uzhdQGTqlwTq7Lpbj3JoJQWfPfIJ1tE0OidAmih8=
 github.com/klauspost/cpuid/v2 v2.0.12/go.mod h1:g2LTdtYhdyuGPqyWyv7qRAmj1WBqxuObKfj5c0PQa7c=
 github.com/klauspost/cpuid/v2 v2.2.4 h1:acbojRNwl3o09bUq+yDCtZFc1aiwaAAxtcn8YkZXnvk=
 github.com/klauspost/cpuid/v2 v2.2.4/go.mod h1:RVVoqg1df56z8g3pUjL/3lE5UfnlrJX8tyFgg4nqhuY=
