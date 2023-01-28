@@ -6,11 +6,13 @@ import (
 	"sync"
 
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"github.com/darvaza-proxy/slog"
 )
 
 // PoolBuffer is a CertPool in the making
 type PoolBuffer struct {
-	mu sync.Mutex
+	mu     sync.Mutex
+	logger slog.Logger
 
 	roots pbCerts
 	certs pbCerts

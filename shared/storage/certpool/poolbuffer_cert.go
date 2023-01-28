@@ -75,6 +75,10 @@ func (m *pbCerts) Export() *x509.CertPool {
 func (pb *PoolBuffer) addCertUnlocked(fn string, cert *x509.Certificate) error {
 	var pool *pbCerts
 
+	if err := pb.printCert(fn, cert); err != nil {
+		return err
+	}
+
 	if cert.IsCA {
 		pool = &pb.roots
 	} else {

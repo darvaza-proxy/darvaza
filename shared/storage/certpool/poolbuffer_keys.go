@@ -45,6 +45,10 @@ func (pb *PoolBuffer) addKeyUnlocked(fn string, pk x509utils.PrivateKey) error {
 			pk:       pk,
 		}
 
+		if err := pb.printKey(fn, pk); err != nil {
+			return err
+		}
+
 		if err := pd.Validate(); err != nil {
 			return err
 		}
