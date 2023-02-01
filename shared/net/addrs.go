@@ -81,11 +81,13 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 // GetStringIPAddresses returns a list of text IP addresses bound
 // to the given interfaces or all if none are given
 func GetStringIPAddresses(ifaces ...string) ([]string, error) {
-	addrs, err := GetNetIPAddresses(ifaces...)
+	addrs, err := GetIPAddresses(ifaces...)
 
 	out := make([]string, 0, len(addrs))
 	for _, addr := range addrs {
-		if s := addr.String(); s != "" {
+
+		if addr.IsValid() {
+			s := addr.String()
 			out = append(out, s)
 		}
 	}
