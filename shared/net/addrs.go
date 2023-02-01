@@ -132,14 +132,14 @@ func GetIPAddresses(ifaces ...string) ([]netip.Addr, error) {
 	var out []netip.Addr
 
 	if len(ifaces) == 0 {
-		var err error
+		// all addresses
+		addrs, err := net.InterfaceAddrs()
+		out = appendNetIPAsIP(out, addrs...)
 
-		ifaces, err = GetInterfacesNames()
-		if err != nil {
-			return out, err
-		}
+		return out, err
 	}
 
+	// only given
 	for _, name := range ifaces {
 		ifi, err := net.InterfaceByName(name)
 		if err != nil {
