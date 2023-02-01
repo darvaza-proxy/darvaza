@@ -82,7 +82,12 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 // to the given interfaces or all if none are given
 func GetStringIPAddresses(ifaces ...string) ([]string, error) {
 	addrs, err := GetIPAddresses(ifaces...)
+	out := asStringIPAddresses(addrs...)
 
+	return out, err
+}
+
+func asStringIPAddresses(addrs ...netip.Addr) []string {
 	out := make([]string, 0, len(addrs))
 	for _, addr := range addrs {
 
@@ -91,15 +96,18 @@ func GetStringIPAddresses(ifaces ...string) ([]string, error) {
 			out = append(out, s)
 		}
 	}
-
-	return out, err
+	return out
 }
 
 // GetNetIPAddresses returns a list of net.IP addresses bound to
 // the given interfaces or all if none are given
 func GetNetIPAddresses(ifaces ...string) ([]net.IP, error) {
 	addrs, err := GetIPAddresses(ifaces...)
+	out := asNetIPAddresses(addrs...)
+	return out, err
+}
 
+func asNetIPAddresses(addrs ...netip.Addr) []net.IP {
 	out := make([]net.IP, len(addrs))
 	for i, addr := range addrs {
 		var ip net.IP
@@ -115,7 +123,7 @@ func GetNetIPAddresses(ifaces ...string) ([]net.IP, error) {
 		out[i] = ip
 	}
 
-	return out, err
+	return out
 }
 
 // GetIPAddresses returns a list of netip.Addr bound to the given
@@ -143,23 +151,29 @@ func GetIPAddresses(ifaces ...string) ([]netip.Addr, error) {
 			return out, err
 		}
 
-		for _, addr := range addrs {
-			var s []byte
-
-			switch v := addr.(type) {
-			case *net.IPAddr:
-				s = v.IP
-			case *net.IPNet:
-				s = v.IP
-			}
-
-			if ip, ok := netip.AddrFromSlice(s); ok {
-				out = append(out, ip.Unmap())
-			}
-		}
+		out = appendNetIPAsIP(out, addrs...)
 	}
 
 	return out, nil
+}
+
+func appendNetIPAsIP(out []netip.Addr, addrs ...net.Addr) []netip.Addr {
+	for _, addr := range addrs {
+		var s []byte
+
+		switch v := addr.(type) {
+		case *net.IPAddr:
+			s = v.IP
+		case *net.IPNet:
+			s = v.IP
+		}
+
+		if ip, ok := netip.AddrFromSlice(s); ok {
+			out = append(out, ip.Unmap())
+		}
+	}
+
+	return out
 }
 
 // GetInterfacesNames returns the list of interfaces,
