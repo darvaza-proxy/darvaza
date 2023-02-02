@@ -102,7 +102,7 @@ func GetNetIPAddresses(ifaces ...string) ([]net.IP, error) {
 	for i, addr := range addrs {
 		var ip net.IP
 
-		if addr.Is4() || addr.Is4In6() {
+		if addr.Is4() {
 			a4 := addr.As4()
 			ip = a4[:]
 		} else {
@@ -152,7 +152,7 @@ func GetIPAddresses(ifaces ...string) ([]netip.Addr, error) {
 			}
 
 			if ip, ok := netip.AddrFromSlice(s); ok {
-				out = append(out, ip)
+				out = append(out, ip.Unmap())
 			}
 		}
 	}
