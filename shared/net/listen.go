@@ -54,7 +54,7 @@ func (lc ListenConfig) ListenPacket(network, addr string) (net.PacketConn, error
 
 // ListenAll acts like Listen but on a list of addresses
 func (lc ListenConfig) ListenAll(network string, addrs []string) ([]net.Listener, error) {
-	var out []net.Listener
+	out := make([]net.Listener, 0, len(addrs))
 
 	for _, addr := range addrs {
 		lsn, err := lc.Listen(network, addr)
@@ -72,7 +72,7 @@ func (lc ListenConfig) ListenAll(network string, addrs []string) ([]net.Listener
 
 // ListenAllPacket acts like ListenPacket but on a list of addresses
 func (lc ListenConfig) ListenAllPacket(network string, addrs []string) ([]net.PacketConn, error) {
-	var out []net.PacketConn
+	out := make([]net.PacketConn, 0, len(addrs))
 
 	for _, addr := range addrs {
 		lsn, err := lc.ListenPacket(network, addr)
