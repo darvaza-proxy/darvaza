@@ -52,6 +52,34 @@ func (lc ListenConfig) ListenPacket(network, addr string) (net.PacketConn, error
 	return lc.ListenConfig.ListenPacket(ctx, network, addr)
 }
 
+// ListenTCP acts like the standard net.ListenTCP but using the context.Context,
+// KeepAlive, and optional Control function from our ListenConfig struct
+func (lc ListenConfig) ListenTCP(network string, laddr *net.TCPAddr) (*net.TCPListener, error) {
+	if laddr == nil {
+		laddr = &net.TCPAddr{}
+	}
+
+	ln, err := lc.Listen(network, laddr.String())
+	if err != nil {
+		return nil, err
+	}
+	return ln.(*net.TCPListener), nil
+}
+
+// ListenUDP acts like the standard net.ListenUDP but using the context.Context,
+// KeepAlive, and optional Control function from our ListenConfig struct
+func (lc ListenConfig) ListenUDP(network string, laddr *net.UDPAddr) (*net.UDPConn, error) {
+	if laddr == nil {
+		laddr = &net.UDPAddr{}
+	}
+
+	ln, err := lc.ListenPacket(network, laddr.String())
+	if err != nil {
+		return nil, err
+	}
+	return ln.(*net.UDPConn), nil
+}
+
 // ListenAll acts like Listen but on a list of addresses
 func (lc ListenConfig) ListenAll(network string, addrs []string) ([]net.Listener, error) {
 	out := make([]net.Listener, 0, len(addrs))
@@ -76,6 +104,43 @@ func (lc ListenConfig) ListenAllPacket(network string, addrs []string) ([]net.Pa
 
 	for _, addr := range addrs {
 		lsn, err := lc.ListenPacket(network, addr)
+		if err != nil {
+			for _, lsn := range out {
+				_ = lsn.Close()
+			}
+			return nil, err
+		}
+		out = append(out, lsn)
+	}
+
+	return out, nil
+}
+
+// ListenAllTCP acts like ListenTCP but on a list of addresses
+func (lc ListenConfig) ListenAllTCP(network string, laddrs []*net.TCPAddr) (
+	[]*net.TCPListener, error) {
+	out := make([]*net.TCPListener, 0, len(laddrs))
+
+	for _, addr := range laddrs {
+		lsn, err := lc.ListenTCP(network, addr)
+		if err != nil {
+			for _, lsn := range out {
+				_ = lsn.Close()
+			}
+			return nil, err
+		}
+		out = append(out, lsn)
+	}
+
+	return out, nil
+}
+
+// ListenAllUDP acts like ListenUDP but on a list of addresses
+func (lc ListenConfig) ListenAllUDP(network string, laddrs []*net.UDPAddr) ([]*net.UDPConn, error) {
+	out := make([]*net.UDPConn, 0, len(laddrs))
+
+	for _, addr := range laddrs {
+		lsn, err := lc.ListenUDP(network, addr)
 		if err != nil {
 			for _, lsn := range out {
 				_ = lsn.Close()
