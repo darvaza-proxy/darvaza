@@ -4,6 +4,15 @@ import (
 	"net"
 )
 
+var (
+	_ ListenerConfig       = (*ListenUpgraderConfig)(nil)
+	_ AllListenerConfig    = (*ListenUpgraderConfig)(nil)
+	_ TCPListenerConfig    = (*ListenUpgraderConfig)(nil)
+	_ UDPListenerConfig    = (*ListenUpgraderConfig)(nil)
+	_ AllTCPListenerConfig = (*ListenUpgraderConfig)(nil)
+	_ AllUDPListenerConfig = (*ListenUpgraderConfig)(nil)
+)
+
 // ListenUpgrader represents a tool that keep account of listening ports
 // but allows us to provide our own helper to do the last step
 type ListenUpgrader interface {
