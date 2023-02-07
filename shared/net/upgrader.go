@@ -40,6 +40,36 @@ func (lu ListenUpgraderConfig) ListenPacket(network, addr string) (net.PacketCon
 	return lu.upg.ListenPacketWithCallback(network, addr, lu.conf.ListenPacket)
 }
 
+// ListenTCP acts like the standard net.ListenTCP but using our ListenConfig and
+// the ListenUpgrader
+func (lu ListenUpgraderConfig) ListenTCP(network string, laddr *net.TCPAddr) (
+	*net.TCPListener, error) {
+	if laddr == nil {
+		laddr = &net.TCPAddr{}
+	}
+
+	ln, err := lu.Listen(network, laddr.String())
+	if err != nil {
+		return nil, err
+	}
+	return ln.(*net.TCPListener), nil
+}
+
+// ListenUDP acts like the standard net.ListenUDP but using our ListenConfig and
+// the ListenUpgrader
+func (lu ListenUpgraderConfig) ListenUDP(network string, laddr *net.UDPAddr) (
+	*net.UDPConn, error) {
+	if laddr == nil {
+		laddr = &net.UDPAddr{}
+	}
+
+	ln, err := lu.ListenPacket(network, laddr.String())
+	if err != nil {
+		return nil, err
+	}
+	return ln.(*net.UDPConn), nil
+}
+
 // ListenAll acts like Listen but on a list of addresses
 func (lu ListenUpgraderConfig) ListenAll(network string, addrs []string) ([]net.Listener, error) {
 	out := make([]net.Listener, 0, len(addrs))
@@ -65,6 +95,44 @@ func (lu ListenUpgraderConfig) ListenAllPacket(network string, addrs []string) (
 
 	for _, addr := range addrs {
 		lsn, err := lu.ListenPacket(network, addr)
+		if err != nil {
+			for _, lsn := range out {
+				_ = lsn.Close()
+			}
+			return nil, err
+		}
+		out = append(out, lsn)
+	}
+
+	return out, nil
+}
+
+// ListenAllTCP acts like ListenTCP but on a list of addresses
+func (lu ListenUpgraderConfig) ListenAllTCP(network string, laddrs []*net.TCPAddr) (
+	[]*net.TCPListener, error) {
+	out := make([]*net.TCPListener, 0, len(laddrs))
+
+	for _, addr := range laddrs {
+		lsn, err := lu.ListenTCP(network, addr)
+		if err != nil {
+			for _, lsn := range out {
+				_ = lsn.Close()
+			}
+			return nil, err
+		}
+		out = append(out, lsn)
+	}
+
+	return out, nil
+}
+
+// ListenAllUDP acts like ListenUDP but on a list of addresses
+func (lu ListenUpgraderConfig) ListenAllUDP(network string, laddrs []*net.UDPAddr) (
+	[]*net.UDPConn, error) {
+	out := make([]*net.UDPConn, 0, len(laddrs))
+
+	for _, addr := range laddrs {
+		lsn, err := lu.ListenUDP(network, addr)
 		if err != nil {
 			for _, lsn := range out {
 				_ = lsn.Close()
