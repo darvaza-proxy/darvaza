@@ -6,6 +6,15 @@ import (
 	"time"
 )
 
+var (
+	_ ListenerConfig       = (*ListenConfig)(nil)
+	_ AllListenerConfig    = (*ListenConfig)(nil)
+	_ TCPListenerConfig    = (*ListenConfig)(nil)
+	_ AllTCPListenerConfig = (*ListenConfig)(nil)
+	_ UDPListenerConfig    = (*ListenConfig)(nil)
+	_ AllUDPListenerConfig = (*ListenConfig)(nil)
+)
+
 // ListenConfig extends the standard net.ListeConfig with a central holder
 // for the Context bound to the listeners
 type ListenConfig struct {
