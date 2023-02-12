@@ -50,3 +50,11 @@ func (s *CertPool) Export() *x509.CertPool {
 
 	return s.exportUnlocked()
 }
+
+// Reset removes all certificates from the Pool
+func (s *CertPool) Reset() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.init()
+}
