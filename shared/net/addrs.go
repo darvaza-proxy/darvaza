@@ -53,7 +53,6 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 	var out []string
 
 	for _, s := range addresses {
-
 		ip, err := net.ResolveIPAddr("ip", s)
 		if err != nil {
 			// bad address
@@ -90,7 +89,6 @@ func GetStringIPAddresses(ifaces ...string) ([]string, error) {
 func asStringIPAddresses(addrs ...netip.Addr) []string {
 	out := make([]string, 0, len(addrs))
 	for _, addr := range addrs {
-
 		if addr.IsValid() {
 			s := addr.String()
 			out = append(out, s)
