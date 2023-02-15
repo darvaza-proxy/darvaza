@@ -25,7 +25,7 @@ type Store struct {
 
 // Get will return the first x509 certificate and an error, the certificate having the same
 // common name as the name parameter
-func (fs *Store) Get(ctx context.Context, name string) (*x509.Certificate, error) {
+func (fs *Store) Get(_ context.Context, name string) (*x509.Certificate, error) {
 	_, cert, err := fs.fileCertFromName(name)
 	return cert, err
 
@@ -33,7 +33,7 @@ func (fs *Store) Get(ctx context.Context, name string) (*x509.Certificate, error
 
 // ForEach will walk the store and ececute the StoreIterFunc for each certificate
 // it can decode
-func (fs *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
+func (fs *Store) ForEach(_ context.Context, f x509utils.StoreIterFunc) error {
 	fn := func(filename string, block *pem.Block) bool {
 		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
 			if err := f(cert); err != nil {
@@ -50,13 +50,13 @@ func (fs *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
 
 // Put will create a file in the store with the given name and the given certificate
 // it will write in the fil eteh content of cert.Raw field
-func (fs *Store) Put(ctx context.Context, name string, cert *x509.Certificate) error {
+func (fs *Store) Put(_ context.Context, name string, cert *x509.Certificate) error {
 	return fs.fl.WriteFile(name, cert.Raw, 0666)
 }
 
 // Delete will delete the first certificate with the same common name as
 // the given parameter
-func (fs *Store) Delete(ctx context.Context, name string) error {
+func (fs *Store) Delete(_ context.Context, name string) error {
 	file, _, err := fs.fileCertFromName(name)
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func (fs *Store) Delete(ctx context.Context, name string) error {
 }
 
 // DeleteCert will delete from the store the certificate given as parameter
-func (fs *Store) DeleteCert(ctx context.Context, cert *x509.Certificate) error {
+func (fs *Store) DeleteCert(_ context.Context, cert *x509.Certificate) error {
 	name := cert.Subject.CommonName
 	file, _, err := fs.fileCertFromName(name)
 	if err != nil {
