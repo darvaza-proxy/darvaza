@@ -87,8 +87,11 @@ EOT
 				cmdx="$cmd -o \$(TMPDIR)/"
 				cmdx="$cmdx -ldflags '-X \$(MODULE)/shared/version.Version=\$(VERSION) -X \$(MODULE)/shared/version.BuildDate=\$(DATE)'"
 				;;
-			get|up)
+			get)
 				cmdx="get -tags tools"
+				;;
+			up)
+				cmdx="get -tags tools -u"
 				;;
 			*)
 				cmdx=
@@ -100,6 +103,9 @@ EOT
 			if [ "up" = "$cmd" ]; then
 				callx="$cmdx
 \$(GO) mod tidy
+\$(GO) install -v \$(REVIVE_INSTALL_URL)"
+			elif [ "get" = "$cmd" ]; then
+				callx="$cmdx
 \$(GO) install -v \$(REVIVE_INSTALL_URL)"
 			elif [ "tidy" = "$cmd" ]; then
 				exclude=

@@ -9,9 +9,10 @@ GOPATH ?= $(shell $(GO) env GOPATH)
 GOBIN ?= $(GOPATH)/bin
 
 PEDANTIC ?= 0
-REVIVE_CONF ?= $(CURDIR)/tools/revive-default.toml
 ifeq ($(PEDANTIC),1)
-    REVIVE_CONF = $(CURDIR)/tools/revive-pedantic.toml
+	REVIVE_CONF ?= $(CURDIR)/tools/revive-pedantic.toml
+else
+	REVIVE_CONF ?= $(CURDIR)/tools/revive-default.toml
 endif
 REVIVE ?= $(GOBIN)/revive
 REVIVE_RUN_ARGS ?= -config $(REVIVE_CONF) -formatter friendly
