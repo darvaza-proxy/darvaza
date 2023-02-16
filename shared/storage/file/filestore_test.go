@@ -1,7 +1,6 @@
 package file
 
-/*
-import (
+/* import (
 	"context"
 	"fmt"
 	"testing"

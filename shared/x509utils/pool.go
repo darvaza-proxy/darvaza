@@ -32,11 +32,9 @@ func (pool *CertPool) addCert(_ string, cert *x509.Certificate) {
 }
 
 func (pool *CertPool) addCertPEM(filename string, block *pem.Block) bool {
-
 	if cert, _ := BlockToCertificate(block); cert != nil {
 		pool.addCert(filename, cert)
 	}
-
 	return false
 }
 
@@ -46,8 +44,11 @@ func (pool *CertPool) Add(s string) error {
 	return ReadStringPEM(s, pool.addCertPEM)
 }
 
+//revive:disable:confusing-naming
+
 // AddCert adds parsed certificates to the CertPool
 func (pool *CertPool) AddCert(cert *x509.Certificate) {
+	//revive:enable:confusing-naming
 	pool.getPool()
 	pool.addCert("", cert)
 }

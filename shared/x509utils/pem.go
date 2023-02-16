@@ -58,7 +58,9 @@ func ReadStringPEM(s string, cb DecodePEMBlockFunc) error {
 	}
 }
 
+//revive:disable:confusing-naming
 func readPEM(filename string, block *pem.Block, rest []byte, cb DecodePEMBlockFunc) bool {
+	//revive:enable:confusing-naming
 	for block != nil {
 		if cb(filename, block) {
 			// cascade termination request
@@ -122,7 +124,7 @@ func fileReadPEM(filename string, cb DecodePEMBlockFunc) (bool, error) {
 // EncodeBytes produces a PEM encoded block
 func EncodeBytes(label string, body []byte, headers map[string]string) []byte {
 	var b bytes.Buffer
-	pem.Encode(&b, &pem.Block{
+	_ = pem.Encode(&b, &pem.Block{
 		Type:    label,
 		Bytes:   body,
 		Headers: headers,

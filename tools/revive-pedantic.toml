@@ -23,6 +23,8 @@ enableAllRules = true
   severity = "warning"
 [rule.empty-lines]
   severity = "warning"
+[rule.unhandled-error]
+  arguments = ["fmt\\..*"]
 
 # Disabled rules
 [rule.max-public-structs]

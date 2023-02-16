@@ -79,11 +79,9 @@ func SupportedVersions(u []uint16) []string {
 	for _, k := range u {
 		if m, ok := tlsversions[k]; ok {
 			result = append(result, m)
-
 		} else {
 			result = append(result, "Unknown")
 		}
-
 	}
 	return result
 }
@@ -95,11 +93,9 @@ func CompressionMethods(u []uint8) []string {
 	for _, k := range u {
 		if m, ok := compressionMethods[k]; ok {
 			result = append(result, m)
-
 		} else {
 			result = append(result, "Unknown")
 		}
-
 	}
 	return result
 }
@@ -110,20 +106,18 @@ func SignatureAlgos(u []SignatureScheme) []string {
 	for _, k := range u {
 		if m, ok := signaturealgos[k]; ok {
 			result = append(result, m)
-
 		} else {
 			result = append(result, "Unknown")
 		}
-
 	}
 	return result
 }
 
-// Copyright 2009 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-// this file is an edited version of $GOROOT/src/crypto/tls/common.go version 1.17
-
+/* Copyright 2009 The Go Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+this file is an edited version of $GOROOT/src/crypto/tls/common.go version 1.17
+*/
 // TLS record types.
 type recordType uint8
 
@@ -142,8 +136,8 @@ const (
 	VersionTLS12 = 0x0303
 	VersionTLS13 = 0x0304
 
-	// Deprecated: SSLv3 is cryptographically broken, and is no longer
-	// supported by this package. See golang.org/issue/32716.
+	/* Deprecated: SSLv3 is cryptographically broken, and is no longer
+	supported by this package. See golang.org/issue/32716.*/
 	VersionSSL30 = 0x0300
 )
 
@@ -173,9 +167,10 @@ const (
 
 // TLS extension numbers
 const (
-	extensionServerName              uint16 = 0
-	extensionStatusRequest           uint16 = 5
-	extensionSupportedCurves         uint16 = 10 // supported_groups in TLS 1.3, see RFC 8446, Section 4.2.7
+	extensionServerName    uint16 = 0
+	extensionStatusRequest uint16 = 5
+	// supported_groups in TLS 1.3, see RFC 8446, Section 4.2.7
+	extensionSupportedCurves         uint16 = 10
 	extensionSupportedPoints         uint16 = 11
 	extensionSignatureAlgorithms     uint16 = 13
 	extensionALPN                    uint16 = 16

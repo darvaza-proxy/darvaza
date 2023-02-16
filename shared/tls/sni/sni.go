@@ -7,21 +7,20 @@ import (
 	"golang.org/x/crypto/cryptobyte"
 )
 
+/*  type ClientHelloInfo struct {
+	Vers                             uint16
+	CipherSuites                     []uint16
+	CompressionMethods               []uint8
+	ServerName                       string
+	SupportedSignatureAlgorithms     []SignatureScheme
+	SupportedSignatureAlgorithmsCert []SignatureScheme
+	SupportedVersions                []uint16
+}*/
+
 // GetInfo returns a pointer to a ClientHelloInfo:
-//
-//	type ClientHelloInfo struct {
-//		Vers                             uint16
-//		CipherSuites                     []uint16
-//		CompressionMethods               []uint8
-//		ServerName                       string
-//		SupportedSignatureAlgorithms     []SignatureScheme
-//		SupportedSignatureAlgorithmsCert []SignatureScheme
-//		SupportedVersions                []uint16
-//	}
 func GetInfo(buf []byte) *ClientHelloInfo {
 	n := len(buf)
 	if n <= 5 {
-
 		return nil
 	}
 
@@ -54,12 +53,12 @@ func GetInfo(buf []byte) *ClientHelloInfo {
 	return msg
 }
 
-// below this line is an edited portion of
-// $GOROOT/src/crypto/tls/handshake_messages.go version 1.17
-//
-// Copyright 2009 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+/* below this line is an edited portion of
+$GOROOT/src/crypto/tls/handshake_messages.go version 1.17
+
+Copyright 2009 The Go Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.*/
 
 // ClientHelloInfo contains information from a ClientHello message in order to
 // guide application logic in the GetCertificate and GetConfigForClient callbacks.
@@ -99,7 +98,15 @@ func readUint16LengthPrefixed(s *cryptobyte.String, out *[]byte) bool {
 	return s.ReadUint16LengthPrefixed((*cryptobyte.String)(out))
 }
 
+// TODO: reimplemet and fix revive
+//
+//revive:disable:cognitive-complexity
+//revive:disable:cyclomatic
+//revive:disable:function-length
 func (m *ClientHelloInfo) unmarshal(data []byte) bool {
+	//revive:enable:cognitive-complexity
+	//revive:enable:cyclomatic
+	//revive:enable:function-length
 	*m = ClientHelloInfo{raw: data}
 	s := cryptobyte.String(data)
 
@@ -108,8 +115,10 @@ func (m *ClientHelloInfo) unmarshal(data []byte) bool {
 		!readUint8LengthPrefixed(&s, &m.sessionID) {
 		return false
 	}
-
+	// TODO: Fix revive
+	//revive:disable:unexported-naming
 	var CipherSuites cryptobyte.String
+	//revive:enable:unexported-naming
 	if !s.ReadUint16LengthPrefixed(&CipherSuites) {
 		return false
 	}
@@ -261,12 +270,18 @@ func (m *ClientHelloInfo) unmarshal(data []byte) bool {
 			m.scts = true
 		case extensionSupportedVersions:
 			// RFC 8446, Section 4.2.1
+			// TODO: Fix revive
+			//revive:disable:unexported-naming
 			var VersList cryptobyte.String
+			//revive:enable:unexported-naming
 			if !extData.ReadUint8LengthPrefixed(&VersList) || VersList.Empty() {
 				return false
 			}
 			for !VersList.Empty() {
+				// TODO: Fix revive
+				//revive:disable:unexported-naming
 				var Vers uint16
+				//revive:enable:unexported-naming
 				if !VersList.ReadUint16(&Vers) {
 					return false
 				}

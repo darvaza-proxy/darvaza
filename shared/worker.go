@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+type emptyStruct struct{}
+
 // Worker is a routing that runs supervised
 type Worker interface {
 	Run() error
@@ -14,7 +16,7 @@ type Worker interface {
 
 // WorkGroup governs a slice of Workers
 type WorkGroup struct {
-	workers map[Worker]struct{}
+	workers map[Worker]emptyStruct
 	wg      sync.WaitGroup
 	Done    chan error
 }
@@ -31,7 +33,7 @@ func (s *WorkGroup) Run() error {
 				select {
 				case s.Done <- err:
 				default:
-					//non blocking send
+					// non blocking send
 				}
 				log.Println(err)
 				err = k.Cancel()
@@ -43,7 +45,7 @@ func (s *WorkGroup) Run() error {
 					select {
 					case s.Done <- fmt.Errorf("no more workers running"):
 					default:
-						//non blocking send
+						// non blocking send
 					}
 				}
 			}
@@ -65,7 +67,7 @@ func (s *WorkGroup) Cancel() error {
 			case s.Done <- err:
 				log.Println(err)
 			default:
-				//non blocking send
+				// non blocking send
 			}
 		}
 	}
@@ -87,7 +89,7 @@ func (s *WorkGroup) Reload() error {
 
 // NewWorkGroup creates a new empty group of workers
 func NewWorkGroup() *WorkGroup {
-	s := make(map[Worker]struct{})
+	s := make(map[Worker]emptyStruct)
 	d := make(chan error)
 	return &WorkGroup{
 		workers: s,
@@ -98,7 +100,7 @@ func NewWorkGroup() *WorkGroup {
 // Append adds a worker to the group
 func (s *WorkGroup) Append(r Worker) {
 	if s.workers != nil {
-		s.workers[r] = struct{}{}
+		s.workers[r] = emptyStruct{}
 	}
 }
 

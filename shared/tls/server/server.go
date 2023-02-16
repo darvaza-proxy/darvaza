@@ -18,6 +18,8 @@ import (
 	"github.com/darvaza-proxy/darvaza/shared/tls/sni"
 )
 
+type emptyStruct struct{}
+
 // ProxyConfig is a configuration for a TLSproxy.
 type ProxyConfig struct {
 	Protocol   string   `default:"http" hcl:"protocol,label"`
@@ -31,8 +33,8 @@ type Proxy struct {
 	cancel      context.CancelFunc
 	inShutdown  int32
 	mu          sync.Mutex
-	listeners   map[*net.Listener]struct{}
-	activeConns map[*net.Conn]struct{}
+	listeners   map[*net.Listener]emptyStruct
+	activeConns map[*net.Conn]emptyStruct
 	tlsHandler  func(net.Conn)
 }
 
@@ -40,33 +42,34 @@ func (p *Proxy) shuttingDown() bool {
 	return atomic.LoadInt32(&p.inShutdown) != 0
 }
 
-func (p *Proxy) trackL(ln *net.Listener, add bool) {
+func (p *Proxy) trackL(ln *net.Listener) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.listeners == nil {
-		p.listeners = make(map[*net.Listener]struct{})
+		p.listeners = make(map[*net.Listener]emptyStruct)
 	}
-	if add {
-		if !p.shuttingDown() {
-			p.listeners[ln] = struct{}{}
+	if !p.shuttingDown() {
+		if _, found := p.listeners[ln]; !found {
+			p.listeners[ln] = emptyStruct{}
+		} else {
+			delete(p.listeners, ln)
 		}
-	} else {
-		delete(p.listeners, ln)
 	}
 }
 
-func (p *Proxy) trackConn(c *net.Conn, add bool) {
+func (p *Proxy) trackConn(c *net.Conn) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.activeConns == nil {
-		p.activeConns = make(map[*net.Conn]struct{})
+		p.activeConns = make(map[*net.Conn]emptyStruct)
 	}
-	if add {
-		if !p.shuttingDown() {
-			p.activeConns[c] = struct{}{}
+
+	if !p.shuttingDown() {
+		if _, found := p.activeConns[c]; !found {
+			p.activeConns[c] = emptyStruct{}
+		} else {
+			delete(p.activeConns, c)
 		}
-	} else {
-		delete(p.activeConns, c)
 	}
 }
 
@@ -79,22 +82,26 @@ func (pc *ProxyConfig) New() *Proxy {
 	p.errGroup, p.errCtx = errgroup.WithContext(ctx)
 
 	for _, laddr := range pc.ListenAddr {
-		//TODO do we want UDP/IP and or others?
+		// TODO: do we want UDP/IP and or others?
 		l, err := net.Listen("tcp", laddr)
 		if err != nil {
 			log.Printf("cannot listen on %s.\n %q\n", laddr, err)
 			continue
 		}
-		p.trackL(&l, true)
+		p.trackL(&l)
 	}
 	p.tlsHandler = defaultTLSHandler
 	return p
 }
 
+// TODO: fix revive
+//revive:disable:cognitive-complexity
+
 // Run is starting a TLSproxy that accepts connections.
 func (p *Proxy) Run() error {
+	//revive:enable:cognitive:complexity
 	for l := range p.listeners {
-		//TODO: Go(func () error{}) means no l tag
+		// TODO: Go(func () error{}) means no l tag
 		// https://golang.org/doc/faq#closures_and_goroutines
 		l := l
 		p.errGroup.Go(func() error {
@@ -111,7 +118,7 @@ func (p *Proxy) Run() error {
 						return err
 					}
 				}
-				p.trackConn(&conn, true)
+				p.trackConn(&conn)
 				go p.tlsHandler(conn)
 			}
 		})
@@ -119,23 +126,29 @@ func (p *Proxy) Run() error {
 	return p.errGroup.Wait()
 }
 
+// TODO: reimplemet and fix revive
+//
+//revive:disable:cognitive-complexity
 func (p *Proxy) closeListeners() error {
+	//revive:enable:cognitive-complexity
 	var err error
 	for ln := range p.listeners {
 		cerr := (*ln).Close()
-		if cerr != nil && cerr.(*net.OpError).Unwrap().Error() != "use of closed network connection" {
-			if err == nil {
-				err = cerr
+		if cerr != nil {
+			if cerr.(*net.OpError).Unwrap().Error() != "use of closed network connection" {
+				if err == nil {
+					err = cerr
+				}
 			}
 		}
-		p.trackL(ln, false)
+		p.trackL(ln)
 	}
 	return err
 }
 
 // Reload wil re-read the configuration of a TLSproxy and apply it.
-func (p *Proxy) Reload() error {
-	//TODO For now this is a no-op that returns nil.
+func (*Proxy) Reload() error {
+	// TODO: For now this is a no-op that returns nil.
 	return nil
 }
 
@@ -155,7 +168,7 @@ func (p *Proxy) Cancel() error {
 		if err != nil && err.(*net.OpError).Unwrap().Error() != "use of closed network connection" {
 			log.Println(err)
 		}
-		p.trackConn(c, false)
+		p.trackConn(c)
 	}
 
 	err := p.closeListeners()
@@ -180,7 +193,7 @@ func (c prefixConn) Read(p []byte) (int, error) {
 
 func defaultTLSHandler(conn net.Conn) {
 	defer conn.Close()
-	conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+	_ = conn.SetReadDeadline(time.Now().Add(30 * time.Second))
 	var buf bytes.Buffer
 	if _, err := io.CopyN(&buf, conn, 1+2+2); err != nil {
 		log.Println(err)
@@ -192,17 +205,17 @@ func defaultTLSHandler(conn net.Conn) {
 		return
 	}
 	sn := sni.GetInfo(buf.Bytes())
-	//TODO Deal with non TLS connections
+	// TODO: Deal with non TLS connections
 	if sn != nil && sn.ServerName != "" {
 		c := prefixConn{
 			Conn:   conn,
 			Reader: io.MultiReader(&buf, conn),
 		}
-		conn.SetReadDeadline(time.Time{})
+		_ = conn.SetReadDeadline(time.Time{})
 		defer c.Close()
 		var upstream net.Conn
-		conn.SetDeadline(time.Now().Add(5 * time.Second))
-		//TODO after we will have backends we can drop the hardcoded 443.
+		_ = conn.SetDeadline(time.Now().Add(5 * time.Second))
+		// TODO: after we will have backends we can drop the hardcoded 443.
 		upstream, err := net.Dial("tcp", fmt.Sprintf("%s:%d", sn.ServerName, 443))
 		if err != nil {
 			// TODO: Need to retry.
@@ -212,6 +225,6 @@ func defaultTLSHandler(conn net.Conn) {
 		defer upstream.Close()
 
 		go io.Copy(upstream, io.MultiReader(bytes.NewReader(buf.Bytes()), c))
-		io.Copy(c, upstream)
+		_, _ = io.Copy(c, upstream)
 	}
 }

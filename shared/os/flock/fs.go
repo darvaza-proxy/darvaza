@@ -44,7 +44,8 @@ func (opt Options) JoinName(name string) string {
 	if name == "" {
 		// empty
 		return opt.Base
-	} else if opt.Base == "" || strings.HasPrefix(name, slash) || strings.HasPrefix(name, dotSlash) || strings.HasPrefix(name, dotDotSlash) {
+	} else if opt.Base == "" || strings.HasPrefix(name, slash) ||
+		strings.HasPrefix(name, dotSlash) || strings.HasPrefix(name, dotDotSlash) {
 		// ignore Base
 		return filepath.Clean(name)
 	} else {
@@ -52,8 +53,11 @@ func (opt Options) JoinName(name string) string {
 	}
 }
 
+//revive:disable:confusing-results
+
 // NameSplit considers Options.Base when splitting a given path
 func (opt Options) NameSplit(name string) (string, string) {
+	//revive:enable:confusing-results
 	if name == "" {
 		// empty
 		return opt.Base, ""
@@ -151,7 +155,7 @@ func (opt Options) Mkdir(name string, dmode fs.FileMode) error {
 
 // MkdirAll attempts to create all directories on a path within the base
 func (opt Options) MkdirAll(name string, dmode fs.FileMode) error {
-	dmode = coalesceMode(opt.DirMode, DefaultDirMode)
+	dmode = coalesceMode(dmode, opt.DirMode, DefaultDirMode)
 	return os.MkdirAll(opt.JoinName(name), dmode)
 }
 

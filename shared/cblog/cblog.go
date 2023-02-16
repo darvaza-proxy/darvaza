@@ -20,7 +20,7 @@ var (
 const LogOutputBuffer = 1024
 
 type loggerHandler interface {
-	setup(config map[string]interface{}) error
+	setup(config map[string]any) error
 	write(msg cblog.LogMsg)
 }
 
@@ -47,7 +47,7 @@ func New() *Logger {
 }
 
 // SetLogger sets the Logger object output.
-func (l *Logger) SetLogger(handlerType string, cfg map[string]interface{}) {
+func (l *Logger) SetLogger(handlerType string, cfg map[string]any) {
 	// BUG(karasz): SetLogger should be replaced with SetOutput in order to become stdlib compatible
 	var handler loggerHandler
 	switch handlerType {
@@ -59,7 +59,7 @@ func (l *Logger) SetLogger(handlerType string, cfg map[string]interface{}) {
 		panic("Unknown log handler.")
 	}
 
-	handler.setup(cfg)
+	_ = handler.setup(cfg)
 	l.outputs[handlerType] = handler
 }
 
@@ -109,7 +109,7 @@ func newConsoleHandler() loggerHandler {
 	return new(consoleHandler)
 }
 
-func (h *consoleHandler) setup(cfg map[string]interface{}) error {
+func (h *consoleHandler) setup(_ map[string]any) error {
 	h.logger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	return nil
 }
@@ -134,7 +134,7 @@ func newFileHandler() loggerHandler {
 	return new(fileHandler)
 }
 
-func (h *fileHandler) setup(config map[string]interface{}) error {
+func (h *fileHandler) setup(config map[string]any) error {
 	if file, ok := config["file"]; ok {
 		h.file = file.(string)
 		if _, err := os.Stat(h.file); os.IsNotExist(err) {
