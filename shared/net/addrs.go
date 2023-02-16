@@ -8,6 +8,8 @@ import (
 	"net/netip"
 	"strconv"
 	"strings"
+
+	"github.com/darvaza-proxy/darvaza/shared/data"
 )
 
 // SplitHostPort splits a network address into host and port,
@@ -173,27 +175,21 @@ func appendNetIPAsIP(out []netip.Addr, addrs ...net.Addr) []netip.Addr {
 // GetInterfacesNames returns the list of interfaces,
 // considering an optional exclusion list
 func GetInterfacesNames(except ...string) ([]string, error) {
-	var out []string
-
 	s, err := net.Interfaces()
 	if err != nil {
-		return out, err
+		return nil, err
 	}
+
+	out := make([]string, 0, len(s))
 
 	for _, ifi := range s {
-		name := ifi.Name
-
-		for _, nope := range except {
-			if name == nope {
-				name = ""
-				break
-			}
-		}
-
-		if name != "" {
-			out = append(out, name)
+		if s := ifi.Name; s != "" {
+			out = append(out, s)
 		}
 	}
 
+	if len(except) > 0 {
+		out = data.SliceMinus(out, except)
+	}
 	return out, nil
 }
