@@ -28,23 +28,30 @@ func SplitHostPort(hostport string) (string, uint16, error) {
 // JoinHostPort combines a given host address and a port, validating
 // the provided IP address in the process
 func JoinHostPort(host string, port uint16) (string, error) {
+	addr, err := net.ResolveIPAddr("ip", host)
+	if err == nil {
+		return fmt.Sprintf("%s:%v", addr, port), nil
+	}
+	return "", err
+}
+
+func resolveIPAddr(host string) (string, error) {
 	ip, err := net.ResolveIPAddr("ip", host)
 	if err != nil {
 		// bad address
 		return "", err
 	} else if ip == nil || ip.IP.IsUnspecified() {
 		// wildcard
-		host = ""
-	} else {
-		host = ip.String()
-
-		if strings.ContainsRune(host, ':') {
-			// IPv6
-			host = fmt.Sprintf("[%s]", host)
-		}
+		return "", nil
 	}
 
-	return fmt.Sprintf("%s:%v", host, port), nil
+	host = ip.String()
+	if strings.ContainsRune(host, ':') {
+		// IPv6
+		host = fmt.Sprintf("[%s]", host)
+	}
+
+	return host, nil
 }
 
 // JoinAllHostPorts combines a list of addresses and a list of ports, validating
@@ -53,24 +60,13 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 	var out []string
 
 	for _, s := range addresses {
-		ip, err := net.ResolveIPAddr("ip", s)
+		addr, err := resolveIPAddr(s)
 		if err != nil {
-			// bad address
 			return out, err
-		} else if ip == nil || ip.IP.IsUnspecified() {
-			// wildcard
-			s = ""
-		} else {
-			s = ip.String()
-
-			if strings.ContainsRune(s, ':') {
-				// IPv6
-				s = fmt.Sprintf("[%s]", s)
-			}
 		}
 
 		for _, p := range ports {
-			out = append(out, fmt.Sprintf("%s:%v", s, p))
+			out = append(out, fmt.Sprintf("%s:%v", addr, p))
 		}
 	}
 
