@@ -60,7 +60,7 @@ func (lc ListenConfig) ListenAll(network string, addrs []string) ([]net.Listener
 		lsn, err := lc.Listen(network, addr)
 		if err != nil {
 			for _, lsn := range out {
-				lsn.Close()
+				_ = lsn.Close()
 			}
 			return nil, err
 		}
@@ -78,7 +78,7 @@ func (lc ListenConfig) ListenAllPacket(network string, addrs []string) ([]net.Pa
 		lsn, err := lc.ListenPacket(network, addr)
 		if err != nil {
 			for _, lsn := range out {
-				lsn.Close()
+				_ = lsn.Close()
 			}
 			return nil, err
 		}
