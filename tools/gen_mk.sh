@@ -87,8 +87,11 @@ EOT
 				cmdx="$cmd -o \$(TMPDIR)/"
 				cmdx="$cmdx -ldflags '-X \$(MODULE)/shared/version.Version=\$(VERSION) -X \$(MODULE)/shared/version.BuildDate=\$(DATE)'"
 				;;
-			get|up)
+			get)
 				cmdx="get -tags tools"
+				;;
+			up)
+				cmdx="get -tags tools -u"
 				;;
 			*)
 				cmdx=
