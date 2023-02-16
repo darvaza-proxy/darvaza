@@ -136,9 +136,7 @@ func (r *resolver) Iterate(c *cache, qname string, qtype string, slist *stack) {
 			case "Answer":
 				c.set(ans.Answer[0].Header().Name, qtype, ans)
 				slist.popFor(ans.Answer[0].Header().Name, qtype)
-				if slist.isEmpty() {
-					break
-				} else {
+				if !slist.isEmpty() {
 					qn, qt := slist.pop()
 					r.Iterate(c, qn, qt, slist)
 				}

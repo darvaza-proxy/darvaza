@@ -84,22 +84,18 @@ func dirReadPEM(dirname string, cb DecodePEMBlockFunc) (bool, error) {
 	for _, file := range files {
 		fl := filepath.Join(dirname, file.Name())
 
-		if st, err := os.Stat(fl); err != nil {
-			// skip bad file
-		} else if st.IsDir() {
-			if term, _ := dirReadPEM(fl, cb); term {
-				// cascade termination request
-				return true, nil
+		if st, _ := os.Stat(fl); st != nil {
+			if st.IsDir() {
+				if term, _ := dirReadPEM(fl, cb); term {
+					// cascade termination request
+					return true, nil
+				}
+			} else if st.Mode().IsRegular() && st.Size() > 0 {
+				if term, _ := fileReadPEM(fl, cb); term {
+					// cascade termination request
+					return true, nil
+				}
 			}
-		} else if !st.Mode().IsRegular() {
-			// skip unknown file type
-		} else if st.Size() > 0 {
-			if term, _ := fileReadPEM(fl, cb); term {
-				// cascade termination request
-				return true, nil
-			}
-		} else {
-			// skip empty file
 		}
 	}
 

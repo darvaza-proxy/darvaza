@@ -25,15 +25,14 @@ type Store struct {
 
 // Get will return the first x509 certificate and an error, the certificate having the same
 // common name as the name parameter
-func (fs *Store) Get(ctx context.Context, name string) (*x509.Certificate, error) {
-	_, cert, err := fs.fileCertFromName(name)
+func (m *Store) Get(_ context.Context, name string) (*x509.Certificate, error) {
+	_, cert, err := m.fileCertFromName(name)
 	return cert, err
-
 }
 
 // ForEach will walk the store and ececute the StoreIterFunc for each certificate
 // it can decode
-func (fs *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
+func (m *Store) ForEach(_ context.Context, f x509utils.StoreIterFunc) error {
 	fn := func(filename string, block *pem.Block) bool {
 		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
 			if err := f(cert); err != nil {
@@ -45,19 +44,19 @@ func (fs *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
 		return false
 	}
 
-	return x509utils.ReadStringPEM(fs.fl.Base, fn)
+	return x509utils.ReadStringPEM(m.fl.Base, fn)
 }
 
 // Put will create a file in the store with the given name and the given certificate
 // it will write in the fil eteh content of cert.Raw field
-func (fs *Store) Put(ctx context.Context, name string, cert *x509.Certificate) error {
-	return fs.fl.WriteFile(name, cert.Raw, 0666)
+func (m *Store) Put(_ context.Context, name string, cert *x509.Certificate) error {
+	return m.fl.WriteFile(name, cert.Raw, 0666)
 }
 
 // Delete will delete the first certificate with the same common name as
 // the given parameter
-func (fs *Store) Delete(ctx context.Context, name string) error {
-	file, _, err := fs.fileCertFromName(name)
+func (m *Store) Delete(_ context.Context, name string) error {
+	file, _, err := m.fileCertFromName(name)
 	if err != nil {
 		return err
 	}
@@ -70,9 +69,9 @@ func (fs *Store) Delete(ctx context.Context, name string) error {
 }
 
 // DeleteCert will delete from the store the certificate given as parameter
-func (fs *Store) DeleteCert(ctx context.Context, cert *x509.Certificate) error {
+func (m *Store) DeleteCert(_ context.Context, cert *x509.Certificate) error {
 	name := cert.Subject.CommonName
-	file, _, err := fs.fileCertFromName(name)
+	file, _, err := m.fileCertFromName(name)
 	if err != nil {
 		return err
 	}
@@ -126,7 +125,7 @@ func NewStore(options Options) (Store, error) {
 	return result, nil
 }
 
-func (fs Store) fileCertFromName(name string) (string, *x509.Certificate, error) {
+func (m *Store) fileCertFromName(name string) (string, *x509.Certificate, error) {
 	var match *x509.Certificate
 	var filename string
 
@@ -136,12 +135,12 @@ func (fs Store) fileCertFromName(name string) (string, *x509.Certificate, error)
 		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
 			switch len(cert.URIs) {
 			case 0:
-				//an "old" certificate, no SAN
+				// an "old" certificate, no SAN
 				if cert.Subject.CommonName == name {
 					match = cert
 				}
 			default:
-				//normal "modern" certificate uses SAN
+				// normal "modern" certificate uses SAN
 				if err := cert.VerifyHostname(name); err == nil {
 					match = cert
 				}
@@ -156,7 +155,7 @@ func (fs Store) fileCertFromName(name string) (string, *x509.Certificate, error)
 		return term
 	}
 
-	x509utils.ReadStringPEM(fs.fl.Base, fn)
+	x509utils.ReadStringPEM(m.fl.Base, fn)
 	if match != nil {
 		return filename, match, nil
 	}

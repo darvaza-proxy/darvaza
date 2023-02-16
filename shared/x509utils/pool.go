@@ -27,7 +27,7 @@ func (pool *CertPool) Pool() *x509.CertPool {
 	return pool.getPool()
 }
 
-func (pool *CertPool) addCert(filename string, cert *x509.Certificate) {
+func (pool *CertPool) addCert(_ string, cert *x509.Certificate) {
 	pool.pool.AddCert(cert)
 }
 
