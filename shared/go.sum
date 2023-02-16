@@ -1,7 +1,7 @@
-github.com/darvaza-proxy/slog v0.0.3 h1:6aikLu+0bxTYmek1iPbjs417bNBVPs4lCdK3UVJil8c=
-github.com/darvaza-proxy/slog v0.0.3/go.mod h1:EDgV3ucYoTaqXW90/XDRfieJXohfoU698s/mg2/QxNE=
-github.com/darvaza-proxy/slog/cblog v0.0.0-20230114124022-1192f08eedec h1:J5lf4uM+LPADTf3e9uADvG0+eKWfq1/GyeKk7iGXHU0=
-github.com/darvaza-proxy/slog/cblog v0.0.0-20230114124022-1192f08eedec/go.mod h1:DgLHQYXPZXXWgdid6tnv5HCcsd2res++nQ1O1IAg4C4=
+github.com/darvaza-proxy/slog v0.2.0 h1:XohKuRrdeZxJpACvYuOF/ePuBm4KX18MO3RjIAgM3Jk=
+github.com/darvaza-proxy/slog v0.2.0/go.mod h1:EDgV3ucYoTaqXW90/XDRfieJXohfoU698s/mg2/QxNE=
+github.com/darvaza-proxy/slog/handlers/cblog v0.2.0 h1:Gt77ROh+1Tkr16+Wny0vAPtRbTyFygVQ4jUk08vElGc=
+github.com/darvaza-proxy/slog/handlers/cblog v0.2.0/go.mod h1:lwUdT0zEM88p2FG3aaLcm46yuw6F+EjmsVI6Eyq+OlE=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 golang.org/x/crypto v0.5.0 h1:U/0M97KRkSFvyD/3FSmdP5W5swImpNgle/EHFhOsQPE=

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/darvaza-proxy/slog"
-	"github.com/darvaza-proxy/slog/cblog"
+	"github.com/darvaza-proxy/slog/handlers/cblog"
 )
 
 var (

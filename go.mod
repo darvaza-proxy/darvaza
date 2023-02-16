@@ -17,8 +17,8 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/chavacava/garif v0.0.0-20221024190013-b3ef35877348 // indirect
-	github.com/darvaza-proxy/slog v0.0.3 // indirect
-	github.com/darvaza-proxy/slog/cblog v0.0.0-20230114124022-1192f08eedec // indirect
+	github.com/darvaza-proxy/slog v0.2.0 // indirect
+	github.com/darvaza-proxy/slog/handlers/cblog v0.2.0 // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
