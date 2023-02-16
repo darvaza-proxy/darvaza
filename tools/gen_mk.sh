@@ -104,6 +104,9 @@ EOT
 				callx="$cmdx
 \$(GO) mod tidy
 \$(GO) install -v \$(REVIVE_INSTALL_URL)"
+			elif [ "get" = "$cmd" ]; then
+				callx="$cmdx
+\$(GO) install -v \$(REVIVE_INSTALL_URL)"
 			elif [ "tidy" = "$cmd" ]; then
 				exclude=
 				for x in $PROJECTS; do
