@@ -87,20 +87,15 @@ func (opt Options) newFileLock(name string, perm fs.FileMode) (*Flock, error) {
 	dir, file := opt.NameSplit(name)
 	if file == "" {
 		return nil, syscall.EINVAL
-	} else if dir != "" {
-		if opt.Create {
-			dmode := coalesceMode(opt.DirMode, DefaultDirMode)
-
-			if err := os.MkdirAll(dir, dmode); err != nil {
-				return nil, err
-			}
+	} else if dir != "" && opt.Create {
+		err := mkdirAllCoalesceMode(dir, opt.DirMode, DefaultDirMode)
+		if err != nil {
+			return nil, err
 		}
-
-		name = filepath.Join(dir, file)
 	}
 
 	fl := &Flock{
-		filename: name,
+		filename: filepath.Join(dir, file),
 		opener:   opt.NewOpener(perm),
 		fd:       -1,
 	}
@@ -112,13 +107,8 @@ func (opt Options) newDirLock(name string, dmode fs.FileMode) (*Flock, error) {
 
 	if _, err := os.Stat(name); err != nil {
 		// failed
-		if os.IsNotExist(err) {
-			// not found
-			if opt.Create {
-				// attempt to create
-				dmode = coalesceMode(dmode, opt.DirMode, DefaultDirMode)
-				err = os.MkdirAll(name, dmode)
-			}
+		if os.IsNotExist(err) && opt.Create {
+			err = mkdirAllCoalesceMode(opt.Base, dmode, opt.DirMode, DefaultDirMode)
 		}
 
 		if err != nil {
@@ -141,22 +131,27 @@ func (opt Options) New(name string, perm fs.FileMode) (*Flock, error) {
 // MkdirBase creates the Options.Base if it doesn't exist
 func (opt Options) MkdirBase(dmode fs.FileMode) error {
 	if opt.Base != "" {
-		dmode = coalesceMode(dmode, opt.DirMode, DefaultDirMode)
-		return os.MkdirAll(opt.Base, dmode)
+		return mkdirAllCoalesceMode(opt.Base, dmode, opt.DirMode, DefaultDirMode)
 	}
 	return nil
 }
 
 // Mkdir creates a directory within the base
 func (opt Options) Mkdir(name string, dmode fs.FileMode) error {
-	dmode = coalesceMode(dmode, opt.DirMode, DefaultDirMode)
-	return os.Mkdir(opt.JoinName(name), dmode)
+	return mkdirCoalesceMode(opt.JoinName(name), dmode, opt.DirMode, DefaultDirMode)
+}
+
+func mkdirCoalesceMode(fullname string, dmode ...fs.FileMode) error {
+	return os.Mkdir(fullname, coalesceMode(dmode...))
 }
 
 // MkdirAll attempts to create all directories on a path within the base
 func (opt Options) MkdirAll(name string, dmode fs.FileMode) error {
-	dmode = coalesceMode(dmode, opt.DirMode, DefaultDirMode)
-	return os.MkdirAll(opt.JoinName(name), dmode)
+	return mkdirAllCoalesceMode(opt.JoinName(name), dmode, opt.DirMode, DefaultDirMode)
+}
+
+func mkdirAllCoalesceMode(fullname string, dmode ...fs.FileMode) error {
+	return os.MkdirAll(fullname, coalesceMode(dmode...))
 }
 
 // ReadDir reads the entries of a directory, flocked
