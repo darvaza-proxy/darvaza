@@ -38,24 +38,31 @@ func ReadStringPEM(s string, cb DecodePEMBlockFunc) error {
 	if ReadPEM([]byte(s), cb) == nil {
 		// done
 		return nil
-	} else if st, err := os.Stat(s); err != nil {
-		// Unknown
-		return fs.ErrNotExist
-	} else if st.IsDir() {
-		// Directory
-		_, err := dirReadPEM(s, cb)
-		return err
-	} else if !st.Mode().IsRegular() {
-		// Invalid file type
-		return fs.ErrInvalid
-	} else if st.Size() > 0 {
-		// Non-Empty File
-		_, err := fileReadPEM(s, cb)
-		return err
-	} else {
-		// Empty File
-		return nil
 	}
+
+	if st, _ := os.Stat(s); st != nil {
+		switch {
+		case st.IsDir():
+			// Directory
+			_, err := dirReadPEM(s, cb)
+			return err
+		case !st.Mode().IsRegular():
+			// Invalid file type
+			return &fs.PathError{
+				Op:   "read",
+				Path: s,
+				Err:  fs.ErrInvalid,
+			}
+		case st.Size() == 0:
+			// Empty File
+			return nil
+		default:
+			// Non-Empty File
+			_, err := fileReadPEM(s, cb)
+			return err
+		}
+	}
+	return fs.ErrNotExist
 }
 
 //revive:disable:confusing-naming
@@ -84,23 +91,36 @@ func dirReadPEM(dirname string, cb DecodePEMBlockFunc) (bool, error) {
 	}
 
 	for _, file := range files {
-		fl := filepath.Join(dirname, file.Name())
-
-		if st, _ := os.Stat(fl); st != nil {
-			if st.IsDir() {
-				if term, _ := dirReadPEM(fl, cb); term {
-					// cascade termination request
-					return true, nil
-				}
-			} else if st.Mode().IsRegular() && st.Size() > 0 {
-				if term, _ := fileReadPEM(fl, cb); term {
-					// cascade termination request
-					return true, nil
-				}
-			}
+		term, _ := dirReadFilePEM(filepath.Join(dirname, file.Name()), cb)
+		if term {
+			// cascade termination request
+			return true, nil
 		}
 	}
 
+	return false, nil
+}
+
+func dirReadFilePEM(filename string, cb DecodePEMBlockFunc) (bool, error) {
+	st, err := os.Stat(filename)
+
+	switch {
+	case err != nil:
+		// file not found
+		return false, err
+	case st.IsDir():
+		if term, _ := dirReadPEM(filename, cb); term {
+			// cascade termination request
+			return true, nil
+		}
+	case st.Mode().IsRegular() && st.Size() > 0:
+		if term, _ := fileReadPEM(filename, cb); term {
+			// cascade termination request
+			return true, nil
+		}
+	}
+
+	// continue
 	return false, nil
 }
 
