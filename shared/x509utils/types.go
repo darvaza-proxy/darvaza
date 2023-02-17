@@ -41,27 +41,33 @@ type PublicKey interface {
 func BlockToPrivateKey(block *pem.Block) (PrivateKey, error) {
 	if block.Type == "PRIVATE KEY" || strings.HasSuffix(block.Type, " PRIVATE KEY") {
 		if pk, _ := x509.ParsePKCS1PrivateKey(block.Bytes); pk != nil {
+			// *rsa.PrivateKey
 			return pk, nil
-		} else if pk, err := x509.ParsePKCS8PrivateKey(block.Bytes); err != nil {
-			return nil, err
-		} else if key, ok := pk.(PrivateKey); ok {
-			return key, nil
-		} else {
-			panic("unreachable")
 		}
+
+		pk, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+
+		return pk.(PrivateKey), nil
 	}
+
 	return nil, ErrIgnored
 }
 
 // BlockToRSAPrivateKey attempts to parse a pem.Block to extract an rsa.PrivateKey
 func BlockToRSAPrivateKey(block *pem.Block) (*rsa.PrivateKey, error) {
-	if pk, err := BlockToPrivateKey(block); err != nil {
+	pk, err := BlockToPrivateKey(block)
+	if err != nil {
 		return nil, err
-	} else if key, ok := pk.(*rsa.PrivateKey); ok {
-		return key, nil
-	} else {
-		return nil, ErrIgnored
 	}
+
+	if key, ok := pk.(*rsa.PrivateKey); ok {
+		return key, nil
+	}
+
+	return nil, ErrIgnored
 }
 
 // BlockToCertificate attempts to parse a pem.Block to extract a x509.Certificate
