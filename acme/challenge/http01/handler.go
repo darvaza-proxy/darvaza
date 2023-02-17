@@ -2,7 +2,6 @@
 package http01
 
 import (
-	"net"
 	"net/http"
 	"strings"
 
@@ -21,40 +20,53 @@ type ChallengeHandler struct {
 }
 
 func (h *ChallengeHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	host := req.URL.Hostname()
-	path := req.URL.Path
-
-	if h.Resolver != nil && net.ParseIP(host) == nil {
-		// only process named hosts
-
-		h.Resolver.AnnounceHost(host)
-
-		token := strings.TrimPrefix(path, "/.well-known/acme-challenge")
-		if token == path {
-			// invalid prefix
-			goto next
-		} else if l := len(token); l == 0 {
-			// no token
-			http.NotFound(rw, req)
-		} else if token[0] != '/' {
-			// invalid prefix
-			goto next
-		} else if c := h.Resolver.LookupChallenge(host, token[1:]); c == nil {
-			// host,token pair not recognised
-			http.NotFound(rw, req)
-		} else {
-			// host,token pair recognised, proceed
+	if h.Resolver != nil {
+		if c := h.resolveHandler(req.URL.Hostname(), req.URL.Path); c != nil {
 			c.ServeHTTP(rw, req)
+			return
 		}
-
-		return
 	}
 
-next:
 	if h.next == nil {
 		h.next = NewHTTPSRedirectHandler()
 	}
 	h.next.ServeHTTP(rw, req)
+}
+
+func (h *ChallengeHandler) resolveHandler(host, path string) http.Handler {
+	var c http.Handler
+
+	token, ok := TokenFromPath(path)
+	if ok {
+		h.Resolver.AnnounceHost(host)
+
+		if token != "" {
+			c = h.Resolver.LookupChallenge(host, token)
+		}
+
+		if c == nil {
+			c = http.NotFoundHandler()
+		}
+	}
+
+	return c
+}
+
+// TokenFromPath returns the path within the well-known
+// directory and an indicator if the path pointed
+// to the well-known directory or not
+func TokenFromPath(path string) (string, bool) {
+	const base = "/.well-known/acme-challenge"
+	token := strings.TrimPrefix(path, base)
+	if token == path {
+		return "", false
+	} else if token == "" {
+		return "", true
+	} else if token[0] != '/' {
+		return "", false
+	} else {
+		return token[1:], true
+	}
 }
 
 // NewChallengeHandler creates a handler for the provided HTTP-01 challenge resolver
