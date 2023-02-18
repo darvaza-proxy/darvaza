@@ -1,4 +1,3 @@
-// Package data provides helpers for generic data types
 package data
 
 // SliceMinus returns a new slice containing only the
@@ -15,16 +14,29 @@ func SliceMinus[T comparable](a []T, b []T) []T {
 func SliceMinusFn[T any](a []T, b []T, eq func(T, T) bool) []T {
 	out := make([]T, 0, len(a))
 
-loop:
 	for _, v := range a {
-		for _, w := range b {
-			if eq(v, w) {
-				continue loop
-			}
+		if !SliceContainsFn(b, v, eq) {
+			out = append(out, v)
 		}
-
-		out = append(out, v)
 	}
 
 	return out
+}
+
+// SliceContains tells if a slice contains a given element
+func SliceContains[T comparable](a []T, v T) bool {
+	return SliceContainsFn(a, v, func(va, vb T) bool {
+		return va == vb
+	})
+}
+
+// SliceContainsFn tells if a slice contains a given element
+// according to the callback eq
+func SliceContainsFn[T any](a []T, v T, eq func(T, T) bool) bool {
+	for _, va := range a {
+		if eq(va, v) {
+			return true
+		}
+	}
+	return false
 }
