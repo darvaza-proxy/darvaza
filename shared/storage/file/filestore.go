@@ -33,18 +33,15 @@ func (m *Store) Get(_ context.Context, name string) (*x509.Certificate, error) {
 // ForEach will walk the store and ececute the StoreIterFunc for each certificate
 // it can decode
 func (m *Store) ForEach(_ context.Context, f x509utils.StoreIterFunc) error {
-	fn := func(filename string, block *pem.Block) bool {
-		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
-			if err := f(cert); err != nil {
-				// TODO: terminate or just continue?
-				return true
-			}
+	return m.forEachCert(func(_ string, cert *x509.Certificate) bool {
+		if err := f(cert); err != nil {
+			// TODO: terminate or just continue?
+			return true
 		}
+
 		// next
 		return false
-	}
-
-	return x509utils.ReadStringPEM(m.fl.Base, fn)
+	})
 }
 
 // Put will create a file in the store with the given name and the given certificate
@@ -129,35 +126,42 @@ func (m *Store) fileCertFromName(name string) (string, *x509.Certificate, error)
 	var match *x509.Certificate
 	var filename string
 
-	fn := func(fl string, block *pem.Block) bool {
-		var term bool
-
-		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
-			switch len(cert.URIs) {
-			case 0:
-				// an "old" certificate, no SAN
-				if cert.Subject.CommonName == name {
-					match = cert
-				}
-			default:
-				// normal "modern" certificate uses SAN
-				if err := cert.VerifyHostname(name); err == nil {
-					match = cert
-				}
-			}
-
-			if match != nil {
-				filename = fl
-				term = true
-			}
+	fn := func(fl string, cert *x509.Certificate) bool {
+		if verifyHostname(cert, name) {
+			match = cert
+			filename = fl
+			return true // term
 		}
 
-		return term
+		return false
 	}
 
-	x509utils.ReadStringPEM(m.fl.Base, fn)
+	_ = m.forEachCert(fn)
 	if match != nil {
 		return filename, match, nil
 	}
 	return "", nil, fmt.Errorf("certificate not found")
+}
+
+func verifyHostname(cert *x509.Certificate, name string) bool {
+	if len(cert.URIs) == 0 {
+		// an "old" certificate, no SAN
+		return cert.Subject.CommonName == name
+	}
+
+	return cert.VerifyHostname(name) == nil
+}
+
+func (m *Store) forEachCert(fn func(string, *x509.Certificate) bool) error {
+	if fn == nil {
+		return nil
+	}
+
+	return x509utils.ReadStringPEM(m.fl.Base, func(fl string, block *pem.Block) bool {
+		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
+			return fn(fl, cert)
+		}
+
+		return false
+	})
 }
