@@ -1,7 +1,7 @@
 package shared
 
 import (
-	"fmt"
+	"errors"
 	"log"
 	"sync"
 )
@@ -28,30 +28,38 @@ func (s *WorkGroup) Run() error {
 		s.wg.Add(1)
 		go func(k Worker) {
 			defer s.wg.Done()
-			err = k.Run()
-			if err != nil {
-				select {
-				case s.Done <- err:
-				default:
-					// non blocking send
-				}
-				log.Println(err)
-				err = k.Cancel()
-				if err != nil {
-					log.Println(err)
-				}
-				s.Remove(k)
-				if len(s.workers) == 0 {
-					select {
-					case s.Done <- fmt.Errorf("no more workers running"):
-					default:
-						// non blocking send
-					}
-				}
-			}
+			err = s.runWorker(k)
 		}(k)
 	}
 	s.wg.Wait()
+	return err
+}
+
+func (s *WorkGroup) trySendError(err error) {
+	select {
+	case s.Done <- err:
+	default:
+		// non blocking send
+	}
+}
+
+func (s *WorkGroup) runWorker(k Worker) error {
+	err := k.Run()
+	if err != nil {
+		s.trySendError(err)
+		log.Println(err)
+
+		err = k.Cancel()
+		if err != nil {
+			log.Println(err)
+		}
+
+		s.Remove(k)
+		if len(s.workers) == 0 {
+			s.trySendError(errors.New("no more workers running"))
+		}
+	}
+
 	return err
 }
 
@@ -63,12 +71,8 @@ func (s *WorkGroup) Cancel() error {
 		err = k.Cancel()
 		s.Remove(k)
 		if err != nil {
-			select {
-			case s.Done <- err:
-				log.Println(err)
-			default:
-				// non blocking send
-			}
+			s.trySendError(err)
+			log.Println(err)
 		}
 	}
 	return err
