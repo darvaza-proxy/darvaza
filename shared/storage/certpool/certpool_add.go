@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"crypto/x509"
 	"encoding/pem"
+	"strings"
 
 	"github.com/darvaza-proxy/darvaza/shared/data"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
@@ -19,7 +20,7 @@ func (s *CertPool) AppendCertsFromPEM(b []byte) bool {
 
 	x509utils.ReadPEM(b, func(_ string, block *pem.Block) bool {
 		if cert, _ := x509utils.BlockToCertificate(block); cert != nil && cert.IsCA {
-			if s.addCertUnsafe(HashCert(cert), cert) {
+			if s.addCertUnsafe(HashCert(cert), "", cert) {
 				added = true
 			}
 		}
@@ -35,22 +36,23 @@ func (s *CertPool) AddCert(cert *x509.Certificate) bool {
 	defer s.mu.Unlock()
 
 	if cert != nil && cert.IsCA {
-		return s.addCertUnsafe(HashCert(cert), cert)
+		return s.addCertUnsafe(HashCert(cert), "", cert)
 	}
 	return false
 }
 
-func (s *CertPool) addCertUnsafe(hash Hash, cert *x509.Certificate) bool {
+func (s *CertPool) addCertUnsafe(hash Hash, name string, cert *x509.Certificate) bool {
 	var added bool
 
 	if s.hashed == nil {
 		s.init()
 	}
 
-	if _, ok := s.hashed[hash]; !ok {
+	p, ok := s.hashed[hash]
+	if !ok {
 		names, patterns := x509utils.Names(cert)
 
-		p := &certPoolEntry{
+		p = &certPoolEntry{
 			hash:     hash,
 			cert:     cert,
 			names:    names,
@@ -63,6 +65,15 @@ func (s *CertPool) addCertUnsafe(hash Hash, cert *x509.Certificate) bool {
 		s.setPatterns(p, patterns)
 		s.setSubjectKeyID(p, cert.SubjectKeyId)
 		added = true
+	}
+
+	if name != "" {
+		name = strings.ToLower(name)
+		if !data.SliceContains(p.names, name) {
+			added = true
+			p.names = append(p.names, name)
+			s.setNames(p, []string{name})
+		}
 	}
 
 	return added
