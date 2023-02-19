@@ -2,6 +2,7 @@
 package certpool
 
 import (
+	"container/list"
 	"crypto/x509"
 	"sync"
 
@@ -18,7 +19,27 @@ type CertPool struct {
 	mu sync.RWMutex
 
 	cached *x509.CertPool
-	hashed map[Hash]*x509.Certificate
+	hashed map[Hash]*certPoolEntry
+
+	names    map[string]*list.List
+	patterns map[string]*list.List
+	subjects map[string]*list.List
+}
+
+type certPoolEntry struct {
+	hash     Hash
+	cert     *x509.Certificate
+	names    []string
+	patterns []string
+}
+
+// init reinitialises the CertPool
+func (s *CertPool) init() {
+	s.cached = nil
+	s.hashed = make(map[Hash]*certPoolEntry)
+	s.names = make(map[string]*list.List)
+	s.patterns = make(map[string]*list.List)
+	s.subjects = make(map[string]*list.List)
 }
 
 // Export produces a standard *x509.CertPool containing the

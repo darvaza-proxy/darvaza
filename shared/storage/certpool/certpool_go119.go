@@ -10,7 +10,7 @@ func (s *CertPool) exportUnlocked() *x509.CertPool {
 	if p == nil {
 		p = x509.NewCertPool()
 		for _, cert := range s.hashed {
-			p.AddCert(cert)
+			p.AddCert(cert.cert)
 		}
 		s.cached = p
 	}

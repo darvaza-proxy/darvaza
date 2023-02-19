@@ -1,9 +1,11 @@
 package certpool
 
 import (
+	"container/list"
 	"crypto/x509"
 	"encoding/pem"
 
+	"github.com/darvaza-proxy/darvaza/shared/data"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
@@ -42,14 +44,55 @@ func (s *CertPool) addCertUnsafe(hash Hash, cert *x509.Certificate) bool {
 	var added bool
 
 	if s.hashed == nil {
-		s.hashed = make(map[Hash]*x509.Certificate)
+		s.init()
 	}
 
 	if _, ok := s.hashed[hash]; !ok {
+		names, patterns := x509utils.Names(cert)
+
+		p := &certPoolEntry{
+			hash:     hash,
+			cert:     cert,
+			names:    names,
+			patterns: patterns,
+		}
+
 		s.cached = nil // invalidate cache
-		s.hashed[hash] = cert
+		s.hashed[hash] = p
+		s.setNames(p, names)
+		s.setPatterns(p, patterns)
+		s.setSubjectKeyID(p, cert.SubjectKeyId)
 		added = true
 	}
 
 	return added
+}
+
+func (s *CertPool) setNames(p *certPoolEntry, names []string) {
+	for _, name := range names {
+		s.setListItem(s.names, p, name)
+	}
+}
+
+func (s *CertPool) setPatterns(p *certPoolEntry, patterns []string) {
+	for _, pat := range patterns {
+		s.setListItem(s.patterns, p, pat)
+	}
+}
+
+func (s *CertPool) setSubjectKeyID(p *certPoolEntry, skid []byte) {
+	s.setListItem(s.subjects, p, string(skid))
+}
+
+func (*CertPool) setListItem(m map[string]*list.List, p *certPoolEntry, name string) {
+	if len(name) > 0 {
+		l, ok := m[name]
+		if !ok {
+			l = list.New()
+			m[name] = l
+		}
+		if !data.ListContains(l, p) {
+			l.PushFront(p)
+		}
+	}
 }
