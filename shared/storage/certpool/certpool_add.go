@@ -2,13 +2,27 @@ package certpool
 
 import (
 	"container/list"
+	"context"
 	"crypto/x509"
 	"encoding/pem"
+	"os"
 	"strings"
 
 	"github.com/darvaza-proxy/darvaza/shared/data"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
+
+// Put adds a certificate by name
+func (s *CertPool) Put(_ context.Context, name string, cert *x509.Certificate) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.addCertUnsafe(HashCert(cert), name, cert) {
+		return nil
+	}
+
+	return os.ErrExist
+}
 
 // AppendCertsFromPEM adds certificates to the Pool from a PEM encoded blob,
 // and returns true if a new Certificate was effectivelt added

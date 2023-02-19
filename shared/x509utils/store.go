@@ -29,6 +29,8 @@ type CertPooler interface {
 
 // CertPoolWriter represents the write-only interface of our CertPool
 type CertPoolWriter interface {
+	WriteStore
+
 	AddCert(cert *x509.Certificate) bool
 	AppendCertsFromPEM(b []byte) bool
 }
