@@ -74,6 +74,14 @@ func (s *CertPool) Clone() x509utils.CertPooler {
 	return clone
 }
 
+// Count tells how many certificates are stored in the CertPool
+func (s *CertPool) Count() int {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	return len(s.hashed)
+}
+
 // Export produces a standard *x509.CertPool containing the
 // same CA certificates
 func (s *CertPool) Export() *x509.CertPool {
