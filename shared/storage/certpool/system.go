@@ -42,20 +42,19 @@ func SystemCertPool() (*CertPool, error) {
 // revive:disable:cognitive-complexity
 func loadSystemRoots() (*CertPool, error) {
 	var pool CertPool
-	var count int
 	var err error
 
 	fn := func(_ string, block *pem.Block) bool {
 		cert, err := x509utils.BlockToCertificate(block)
-		if err == nil && pool.AddCert(cert) {
-			count++
+		if err == nil {
+			pool.AddCert(cert)
 		}
 		return false
 	}
 
 	for _, f := range certFiles {
 		err = x509utils.ReadStringPEM(f, fn)
-		if count > 0 {
+		if pool.Count() > 0 {
 			// stop after finding one
 			break
 		}
@@ -65,7 +64,7 @@ func loadSystemRoots() (*CertPool, error) {
 		x509utils.ReadStringPEM(d, fn)
 	}
 
-	if count > 0 {
+	if pool.Count() > 0 {
 		return &pool, nil
 	}
 
