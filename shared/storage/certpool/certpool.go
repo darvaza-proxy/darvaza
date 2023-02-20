@@ -82,6 +82,19 @@ func (s *CertPool) Count() int {
 	return len(s.hashed)
 }
 
+// IsCA tells if all certificates in the store are CAs
+func (s *CertPool) IsCA() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for _, e := range s.hashed {
+		if !e.cert.IsCA {
+			return false
+		}
+	}
+	return true
+}
+
 // Export produces a standard *x509.CertPool containing the
 // same CA certificates
 func (s *CertPool) Export() *x509.CertPool {
