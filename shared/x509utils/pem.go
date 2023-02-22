@@ -24,7 +24,7 @@ func ReadPEM(b []byte, cb DecodePEMBlockFunc) error {
 		return nil
 	} else if block, rest := pem.Decode(b); block != nil {
 		// PEM chain
-		_ = readPEM("", block, rest, cb)
+		_ = readBlock("", block, rest, cb)
 		return nil
 	} else {
 		// Not PEM
@@ -65,9 +65,7 @@ func ReadStringPEM(s string, cb DecodePEMBlockFunc) error {
 	return fs.ErrNotExist
 }
 
-//revive:disable:confusing-naming
-func readPEM(filename string, block *pem.Block, rest []byte, cb DecodePEMBlockFunc) bool {
-	//revive:enable:confusing-naming
+func readBlock(filename string, block *pem.Block, rest []byte, cb DecodePEMBlockFunc) bool {
 	for block != nil {
 		if cb(filename, block) {
 			// cascade termination request
@@ -132,7 +130,7 @@ func fileReadPEM(filename string, cb DecodePEMBlockFunc) (bool, error) {
 		block, rest := pem.Decode(b)
 		if block != nil {
 			// process PEM file and propagate termination if needed
-			term := readPEM(filename, block, rest, cb)
+			term := readBlock(filename, block, rest, cb)
 			return term, nil
 		}
 	}
