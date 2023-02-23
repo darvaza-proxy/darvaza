@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/netip"
 	"strconv"
-	"strings"
 
 	"github.com/darvaza-proxy/darvaza/shared/data"
 )
@@ -30,27 +29,32 @@ func SplitHostPort(hostport string) (string, uint16, error) {
 // JoinHostPort combines a given host address and a port, validating
 // the provided IP address in the process
 func JoinHostPort(host string, port uint16) (string, error) {
-	addr, err := net.ResolveIPAddr("ip", host)
-	if err == nil {
-		return fmt.Sprintf("%s:%v", addr, port), nil
+	host, err := stringifyAddr(host)
+	if err != nil {
+		return "", err
 	}
-	return "", err
+
+	return fmt.Sprintf("%s:%v", host, port), nil
 }
 
-func resolveIPAddr(host string) (string, error) {
-	ip, err := net.ResolveIPAddr("ip", host)
-	if err != nil {
-		// bad address
-		return "", err
-	} else if ip == nil || ip.IP.IsUnspecified() {
-		// wildcard
+func stringifyAddr(host string) (string, error) {
+	switch host {
+	case "0":
+		// special case
 		return "", nil
 	}
 
-	host = ip.String()
-	if strings.ContainsRune(host, ':') {
-		// IPv6
-		host = fmt.Sprintf("[%s]", host)
+	addr, err := netip.ParseAddr(host)
+	if err != nil {
+		return "", err
+	}
+
+	if addr.IsUnspecified() {
+		host = ""
+	} else if addr.Is4() {
+		host = addr.String()
+	} else {
+		host = fmt.Sprintf("[%s]", addr.String())
 	}
 
 	return host, nil
@@ -62,7 +66,7 @@ func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 	var out []string
 
 	for _, s := range addresses {
-		addr, err := resolveIPAddr(s)
+		addr, err := stringifyAddr(s)
 		if err != nil {
 			return out, err
 		}
