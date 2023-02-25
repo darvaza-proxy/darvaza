@@ -38,8 +38,7 @@ func JoinHostPort(host string, port uint16) (string, error) {
 }
 
 func stringifyAddr(host string) (string, error) {
-	switch host {
-	case "0":
+	if host == "0" {
 		// special case
 		return "", nil
 	}
