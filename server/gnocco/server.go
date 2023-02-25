@@ -121,3 +121,15 @@ func (s *Resolver) startCacheDumping() {
 		s.DumpCache()
 	}
 }
+
+// NewResolver returns a pointer to a gnocco.Resolver from a gnocco.Gnocco pointer
+func NewResolver(cf *Gnocco) *Resolver {
+	return &Resolver{
+		Host:       cf.Listen.Host,
+		Port:       cf.Listen.Port,
+		MaxJobs:    cf.MaxJobs,
+		MaxQueries: cf.MaxQueries,
+		cf:         cf,
+	}
+
+}

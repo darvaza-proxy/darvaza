@@ -29,12 +29,7 @@ func main() {
 		panic(err)
 	}
 
-	aserver := &gnocco.Resolver{
-		Host:       cf.Listen.Host,
-		Port:       cf.Listen.Port,
-		MaxJobs:    cf.MaxJobs,
-		MaxQueries: cf.MaxQueries,
-	}
+	aserver := gnocco.NewResolver(cf)
 
 	aserver.Run()
 
