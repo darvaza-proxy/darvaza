@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net"
+	"net/netip"
 	"net/url"
 	"strings"
 
@@ -13,32 +14,47 @@ import (
 // Names returns a list of exact names and patterns the certificate
 // supports
 func Names(cert *x509.Certificate) ([]string, []string) {
-	var names []string
-	var patterns []string
+	names, patterns := splitDNSNames(cert.DNSNames)
+	names = appendIPAddresses(names, cert.IPAddresses)
 
-	if len(cert.URIs) == 0 {
-		// an "old" certificate, no SAN
-		names = append(names, cert.Subject.CommonName)
+	if len(names) == 0 && len(patterns) == 0 {
+		if len(cert.URIs) == 0 {
+			// an "old" certificate, no SAN
+			cn := cert.Subject.CommonName
+			if cn != "" {
+				names = append(names, strings.ToLower(cn))
+			}
+		}
 	}
+	return names, patterns
+}
 
-	for _, addr := range cert.IPAddresses {
-		// See RFC 6125, Appendix B.2.
-		names = append(names, fmt.Sprintf("[%s]", addr.String()))
-	}
-
-	for _, s := range cert.DNSNames {
+func splitDNSNames(dnsNames []string) (names []string, patterns []string) {
+	for _, s := range dnsNames {
 		s = strings.ToLower(s)
 
 		if strings.HasPrefix(s, "*.") {
 			// pattern
 			patterns = append(patterns, s[1:])
-		} else {
+		} else if s != "" {
 			// literal
 			names = append(names, s)
 		}
 	}
 
 	return names, patterns
+}
+
+func appendIPAddresses(names []string, addrs []net.IP) []string {
+	for _, ip := range addrs {
+		if addr, ok := netip.AddrFromSlice(ip); ok {
+			if addr.IsValid() {
+				name := fmt.Sprintf("[%s]", addr.String())
+				names = append(names, name)
+			}
+		}
+	}
+	return names
 }
 
 // Hostname returns a sanitised hostname for a parsed URL
