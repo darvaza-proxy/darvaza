@@ -6,6 +6,7 @@ import (
 	"net/netip"
 	"strings"
 
+	"github.com/darvaza-proxy/core"
 	"github.com/darvaza-proxy/darvaza/shared/data"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
@@ -14,7 +15,7 @@ func (s *CertPool) getAllHashByName(name string) []Hash {
 	if entries, ok := s.getEntriesByName(name); ok {
 		out := make([]Hash, 0, len(entries))
 		for _, e := range entries {
-			if !data.SliceContains(out, e.hash) {
+			if !core.SliceContains(out, e.hash) {
 				out = append(out, e.hash)
 			}
 		}

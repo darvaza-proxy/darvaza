@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/darvaza-proxy/core"
 	"github.com/darvaza-proxy/darvaza/shared/data"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
@@ -83,7 +84,7 @@ func (s *CertPool) addCertUnsafe(hash Hash, name string, cert *x509.Certificate)
 
 	if name != "" {
 		name = strings.ToLower(name)
-		if !data.SliceContains(p.names, name) {
+		if !core.SliceContains(p.names, name) {
 			added = true
 			p.names = append(p.names, name)
 			s.setNames(p, []string{name})
