@@ -8,8 +8,8 @@ import (
 	"io/fs"
 	"path/filepath"
 
+	"github.com/darvaza-proxy/core"
 	"github.com/darvaza-proxy/darvaza/shared/os"
-	"github.com/pkg/errors"
 )
 
 // DecodePEMBlockFunc is called for each PEM block coded. it returns true
@@ -166,7 +166,7 @@ func EncodePKCS8PrivateKey(key PrivateKey) []byte {
 	if key != nil {
 		body, err := x509.MarshalPKCS8PrivateKey(key)
 		if err != nil {
-			panic(errors.Wrap(err, "unreachable"))
+			panic(core.Wrap(err, "unreachable"))
 		}
 		out = EncodeBytes("PRIVATE KEY", body, nil)
 	}
