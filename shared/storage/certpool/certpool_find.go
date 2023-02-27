@@ -3,7 +3,6 @@ package certpool
 import (
 	"container/list"
 	"fmt"
-	"net/netip"
 	"strings"
 
 	"github.com/darvaza-proxy/core"
@@ -41,7 +40,7 @@ func getEntriesInList(l *list.List) (out []*certPoolEntry, found bool) {
 }
 
 func nameAsIP(name string) (string, bool) {
-	if addr, err := netip.ParseAddr(name); err == nil {
+	if addr, err := core.ParseAddr(name); err == nil {
 		return fmt.Sprintf("[%s]", addr.String()), true
 	}
 	return "", false

@@ -4,9 +4,10 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net"
-	"net/netip"
 	"net/url"
 	"strings"
+
+	"github.com/darvaza-proxy/core"
 )
 
 // Names returns a list of exact names and patterns the certificate
@@ -50,7 +51,7 @@ func Hostname(u *url.URL) (string, bool) {
 func SanitiseName(name string) (string, bool) {
 	if name != "" {
 		if host, _, err := net.SplitHostPort(name); err == nil {
-			if addr, err := netip.ParseAddr(host); err == nil {
+			if addr, err := core.ParseAddr(host); err == nil {
 				// IP
 				addr.Unmap()
 				addr.WithZone("")
