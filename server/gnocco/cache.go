@@ -69,21 +69,16 @@ func (cf *Gnocco) newCache(size int64, exp int32) *cache {
 	return c
 }
 
-func (c *cache) dump(w io.Writer, positiveCache bool) error {
+func (c *cache) dump(w io.Writer) error {
 	if w != os.Stdout {
 		encoder := gob.NewEncoder(w)
-		if positiveCache {
-			errp := encoder.Encode(c.pcache)
-			if errp != nil {
-				return fmt.Errorf("cache %s", errp)
-			}
-
-		} else {
-			errn := encoder.Encode(c.ncache)
-			if errn != nil {
-				return fmt.Errorf("negative cache %s", errn)
-			}
-
+		errp := encoder.Encode(c.pcache)
+		if errp != nil {
+			return fmt.Errorf("cache %s", errp)
+		}
+		errn := encoder.Encode(c.ncache)
+		if errn != nil {
+			return fmt.Errorf("negative cache %s", errn)
 		}
 	} else {
 		for z, cc := range c.pcache {
@@ -124,7 +119,6 @@ func (c *cache) setVal(key string, mtype string, ttl int, val string) {
 	c.Lock()
 	c.pcache[mk] = mrec
 	c.Unlock()
-
 }
 
 func (c *cache) set(key string, mtype string, d *dns.Msg) {
@@ -167,7 +161,6 @@ func (c *cache) set(key string, mtype string, d *dns.Msg) {
 			rec.Stored = int(time.Now().Unix())
 			rec.TTL = v.TTL
 			rec.Value = append(rec.Value, v.Value)
-
 		}
 		c.Lock()
 		c.pcache[mk] = rec
@@ -177,19 +170,17 @@ func (c *cache) set(key string, mtype string, d *dns.Msg) {
 	}
 }
 
-func (c *cache) load(r io.Reader, positiveCache bool) error {
-	var err error
+func (c *cache) load(r io.Reader) error {
 	decoder := gob.NewDecoder(r)
-	if positiveCache {
-		c.Lock()
-		err = decoder.Decode(&c.pcache)
-		c.Unlock()
-	} else {
-		c.Lock()
-		err = decoder.Decode(&c.pcache)
-		c.Unlock()
+	c.Lock()
+	errp := decoder.Decode(&c.pcache)
+	errn := decoder.Decode(&c.ncache)
+	c.Unlock()
+
+	if errp != nil {
+		return errp
 	}
-	return err
+	return errn
 }
 
 func (c *cache) delete(key string) {
@@ -204,7 +195,6 @@ func (c *cache) size() int {
 }
 
 func (c *cache) loadRoots(cf *Gnocco) error {
-
 	if cf.RootsFile == "" {
 		return fmt.Errorf("Config.RootsFile is empty :(")
 	}
@@ -218,7 +208,7 @@ func (c *cache) loadRoots(cf *Gnocco) error {
 
 	reader := bufio.NewReader(fl)
 	var nstmp crecord
-	//keep root records for one year.....
+	// keep root records for one year.....
 	nstmp.Stored = int(time.Now().AddDate(1, 0, 0).Unix())
 	nstmp.TTL = 518400
 	for {
@@ -233,7 +223,7 @@ func (c *cache) loadRoots(cf *Gnocco) error {
 	c.pcache["./NS"] = nstmp
 	c.Unlock()
 
-	fl.Seek(0, 0)
+	_, _ = fl.Seek(0, 0)
 	for {
 		line, err := reader.ReadString('\n')
 		if err == io.EOF {
@@ -241,8 +231,9 @@ func (c *cache) loadRoots(cf *Gnocco) error {
 		}
 
 		var v, q crecord
-		//keep root records for one year.....
-		v.Stored, q.Stored = int(time.Now().AddDate(1, 0, 0).Unix()), int(time.Now().AddDate(1, 0, 0).Unix())
+		// keep root records for one year.....
+		v.Stored = int(time.Now().AddDate(1, 0, 0).Unix())
+		q.Stored = int(time.Now().AddDate(1, 0, 0).Unix())
 		v.TTL, q.TTL = 518400, 518400
 		fields := strings.Fields(line)
 		v.Value = append(v.Value, fields[1])
@@ -254,12 +245,11 @@ func (c *cache) loadRoots(cf *Gnocco) error {
 			c.Lock()
 			c.pcache[dns.Fqdn(fields[0])+"/AAAA"] = q
 			c.Unlock()
-
 		}
 	}
 	return nil
 }
 
-func (c *cache) makeKey(a string, b string) string {
+func (*cache) makeKey(a string, b string) string {
 	return dns.Fqdn(a) + "/" + b
 }

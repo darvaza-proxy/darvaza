@@ -105,10 +105,10 @@ func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
 }
 
 func (r *resolver) Iterate(c *cache, qname string, qtype string, slist *stack) {
-	//We arrived here because original question was not in cache
-	//so we iterate to find a nameserver for our question.
+	// We arrived here because original question was not in cache
+	// so we iterate to find a nameserver for our question.
 
-	//Down the rabbit hole!
+	// Down the rabbit hole!
 	ancestor := getParentinCache(qname, c)
 	if nstoask, ancerr := c.get(ancestor + "/NS"); ancerr == nil {
 		qq := randomfromslice(nstoask.Value)
@@ -117,8 +117,8 @@ func (r *resolver) Iterate(c *cache, qname string, qtype string, slist *stack) {
 
 			switch typify(ans) {
 			case "Delegation":
-				//FIXME: Check bailiwick and observe that Extra can have fewer or more
-				//records than NS
+				// FIXME: Check bailiwick and observe that Extra can have fewer or more
+				// records than NS
 				c.set(ans.Ns[0].Header().Name, "NS", ans)
 
 				ex := mdRRtoRRs(ans.Extra)
@@ -157,7 +157,6 @@ func (r *resolver) Iterate(c *cache, qname string, qtype string, slist *stack) {
 			r.Iterate(c, qq, "A", slist)
 		}
 	}
-
 }
 
 func (r *resolver) getans(qname string, qtype string, nameserver string) (result *dns.Msg) {
@@ -174,8 +173,7 @@ func (r *resolver) getans(qname string, qtype string, nameserver string) (result
 	if err != nil {
 		r.Logger.Error().Print(err)
 	}
-	return
-
+	return result
 }
 
 func getParentinCache(domain string, c *cache) string {
@@ -189,7 +187,7 @@ func getParentinCache(domain string, c *cache) string {
 		}
 	}
 
-	//We ALLWAYS have root.
+	// We ALLWAYS have root.
 	if result == "" {
 		result = "."
 	}

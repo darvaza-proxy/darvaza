@@ -43,7 +43,6 @@ func (s *stack) popFor(t string, tt string) {
 		}
 	}
 	s.Unlock()
-
 }
 
 func (s *stack) isEmpty() bool {
@@ -53,7 +52,7 @@ func (s *stack) isEmpty() bool {
 	return false
 }
 
-func (s *stack) pop() (string, string) {
+func (s *stack) pop() (name string, qtype string) {
 	var x string
 	s.Lock()
 	if len(s.data) > 0 {
@@ -64,6 +63,6 @@ func (s *stack) pop() (string, string) {
 	s.Unlock()
 
 	t := strings.Split(x, "/")
-	qname, qtype := t[0], t[1]
-	return qname, qtype
+	name, qtype = t[0], t[1]
+	return name, qtype
 }

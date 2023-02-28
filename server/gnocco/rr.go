@@ -20,7 +20,8 @@ type rrs []rr
 
 // String returns a string representation of an RR in zone-file format.
 func (arr *rr) String() string {
-	return arr.Name + "\t      " + fmt.Sprint(arr.TTL) + "\t" + arr.Class + "\t" + arr.Type + "\t" + arr.Value
+	return fmt.Sprintf("%s \t %s \t %s \t %s \t %s",
+		arr.Name, fmt.Sprint(arr.TTL), arr.Class, arr.Type, arr.Value)
 }
 
 func sliceToString(sli []string) string {
@@ -35,26 +36,55 @@ func sliceToString(sli []string) string {
 
 func dRRtoRR(drr dns.RR) (rr, bool) {
 	if drr != nil {
+		rname := dns.Fqdn(strings.ToLower(drr.Header().Name))
+		rttl := int(drr.Header().Ttl)
+		rcls := dns.ClassToString[drr.Header().Class]
 		switch t := drr.(type) {
 		case *dns.SOA:
-			return rr{dns.Fqdn(strings.ToLower(t.Hdr.Name)), int(t.Hdr.Ttl), dns.ClassToString[t.Hdr.Class], "SOA", dns.Fqdn(strings.ToLower(t.Ns))}, true
+			return rr{rname,
+				rttl,
+				rcls,
+				"SOA",
+				dns.Fqdn(strings.ToLower(t.Ns))}, true
 		case *dns.NS:
-			return rr{dns.Fqdn(strings.ToLower(t.Hdr.Name)), int(t.Hdr.Ttl), dns.ClassToString[t.Hdr.Class], "NS", dns.Fqdn(strings.ToLower(t.Ns))}, true
+			return rr{rname,
+				rttl,
+				rcls,
+				"NS",
+				dns.Fqdn(strings.ToLower(t.Ns))}, true
 		case *dns.CNAME:
-			return rr{dns.Fqdn(strings.ToLower(t.Hdr.Name)), int(t.Hdr.Ttl), dns.ClassToString[t.Hdr.Class], "CNAME", dns.Fqdn(strings.ToLower(t.Target))}, true
+			return rr{rname,
+				rttl,
+				rcls,
+				"CNAME",
+				dns.Fqdn(strings.ToLower(t.Target))}, true
 		case *dns.A:
-			return rr{dns.Fqdn(strings.ToLower(t.Hdr.Name)), int(t.Hdr.Ttl), dns.ClassToString[t.Hdr.Class], "A", t.A.String()}, true
+			return rr{rname,
+				rttl,
+				rcls,
+				"A",
+				t.A.String()}, true
 		case *dns.AAAA:
-			return rr{dns.Fqdn(strings.ToLower(t.Hdr.Name)), int(t.Hdr.Ttl), dns.ClassToString[t.Hdr.Class], "AAAA", t.AAAA.String()}, true
+			return rr{rname,
+				rttl,
+				rcls,
+				"AAAA",
+				t.AAAA.String()}, true
 		case *dns.TXT:
-			return rr{dns.Fqdn(strings.ToLower(t.Hdr.Name)), int(t.Hdr.Ttl), dns.ClassToString[t.Hdr.Class], "TXT", strings.Join(t.Txt, "\t")}, true
+			return rr{rname,
+				rttl,
+				rcls,
+				"TXT",
+				strings.Join(t.Txt, "\t")}, true
 		case *dns.MX:
-			return rr{dns.Fqdn(strings.ToLower(t.Hdr.Name)), int(t.Hdr.Ttl), dns.ClassToString[t.Hdr.Class], "MX", t.Mx}, true
+			return rr{rname,
+				rttl,
+				rcls,
+				"MX",
+				t.Mx}, true
 		}
 	}
-
 	return rr{}, false
-
 }
 
 func mdRRtoRRs(mdrr []dns.RR) rrs {

@@ -5,7 +5,6 @@ import (
 	"net"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/darvaza-proxy/slog"
@@ -41,20 +40,21 @@ func (s *Resolver) DumpCache() {
 
 	for _, file := range files {
 		_ = os.MkdirAll(cache.CachePath, 0755)
-		if fl, err := os.Create(file); err == nil {
-
-			defer fl.Close()
-			if strings.HasSuffix(file, "pcache") {
-				s.handler.Cache.dump(fl, true)
-			} else {
-				s.handler.Cache.dump(fl, false)
-			}
-
-		} else {
+		if err := s.handleFile(file); err != nil {
 			s.Logger().Error().Print(err)
 		}
 	}
+}
 
+func (s *Resolver) handleFile(file string) error {
+	var err error
+	if fl, err := os.Create(file); err == nil {
+		defer fl.Close()
+		if ern := s.handler.Cache.dump(fl); ern != nil {
+			return ern
+		}
+	}
+	return err
 }
 
 func (s *Resolver) newHandler() *gnoccoHandler {
@@ -66,29 +66,24 @@ func (s *Resolver) Run() {
 	cache := &s.cf.Cache
 
 	s.handler = s.newHandler()
-	if _, err := os.Stat(cache.CachePath + "/pcache"); err == nil {
-		var file, err = os.OpenFile(cache.CachePath+"/pcache", os.O_RDWR, 0644)
-		if err == nil {
-			s.handler.Cache.load(file, true)
+	for _, fl := range []string{"/pcache", "/ncache"} {
+		if _, err := os.Stat(cache.CachePath + fl); err == nil {
+			var file, err = os.OpenFile(cache.CachePath+fl, os.O_RDWR, 0644)
+			if err == nil {
+				s.Logger().Error().Println(s.handler.Cache.load(file))
+			}
 		}
-	}
-	if _, err := os.Stat(cache.CachePath + "/ncache"); err == nil {
-		var file, err = os.OpenFile(cache.CachePath+"/ncache", os.O_RDWR, 0644)
-		if err == nil {
-			s.handler.Cache.load(file, false)
-		}
-
 	}
 
 	tcpHandler := dns.NewServeMux()
-	tcpHandler.HandleFunc(".", s.handler.doTCP)
+	tcpHandler.HandleFunc(".", s.handler.do)
 	tcpResolver := &dns.Server{Addr: s.Addr(),
 		Net:     "tcp",
 		Handler: tcpHandler}
 	go s.start(tcpResolver)
 
 	udpHandler := dns.NewServeMux()
-	udpHandler.HandleFunc(".", s.handler.doUDP)
+	udpHandler.HandleFunc(".", s.handler.do)
 
 	udpResolver := &dns.Server{Addr: s.Addr(),
 		Net:     "udp",
@@ -98,7 +93,6 @@ func (s *Resolver) Run() {
 	go s.start(udpResolver)
 
 	go s.startCacheDumping()
-
 }
 
 func (s *Resolver) start(ds *dns.Server) {
@@ -131,5 +125,4 @@ func NewResolver(cf *Gnocco) *Resolver {
 		MaxQueries: cf.MaxQueries,
 		cf:         cf,
 	}
-
 }

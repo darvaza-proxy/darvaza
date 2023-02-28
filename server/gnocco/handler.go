@@ -34,42 +34,44 @@ func (cf *Gnocco) newHandler(m int) *gnoccoHandler {
 	return &gnoccoHandler{c, r, m, 0, cf.Logger()}
 }
 
-func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
+func getIPFromWriter(w dns.ResponseWriter) net.IP {
+	if _, ok := w.RemoteAddr().(*net.UDPAddr); ok {
+		return w.RemoteAddr().(*net.UDPAddr).IP
+	}
+	return w.RemoteAddr().(*net.TCPAddr).IP
+}
+
+func (h *gnoccoHandler) do(w dns.ResponseWriter, req *dns.Msg) {
 	if h.Jobs < h.MaxJobs {
 		q := req.Question[0]
-		Q := question{q.Name, dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
+		myQ := question{q.Name, dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
 
-		var remote net.IP
-		if Net == "tcp" {
-			remote = w.RemoteAddr().(*net.TCPAddr).IP
-		} else {
-			remote = w.RemoteAddr().(*net.UDPAddr).IP
-		}
+		remote := getIPFromWriter(w)
 
-		h.logger.Info().Printf("%s lookup　%s", remote, Q.String())
+		h.logger.Info().Printf("%s lookup　%s", remote, myQ.String())
 		h.Jobs++
 		switch {
-		case Q.qclass == "IN":
-			if recs, err := h.Cache.get(h.Cache.makeKey(Q.qname, Q.qtype)); err == nil {
-				//we have an answer now construct a dns.Msg
+		case myQ.qclass == "IN":
+			if recs, err := h.Cache.get(h.Cache.makeKey(myQ.qname, myQ.qtype)); err == nil {
+				// we have an answer now construct a dns.Msg
 				result := new(dns.Msg)
 				result.SetReply(req)
 				for _, z := range recs.Value {
-					rec, _ := dns.NewRR(dns.Fqdn(Q.qname) + " " + Q.qtype + " " + z)
+					rec, _ := dns.NewRR(dns.Fqdn(myQ.qname) + " " + myQ.qtype + " " + z)
 					result.Answer = append(result.Answer, rec)
 				}
 				w.WriteMsg(result)
 			} else {
-				if rcs, err := h.Cache.get(h.Cache.makeKey(Q.qname, "CNAME")); err == nil {
+				if rcs, err := h.Cache.get(h.Cache.makeKey(myQ.qname, "CNAME")); err == nil {
 					h.logger.Info().Printf("Found CNAME %s", rcs.String())
 					result := new(dns.Msg)
 					result.SetReply(req)
 					for _, z := range rcs.Value {
-						rc, _ := dns.NewRR(dns.Fqdn(Q.qname) + " " + "CNAME" + " " + z)
+						rc, _ := dns.NewRR(dns.Fqdn(myQ.qname) + " " + "CNAME" + " " + z)
 						result.Answer = append(result.Answer, rc)
-						if rt, err := h.Cache.get(h.Cache.makeKey(z, Q.qtype)); err == nil {
+						if rt, err := h.Cache.get(h.Cache.makeKey(z, myQ.qtype)); err == nil {
 							for _, ey := range rt.Value {
-								gg, _ := dns.NewRR(z + " " + Q.qtype + " " + ey)
+								gg, _ := dns.NewRR(z + " " + myQ.qtype + " " + ey)
 								result.Answer = append(result.Answer, gg)
 							}
 						}
@@ -79,21 +81,8 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 					h.Resolver.Lookup(h.Cache, w, req)
 				}
 			}
-		case Q.qclass == "CH", Q.qtype == "TXT":
-			m := new(dns.Msg)
-			m.SetReply(req)
-			hdr := dns.RR_Header{Name: Q.qname, Rrtype: dns.TypeTXT, Class: dns.ClassCHAOS, Ttl: 0}
-			switch Q.qname {
-			case "authors.bind.":
-				m.Answer = append(m.Answer, &dns.TXT{Hdr: hdr, Txt: []string{"Nagy Karoly Gabriel <k@jpi.io>"}})
-			case "version.bind.", "version.server.":
-				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"Version " + version.Version + " built on " + version.BuildDate}}}
-			case "hostname.bind.", "id.server.":
-				m.Answer = []dns.RR{&dns.TXT{Hdr: hdr, Txt: []string{"localhost"}}}
-			default:
-				m.SetRcode(req, dns.RcodeNotImplemented)
-				w.WriteMsg(m)
-			}
+		case myQ.qclass == "CH", myQ.qtype == "TXT":
+			m := handleChaos(req)
 			w.WriteMsg(m)
 
 		default:
@@ -106,10 +95,33 @@ func (h *gnoccoHandler) do(Net string, w dns.ResponseWriter, req *dns.Msg) {
 	}
 }
 
-func (h *gnoccoHandler) doTCP(w dns.ResponseWriter, req *dns.Msg) {
-	h.do("tcp", w, req)
-}
+func handleChaos(req *dns.Msg) (m *dns.Msg) {
+	reqQ := req.Question[0]
+	gq := question{reqQ.Name, dns.TypeToString[reqQ.Qtype], dns.ClassToString[reqQ.Qclass]}
 
-func (h *gnoccoHandler) doUDP(w dns.ResponseWriter, req *dns.Msg) {
-	h.do("udp", w, req)
+	m = new(dns.Msg)
+	m.SetReply(req)
+	hdr := dns.RR_Header{
+		Name:   gq.qname,
+		Rrtype: dns.TypeTXT,
+		Class:  dns.ClassCHAOS,
+		Ttl:    0,
+	}
+	switch gq.qname {
+	case "authors.bind.":
+		m.Answer = append(m.Answer, &dns.TXT{
+			Hdr: hdr,
+			Txt: []string{"Nagy Kroly Gabriel <k@jpi.io>"}})
+	case "version.bind.", "version.server.":
+		m.Answer = []dns.RR{&dns.TXT{
+			Hdr: hdr,
+			Txt: []string{"Version " + version.Version + " built on " + version.BuildDate}}}
+	case "hostname.bind.", "id.server.":
+		m.Answer = []dns.RR{&dns.TXT{
+			Hdr: hdr,
+			Txt: []string{"localhost"}}}
+	default:
+		m.SetRcode(req, dns.RcodeNotImplemented)
+	}
+	return m
 }

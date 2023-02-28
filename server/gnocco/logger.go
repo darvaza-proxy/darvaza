@@ -19,7 +19,7 @@ func newLogger(cf *Gnocco) slog.Logger {
 	}
 
 	if cf.Log.File != "" {
-		cfg := map[string]interface{}{"file": cf.Log.File}
+		cfg := map[string]any{"file": cf.Log.File}
 		logger.SetLogger("file", cfg)
 		logger.Info().Print("Logger started")
 	}
