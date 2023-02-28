@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/darvaza-proxy/core"
-	"github.com/darvaza-proxy/darvaza/shared/data"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
@@ -26,7 +25,7 @@ func (s *CertPool) getAllHashByName(name string) []Hash {
 }
 
 func getFirstInList(l *list.List) (out *certPoolEntry) {
-	data.ListForEach(l, func(v *certPoolEntry) bool {
+	core.ListForEach(l, func(v *certPoolEntry) bool {
 		out = v
 		return true
 	})
@@ -34,7 +33,7 @@ func getFirstInList(l *list.List) (out *certPoolEntry) {
 }
 
 func getEntriesInList(l *list.List) (out []*certPoolEntry, found bool) {
-	data.ListForEach(l, func(v *certPoolEntry) bool {
+	core.ListForEach(l, func(v *certPoolEntry) bool {
 		out = append(out, v)
 		return false
 	})

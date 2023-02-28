@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/darvaza-proxy/core"
-	"github.com/darvaza-proxy/darvaza/shared/data"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
@@ -117,7 +116,7 @@ func (*CertPool) setListItem(m map[string]*list.List, p *certPoolEntry, name str
 			l = list.New()
 			m[name] = l
 		}
-		if !data.ListContains(l, p) {
+		if !core.ListContains(l, p) {
 			l.PushFront(p)
 		}
 	}

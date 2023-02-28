@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"io/fs"
 
-	"github.com/darvaza-proxy/darvaza/shared/data"
+	"github.com/darvaza-proxy/core"
 )
 
 // Delete removes a certificate by name
@@ -58,7 +58,7 @@ func deleteHashFromLists(m map[string]*list.List, hash Hash, names ...string) {
 }
 
 func deleteHashFromList(l *list.List, hash Hash) {
-	data.ListForEachElement(l, func(e *list.Element) bool {
+	core.ListForEachElement(l, func(e *list.Element) bool {
 		if p, ok := e.Value.(*certPoolEntry); ok {
 			if p.hash == hash {
 				l.Remove(e)
