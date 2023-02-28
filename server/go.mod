@@ -5,14 +5,15 @@ go 1.18
 replace github.com/darvaza-proxy/darvaza/shared => ../shared
 
 require (
-	github.com/darvaza-proxy/darvaza/shared v0.0.0-20230216125300-b1fc1be6afaf
-	github.com/darvaza-proxy/slog v0.2.0
-	github.com/miekg/dns v1.1.50
+	github.com/darvaza-proxy/darvaza/shared v0.1.3
+	github.com/darvaza-proxy/slog v0.4.4
+	github.com/miekg/dns v1.1.51
 	github.com/naoina/toml v0.1.1
 )
 
 require (
-	github.com/darvaza-proxy/slog/handlers/cblog v0.2.0 // indirect
+	github.com/darvaza-proxy/core v0.1.3 // indirect
+	github.com/darvaza-proxy/slog/handlers/cblog v0.2.2 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/naoina/go-stringutil v0.1.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
