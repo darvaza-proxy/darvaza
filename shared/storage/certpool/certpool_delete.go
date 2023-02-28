@@ -37,10 +37,10 @@ func (s *CertPool) DeleteCert(_ context.Context, cert *x509.Certificate) error {
 func (s *CertPool) deleteHash(hash [HashSize]byte) error {
 	if p, ok := s.hashed[hash]; ok {
 		s.cached = nil // invalidate cache
-		deleteHashFromLists(s.names, hash, p.names...)
-		deleteHashFromLists(s.patterns, hash, p.patterns...)
+		deleteHashFromNames(s.names, hash, p.names...)
+		deleteHashFromNames(s.patterns, hash, p.patterns...)
 		if skid := string(p.cert.SubjectKeyId); len(skid) > 0 {
-			deleteHashFromLists(s.subjects, hash, skid)
+			deleteHashFromNames(s.subjects, hash, skid)
 		}
 		delete(s.hashed, hash)
 		return nil
@@ -49,7 +49,7 @@ func (s *CertPool) deleteHash(hash [HashSize]byte) error {
 	return fs.ErrNotExist
 }
 
-func deleteHashFromLists(m map[string]*list.List, hash Hash, names ...string) {
+func deleteHashFromNames(m map[string]*list.List, hash Hash, names ...string) {
 	for _, name := range names {
 		if l, ok := m[name]; ok {
 			deleteHashFromList(l, hash)
