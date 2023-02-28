@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"sync"
 
-	"github.com/darvaza-proxy/darvaza/shared/data"
+	"github.com/darvaza-proxy/darvaza/shared/x"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
@@ -51,9 +51,9 @@ func (s *CertPool) Clone() x509utils.CertPooler {
 	clone := &CertPool{
 		cached:   s.exportUnlocked(),
 		hashed:   make(map[Hash]*certPoolEntry, len(s.hashed)),
-		names:    data.CloneMapList(s.names),
-		patterns: data.CloneMapList(s.patterns),
-		subjects: data.CloneMapList(s.subjects),
+		names:    x.CloneMapList(s.names),
+		patterns: x.CloneMapList(s.patterns),
+		subjects: x.CloneMapList(s.subjects),
 	}
 
 	for hash, d := range s.hashed {

@@ -1,4 +1,4 @@
-package data
+package x
 
 // MapContains tells if a given map contains a key.
 // this helper is inteded for switch/case conditions
