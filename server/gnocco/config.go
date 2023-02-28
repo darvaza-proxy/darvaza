@@ -11,38 +11,43 @@ import (
 	"github.com/darvaza-proxy/slog"
 )
 
+// ListenCfg is a host:port combination
+type ListenCfg struct {
+	Host string
+	Port int
+}
+
+// LogCfg is the configuration for logging
+type LogCfg struct {
+	Stdout bool
+	File   string
+}
+
+// CacheCfg is the configuration for the cache
+type CacheCfg struct {
+	DumpInterval int
+	Expire       int
+	MaxCount     int
+	CachePath    string
+}
+
 // Gnocco is the configuration representing the dns-resolver
 type Gnocco struct {
 	RootsFile      string
 	PermissionsDir string
 	Daemon         bool
 	IterateResolv  bool
-
-	Listen struct {
-		Host string
-		Port int
-	}
-
-	MaxJobs    int
-	MaxQueries int
-
-	Log struct {
-		Stdout bool
-		File   string
-	}
-
-	Cache struct {
-		DumpInterval int
-		Expire       int
-		MaxCount     int
-		CachePath    string
-	}
-
-	hosts  hostsCfg
-	logger slog.Logger
+	Listen         ListenCfg
+	MaxJobs        int
+	MaxQueries     int
+	Log            LogCfg
+	Cache          CacheCfg
+	hosts          HostsCfg
+	logger         slog.Logger
 }
 
-type hostsCfg struct {
+// HostsCfg is the configuration for using hosts file
+type HostsCfg struct {
 	Enable          bool
 	HostsFile       string
 	RefreshInterval uint
