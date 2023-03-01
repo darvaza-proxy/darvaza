@@ -5,8 +5,9 @@ package net
 import (
 	"fmt"
 	"net"
-	"net/netip"
 	"strconv"
+
+	"github.com/darvaza-proxy/core"
 )
 
 // SplitHostPort splits a network address into host and port,
@@ -36,12 +37,7 @@ func JoinHostPort(host string, port uint16) (string, error) {
 }
 
 func stringifyAddr(host string) (string, error) {
-	if host == "0" {
-		// special case
-		return "", nil
-	}
-
-	addr, err := netip.ParseAddr(host)
+	addr, err := core.ParseAddr(host)
 	if err != nil {
 		return "", err
 	}

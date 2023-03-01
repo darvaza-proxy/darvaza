@@ -111,13 +111,6 @@ func (s *CertPool) setSubjectKeyID(p *certPoolEntry, skid []byte) {
 
 func (*CertPool) setListItem(m map[string]*list.List, p *certPoolEntry, name string) {
 	if len(name) > 0 {
-		l, ok := m[name]
-		if !ok {
-			l = list.New()
-			m[name] = l
-		}
-		if !core.ListContains(l, p) {
-			l.PushFront(p)
-		}
+		core.MapListInsertUnique(m, name, p)
 	}
 }

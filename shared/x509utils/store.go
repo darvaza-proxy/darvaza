@@ -3,6 +3,7 @@ package x509utils
 
 import (
 	"context"
+	"crypto/tls"
 	"crypto/x509"
 )
 
@@ -36,4 +37,9 @@ type CertPoolWriter interface {
 
 	AddCert(cert *x509.Certificate) bool
 	AppendCertsFromPEM(b []byte) bool
+}
+
+// Bundler is an object that bundles tls.Certificates
+type Bundler interface {
+	Bundle(cert *x509.Certificate, key PrivateKey, roots CertPooler) (*tls.Certificate, error)
 }
