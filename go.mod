@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/creasty/defaults v1.6.0
 	github.com/darvaza-proxy/darvaza/server v0.0.1
-	github.com/darvaza-proxy/darvaza/shared v0.1.3
+	github.com/darvaza-proxy/darvaza/shared v0.1.6
 	github.com/hashicorp/hcl/v2 v2.16.1
 	github.com/mgechev/revive v1.2.5
 	github.com/miekg/dns v1.1.51
@@ -17,7 +17,7 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8 // indirect
-	github.com/darvaza-proxy/core v0.1.3 // indirect
+	github.com/darvaza-proxy/core v0.5.1 // indirect
 	github.com/darvaza-proxy/slog v0.4.4 // indirect
 	github.com/darvaza-proxy/slog/handlers/cblog v0.2.2 // indirect
 	github.com/fatih/color v1.14.1 // indirect
@@ -38,11 +38,11 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/zclconf/go-cty v1.13.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
-	golang.org/x/mod v0.8.0 // indirect
+	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 )
 

@@ -1,5 +1,5 @@
-github.com/darvaza-proxy/core v0.1.3 h1:sS4DvylJaQZLA17VjS4TwLQld4Ja9Qagw3DDNdt5TdA=
-github.com/darvaza-proxy/core v0.1.3/go.mod h1:ZImPFrOKEzwDTU5vS9dC7QpBAzl+3I8XhtnCkB6l5Ss=
+github.com/darvaza-proxy/core v0.5.1 h1:HmHyiqOlhXQTGi3y3zcCYCfdB3i7z2mgqUy8+P40WNA=
+github.com/darvaza-proxy/core v0.5.1/go.mod h1:ZImPFrOKEzwDTU5vS9dC7QpBAzl+3I8XhtnCkB6l5Ss=
 github.com/darvaza-proxy/slog v0.4.4 h1:zopOiHIAE3deKlFjDa/qlXBT0awaJv5X5GnH1yxXL0w=
 github.com/darvaza-proxy/slog v0.4.4/go.mod h1:uW4oSt8Fs803dQxHwi0VoJK66M40JE0YNXdYmo/mmTM=
 github.com/darvaza-proxy/slog/handlers/cblog v0.2.2 h1:bm2s7dVRHgMZHL6Kclg7tksDk73AwhRtZXF1cpj3Fy4=
@@ -20,5 +20,5 @@ golang.org/x/crypto v0.6.0/go.mod h1:OFC/31mSvZgRz0V1QTNCzfAI1aIRzbiufJtkMIlEp58
 golang.org/x/sync v0.1.0 h1:wsuoTGHzEhffawBOhz5CYhcrV4IdKZbEyZjBMuTp12o=
 golang.org/x/sync v0.1.0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sys v0.0.0-20220704084225-05e143d24a9e/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.5.0 h1:MUK/U/4lj1t1oPg0HfuXDN/Z1wv31ZJ/YcPiGccS4DU=
-golang.org/x/sys v0.5.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
+golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
