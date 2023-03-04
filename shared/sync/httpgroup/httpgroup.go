@@ -3,12 +3,14 @@ package httpgroup
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"sync/atomic"
 	"syscall"
 
 	"github.com/darvaza-proxy/core"
+	"github.com/darvaza-proxy/slog"
 )
 
 // Server is a subset of the standard *http.Server including what httpgroup uses
@@ -58,6 +60,7 @@ type Group struct {
 	cancel    context.CancelFunc
 	cancelled int32
 	count     int32
+	logger    atomic.Value
 
 	wg core.WaitGroup
 }
@@ -110,6 +113,12 @@ func (heg *Group) SetContext(ctx context.Context) {
 	heg.init(ctx)
 }
 
+// SetLogger sets the slog.Logger to be used when supervising
+// workers
+func (heg *Group) SetLogger(logger slog.Logger) {
+	heg.logger.Store(logger)
+}
+
 // Cancel initiates a shutdown of all *http.Server{}s
 func (heg *Group) Cancel() error {
 	heg.init(context.TODO())
@@ -133,18 +142,79 @@ func (heg *Group) Go(srv Server, lsn net.Listener) error {
 		Listener: lsn,
 	}
 
+	// make a copy of the Listener's Address
+	// in case something happens to it
+	addr, _ := core.AddrPort(lsn)
+	name := fmt.Sprintf("http://%s", addr.String())
+
 	atomic.AddInt32(&heg.count, 1)
 
-	heg.wg.Go(func() error {
-		return w.Run()
+	heg.wg.GoCatch(func() error {
+		return heg.runWorker(w, name)
+	}, func(err error) error {
+		return heg.catchWorker(name, err)
 	})
 
-	heg.wg.Go(func() error {
+	heg.wg.GoCatch(func() error {
 		defer atomic.AddInt32(&heg.count, -1)
 
-		<-heg.ctx.Done()
-		return w.Shutdown(context.Background())
+		return heg.runSupervisor(w, name)
+	}, func(err error) error {
+		return heg.catchSupervisor(name, err)
 	})
+
+	return nil
+}
+
+func (heg *Group) runWorker(w *Worker, name string) error {
+	if log, ok := heg.debug(); ok {
+		log.Println(name, "started")
+	}
+
+	return w.Run()
+}
+
+func (heg *Group) catchWorker(name string, err error) error {
+	if err != nil {
+		if log, ok := heg.error(err); ok {
+			log.Println(name, "crashed")
+		}
+		return err
+	}
+
+	if log, ok := heg.debug(); ok {
+		log.Println(name, "ended")
+	}
+
+	return nil
+}
+
+func (heg *Group) runSupervisor(w *Worker, name string) error {
+	if log, ok := heg.debug(); ok {
+		log.Println(name, "supervisor started")
+	}
+
+	// wait for cancellation
+	<-heg.ctx.Done()
+
+	if log, ok := heg.debug(); ok {
+		log.Println(name, "shutting down")
+	}
+
+	return w.Shutdown(context.Background())
+}
+
+func (heg *Group) catchSupervisor(name string, err error) error {
+	if err != nil {
+		if log, ok := heg.error(err); ok {
+			log.Println(name, "shutdown error")
+		}
+		return err
+	}
+
+	if log, ok := heg.debug(); ok {
+		log.Println(name, "shutdown ended")
+	}
 
 	return nil
 }
