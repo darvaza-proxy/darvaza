@@ -18,39 +18,36 @@ import (
 
 // SetLogger binds a slog.Logger to the buffer
 func (pb *PoolBuffer) SetLogger(logger slog.Logger) {
-	pb.logger = logger
+	pb.logger.Store(logger)
+}
+
+func (pb *PoolBuffer) withLogger(level slog.LogLevel) (slog.Logger, bool) {
+	l, ok := pb.logger.Load().(slog.Logger)
+	if !ok {
+		return nil, false
+	}
+
+	return l.WithLevel(level).WithEnabled()
 }
 
 func (pb *PoolBuffer) debug() (slog.Logger, bool) {
-	if pb.logger != nil {
-		return pb.logger.Debug().WithEnabled()
-	}
-	return nil, false
+	return pb.withLogger(slog.Debug)
 }
 
 func (pb *PoolBuffer) info() (slog.Logger, bool) {
-	if pb.logger != nil {
-		return pb.logger.Info().WithEnabled()
-	}
-	return nil, false
+	return pb.withLogger(slog.Debug)
 }
 
 func (pb *PoolBuffer) warn() (slog.Logger, bool) {
-	if pb.logger != nil {
-		return pb.logger.Warn().WithEnabled()
-	}
-	return nil, false
+	return pb.withLogger(slog.Warn)
 }
 
 func (pb *PoolBuffer) error(err error) (slog.Logger, bool) {
-	if pb.logger != nil {
-		log, ok := pb.logger.Error().WithEnabled()
-		if ok {
-			if err != nil {
-				log = log.WithField(slog.ErrorFieldName, err)
-			}
-			return log, true
+	if l, ok := pb.withLogger(slog.Error); ok {
+		if err != nil {
+			l = l.WithField(slog.ErrorFieldName, err)
 		}
+		return l, true
 	}
 	return nil, false
 }
