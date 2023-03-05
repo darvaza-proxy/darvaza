@@ -54,6 +54,9 @@ EOT
 		call="\$(GO) get -u -v ./...
 \$(GO) mod tidy"
 		;;
+	test)
+		call="\$(GO) $cmd ./..."
+		;;
 	*)
 		call="\$(GO) $cmd -v ./..."
 		;;
