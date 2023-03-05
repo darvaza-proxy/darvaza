@@ -91,6 +91,20 @@ func (s *CertPool) Export() *x509.CertPool {
 	return s.exportUnlocked()
 }
 
+func (s *CertPool) exportUnlocked() *x509.CertPool {
+	p := s.cached
+
+	if p == nil {
+		p = x509.NewCertPool()
+		for _, cert := range s.hashed {
+			p.AddCert(cert.cert)
+		}
+		s.cached = p
+	}
+
+	return p.Clone()
+}
+
 // Reset removes all certificates from the Pool
 func (s *CertPool) Reset() {
 	s.mu.Lock()
