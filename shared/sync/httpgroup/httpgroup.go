@@ -58,8 +58,8 @@ func (w *Worker) Shutdown(ctx context.Context) error {
 type Group struct {
 	ctx       context.Context
 	cancel    context.CancelFunc
-	cancelled int32
-	count     int32
+	cancelled atomic.Bool
+	count     atomic.Int32
 	logger    atomic.Value
 
 	wg core.WaitGroup
@@ -91,7 +91,7 @@ func (heg *Group) onError(err error) error {
 }
 
 func (heg *Group) tryCancel() bool {
-	if atomic.CompareAndSwapInt32(&heg.cancelled, 0, 1) {
+	if heg.cancelled.CompareAndSwap(false, true) {
 		heg.cancel()
 		return true
 	}
@@ -100,7 +100,7 @@ func (heg *Group) tryCancel() bool {
 
 // Cancelled tells if the Group has been cancelled
 func (heg *Group) Cancelled() bool {
-	return atomic.LoadInt32(&heg.cancelled) != 0
+	return heg.cancelled.Load()
 }
 
 // SetContext initialises a Group with a given and externally
@@ -147,7 +147,7 @@ func (heg *Group) Go(srv Server, lsn net.Listener) error {
 	addr, _ := core.AddrPort(lsn)
 	name := fmt.Sprintf("http://%s", addr.String())
 
-	atomic.AddInt32(&heg.count, 1)
+	heg.count.Add(1)
 
 	heg.wg.GoCatch(func() error {
 		return heg.runWorker(w, name)
@@ -156,7 +156,7 @@ func (heg *Group) Go(srv Server, lsn net.Listener) error {
 	})
 
 	heg.wg.GoCatch(func() error {
-		defer atomic.AddInt32(&heg.count, -1)
+		defer heg.count.Add(-1)
 
 		return heg.runSupervisor(w, name)
 	}, func(err error) error {
@@ -221,7 +221,7 @@ func (heg *Group) catchSupervisor(name string, err error) error {
 
 // Count returns how many servers are running in the Group
 func (heg *Group) Count() uint {
-	count := atomic.LoadInt32(&heg.count)
+	count := heg.count.Load()
 	if count > 0 {
 		return uint(count)
 	}
