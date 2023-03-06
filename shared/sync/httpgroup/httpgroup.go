@@ -13,6 +13,10 @@ import (
 	"github.com/darvaza-proxy/slog"
 )
 
+var (
+	_ Server = (*http.Server)(nil)
+)
+
 // Server is a subset of the standard *http.Server including what httpgroup uses
 type Server interface {
 	Serve(net.Listener) error
