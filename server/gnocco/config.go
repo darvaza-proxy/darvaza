@@ -56,19 +56,9 @@ type HostsCfg struct {
 // NewFromTOML creates a new Gnocco configuration from a TOML file
 func NewFromTOML(f string) (*Gnocco, error) {
 	var cf Gnocco
-
-	if f == "" {
-		ex, err := os.Executable()
-		if err != nil {
-			return nil, fmt.Errorf("error %s occurred", err)
-		}
-		confPath := filepath.Dir(ex) + "/gnocco.conf"
-		if _, err := os.Stat("/etc/gnocco/gnocco.conf"); err == nil {
-			f = "/etc/gnocco/gnocco.conf"
-		}
-		if _, err := os.Stat(confPath); err == nil {
-			f = confPath
-		}
+	f, err := checkConfFile(f)
+	if err != nil {
+		return nil, err
 	}
 	file, err := os.Open(f)
 	if err != nil {
@@ -87,4 +77,21 @@ func NewFromTOML(f string) (*Gnocco, error) {
 
 	cf.logger = newLogger(&cf)
 	return &cf, nil
+}
+
+func checkConfFile(fileName string) (string, error) {
+	if fileName == "" {
+		ex, err := os.Executable()
+		if err != nil {
+			return "", fmt.Errorf("error %s occurred", err)
+		}
+		confPath := filepath.Dir(ex) + "/gnocco.conf"
+		if _, err := os.Stat("/etc/gnocco/gnocco.conf"); err == nil {
+			fileName = "/etc/gnocco/gnocco.conf"
+		}
+		if _, err := os.Stat(confPath); err == nil {
+			fileName = confPath
+		}
+	}
+	return fileName, nil
 }

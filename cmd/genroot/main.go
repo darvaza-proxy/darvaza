@@ -3,8 +3,8 @@
 package main
 
 import (
+	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"sort"
@@ -14,8 +14,8 @@ import (
 )
 
 type ips struct {
-	ip4 net.IP
-	ip6 net.IP
+	ip4 string
+	ip6 string
 }
 
 const url = "https://www.internic.net/domain/named.root"
@@ -38,18 +38,15 @@ func main() {
 		out = os.Stdout
 	}
 
-	getRoots(out)
-
+	genRoots(out)
 }
 
-func getRoots(rootsfile *os.File) {
-
-	var myroots = map[string]*ips{}
-
+// revive:disable:cognitive-complexity
+func genRoots(rootsfile *os.File) {
 	rsp, err := http.Get(url)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	defer rsp.Body.Close()
@@ -57,36 +54,14 @@ func getRoots(rootsfile *os.File) {
 	xroots, err := io.ReadAll(rsp.Body)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	if len(xroots) == 0 {
-		panic("no roots found in the download")
+		fmt.Println("no roots found in the download")
 	}
 
-	zp := dns.NewZoneParser(strings.NewReader(string(xroots)), "", "")
-
-	for rr, ok := zp.Next(); ok; rr, ok = zp.Next() {
-		dom := trimDot(strings.ToLower(rr.Header().Name))
-		if dom != "" {
-			switch tt := rr.(type) {
-			case *dns.A:
-				z4, ok := myroots[dom]
-				if !ok {
-					z4 = &ips{}
-				}
-				z4.ip4 = tt.A
-				myroots[dom] = z4
-			case *dns.AAAA:
-				z6, ok := myroots[dom]
-				if !ok {
-					z6 = &ips{}
-				}
-				z6.ip6 = tt.AAAA
-				myroots[dom] = z6
-			}
-		}
-	}
+	myroots := buildMyRoots(xroots)
 	sortedKeys := make([]string, 0, len(myroots))
 
 	for k := range myroots {
@@ -95,9 +70,9 @@ func getRoots(rootsfile *os.File) {
 	sort.Strings(sortedKeys)
 
 	for _, k := range sortedKeys {
-		_, err := rootsfile.WriteString(k + " " + myroots[k].ip4.String() + " " + myroots[k].ip6.String() + "\n")
-		if err != nil {
-			panic(err)
+		strToWrite := fmt.Sprintf("%s %s %s \n", k, myroots[k].ip4, myroots[k].ip6)
+		if _, err2 := rootsfile.WriteString(strToWrite); err2 != nil {
+			panic(err2)
 		}
 	}
 	if rootsfile.Name() != os.Stdout.Name() {
@@ -106,3 +81,32 @@ func getRoots(rootsfile *os.File) {
 		}
 	}
 }
+
+func buildMyRoots(b []byte) map[string]ips {
+	myroots := make(map[string]ips)
+	zp := dns.NewZoneParser(strings.NewReader(string(b)), "", "")
+	for rr, ok := zp.Next(); ok; rr, ok = zp.Next() {
+		dom := trimDot(strings.ToLower(rr.Header().Name))
+		if dom != "" {
+			switch tt := rr.(type) {
+			case *dns.A:
+				z4, ok := myroots[dom]
+				if !ok {
+					z4 = ips{}
+				}
+				z4.ip4 = tt.A.String()
+				myroots[dom] = z4
+			case *dns.AAAA:
+				z6, ok := myroots[dom]
+				if !ok {
+					z6 = ips{}
+				}
+				z6.ip6 = tt.AAAA.String()
+				myroots[dom] = z6
+			}
+		}
+	}
+	return myroots
+}
+
+//revive:enable:cognitive-complexity

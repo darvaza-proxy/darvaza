@@ -21,7 +21,6 @@ func (q *question) String() string {
 }
 
 type gnoccoHandler struct {
-	Cache    *cache
 	Resolver *resolver
 	MaxJobs  int
 	Jobs     int
@@ -29,9 +28,8 @@ type gnoccoHandler struct {
 }
 
 func (cf *Gnocco) newHandler(m int) *gnoccoHandler {
-	c := newCache(int64(cf.Cache.MaxCount), int32(cf.Cache.Expire))
 	r := cf.newResolver()
-	return &gnoccoHandler{c, r, m, 0, cf.Logger()}
+	return &gnoccoHandler{r, m, 0, cf.Logger()}
 }
 
 func getIPFromWriter(w dns.ResponseWriter) net.IP {
@@ -46,41 +44,10 @@ func (h *gnoccoHandler) do(w dns.ResponseWriter, req *dns.Msg) {
 		q := req.Question[0]
 		myQ := question{q.Name, dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
 
-		remote := getIPFromWriter(w)
-
-		h.logger.Info().Printf("%s lookup　%s", remote, myQ.String())
 		h.Jobs++
 		switch {
 		case myQ.qclass == "IN":
-			if recs, err := h.Cache.get(h.Cache.makeKey(myQ.qname, myQ.qtype)); err == nil {
-				// we have an answer now construct a dns.Msg
-				result := new(dns.Msg)
-				result.SetReply(req)
-				for _, z := range recs.Value {
-					rec, _ := dns.NewRR(dns.Fqdn(myQ.qname) + " " + myQ.qtype + " " + z)
-					result.Answer = append(result.Answer, rec)
-				}
-				w.WriteMsg(result)
-			} else {
-				if rcs, err := h.Cache.get(h.Cache.makeKey(myQ.qname, "CNAME")); err == nil {
-					h.logger.Info().Printf("Found CNAME %s", rcs.String())
-					result := new(dns.Msg)
-					result.SetReply(req)
-					for _, z := range rcs.Value {
-						rc, _ := dns.NewRR(dns.Fqdn(myQ.qname) + " " + "CNAME" + " " + z)
-						result.Answer = append(result.Answer, rc)
-						if rt, err := h.Cache.get(h.Cache.makeKey(z, myQ.qtype)); err == nil {
-							for _, ey := range rt.Value {
-								gg, _ := dns.NewRR(z + " " + myQ.qtype + " " + ey)
-								result.Answer = append(result.Answer, gg)
-							}
-						}
-					}
-					w.WriteMsg(result)
-				} else {
-					h.Resolver.Lookup(h.Cache, w, req)
-				}
-			}
+			h.Resolver.Lookup(nil, w, req)
 		case myQ.qclass == "CH", myQ.qtype == "TXT":
 			m := handleChaos(req)
 			w.WriteMsg(m)
