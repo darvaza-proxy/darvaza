@@ -1,13 +1,11 @@
 package gnocco
 
 import (
-	"bufio"
 	"encoding/gob"
 	"fmt"
 	"io"
 	"os"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -54,7 +52,7 @@ func (c *crecord) String() string {
 	return result
 }
 
-func (cf *Gnocco) newCache(size int64, exp int32) *cache {
+func newCache(size int64, exp int32) *cache {
 	c := new(cache)
 	c.pcache = make(map[string]crecord)
 	c.pcap = size
@@ -62,10 +60,6 @@ func (cf *Gnocco) newCache(size int64, exp int32) *cache {
 	c.ncache = make(map[string]crecord)
 	c.ncap = size
 	c.nttl = 60
-	err := c.loadRoots(cf)
-	if err != nil {
-		cf.logger.Warn().Print(err)
-	}
 	return c
 }
 
@@ -192,62 +186,6 @@ func (c *cache) delete(key string) {
 
 func (c *cache) size() int {
 	return len(c.pcache)
-}
-
-func (c *cache) loadRoots(cf *Gnocco) error {
-	if cf.RootsFile == "" {
-		return fmt.Errorf("Config.RootsFile is empty :(")
-	}
-
-	fl, err := os.Open(cf.RootsFile)
-	defer fl.Close()
-
-	if err != nil {
-		return fmt.Errorf("Error %s", err)
-	}
-
-	reader := bufio.NewReader(fl)
-	var nstmp crecord
-	// keep root records for one year.....
-	nstmp.Stored = int(time.Now().AddDate(1, 0, 0).Unix())
-	nstmp.TTL = 518400
-	for {
-		line, err := reader.ReadString('\n')
-		if err == io.EOF {
-			break
-		}
-		fields := strings.Fields(line)
-		nstmp.Value = append(nstmp.Value, fields[0])
-	}
-	c.Lock()
-	c.pcache["./NS"] = nstmp
-	c.Unlock()
-
-	_, _ = fl.Seek(0, 0)
-	for {
-		line, err := reader.ReadString('\n')
-		if err == io.EOF {
-			break
-		}
-
-		var v, q crecord
-		// keep root records for one year.....
-		v.Stored = int(time.Now().AddDate(1, 0, 0).Unix())
-		q.Stored = int(time.Now().AddDate(1, 0, 0).Unix())
-		v.TTL, q.TTL = 518400, 518400
-		fields := strings.Fields(line)
-		v.Value = append(v.Value, fields[1])
-		c.Lock()
-		c.pcache[dns.Fqdn(fields[0])+"/A"] = v
-		c.Unlock()
-		if len(fields) > 2 {
-			q.Value = append(q.Value, fields[2])
-			c.Lock()
-			c.pcache[dns.Fqdn(fields[0])+"/AAAA"] = q
-			c.Unlock()
-		}
-	}
-	return nil
 }
 
 func (*cache) makeKey(a string, b string) string {

@@ -29,7 +29,7 @@ type gnoccoHandler struct {
 }
 
 func (cf *Gnocco) newHandler(m int) *gnoccoHandler {
-	c := cf.newCache(int64(cf.Cache.MaxCount), int32(cf.Cache.Expire))
+	c := newCache(int64(cf.Cache.MaxCount), int32(cf.Cache.Expire))
 	r := cf.newResolver()
 	return &gnoccoHandler{c, r, m, 0, cf.Logger()}
 }

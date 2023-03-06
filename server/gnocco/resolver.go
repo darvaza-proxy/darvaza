@@ -23,47 +23,22 @@ type resolver struct {
 func (cf *Gnocco) newResolver() *resolver {
 	resolvers := make([]net.IP, 0)
 
-	f, err := os.Open("/etc/resolv.conf")
-	defer f.Close()
-
+	ccfg, err := dns.ClientConfigFromFile("/etc/resolv.conf")
 	if err != nil {
-		cf.logger.Warn().Printf("Error %s occurred.", err)
+		cf.logger.Warn().Print("attemting to parse resolv.conf resulted in %s", err)
 	}
-
-	scan := bufio.NewScanner(f)
-
-	for scan.Scan() {
-		line := scan.Text()
-		line = strings.TrimSpace(line)
-		if len(line) > 0 && line[1] != '#' {
-			fields := strings.Fields(line)
-			if len(fields) > 0 && fields[0] == "nameserver" {
-				myIP := net.ParseIP(fields[1])
-				if myIP != nil {
-					resolvers = append(resolvers, myIP)
-				}
-			}
+	for _, s := range ccfg.Servers {
+		myIP := net.ParseIP(s)
+		if myIP != nil {
+			resolvers = append(resolvers, myIP)
 		}
 	}
 
 	// load the roots in the slice
-	fr, err := os.Open(cf.RootsFile)
-	defer fr.Close()
+	rrs, err := loadFileColumn(cf.RootsFile, 1)
 	if err != nil {
-		cf.logger.Fatal().Printf("cannot load roots file %s", cf.RootsFile)
+		cf.logger.Fatal().Print("attemting to parse %s resulted in %s", cf.RootsFile, err)
 	}
-	rrs := make([]string, 0)
-	scan = bufio.NewScanner(fr)
-	for scan.Scan() {
-		lf := strings.TrimSpace(scan.Text())
-		if len(lf) > 0 {
-			ff := strings.Fields(lf)
-			if len(ff) > 0 {
-				rrs = append(rrs, ff[1])
-			}
-		}
-	}
-
 	resolver := &resolver{
 		Resolvers: resolvers,
 		Iterative: cf.IterateResolv,
@@ -71,6 +46,26 @@ func (cf *Gnocco) newResolver() *resolver {
 		roots:     rrs,
 	}
 	return resolver
+}
+
+func loadFileColumn(file string, column int) ([]string, error) {
+	result := make([]string, 0)
+	f, err := os.Open(file)
+	defer f.Close()
+	if err != nil {
+		return result, nil
+	}
+	scan := bufio.NewScanner(f)
+	for scan.Scan() {
+		lf := strings.TrimSpace(scan.Text())
+		if len(lf) > 0 {
+			ff := strings.Fields(lf)
+			if len(ff) > 0 {
+				result = append(result, ff[column])
+			}
+		}
+	}
+	return result, nil
 }
 
 func (r *resolver) Lookup(_ *cache, w dns.ResponseWriter, req *dns.Msg) {
@@ -104,20 +99,11 @@ func (r *resolver) Lookup(_ *cache, w dns.ResponseWriter, req *dns.Msg) {
 // Iterate will perform an itarative query with given name ant type
 // starting with given nameserver
 func Iterate(name string, qtype uint16, server string) (*dns.Msg, error) {
-	msg := new(dns.Msg)
-	msg.SetQuestion(name, qtype)
-	msg.RecursionDesired = false
-	client := &dns.Client{Timeout: 5 * time.Second}
-	client.Net = "tcp"
-	resp, _, err := client.Exchange(msg, server)
-	if err != nil {
+	msg := newMsgFromParts(name, qtype)
+	resp, _, err := clientTalk(msg, server)
+	werr := validateResp(resp, err)
+	if werr != nil {
 		return nil, err
-	}
-	if resp.Truncated {
-		return nil, fmt.Errorf("dns response was truncated")
-	}
-	if resp.Rcode != dns.RcodeSuccess {
-		return nil, fmt.Errorf("dns response error: %s", dns.RcodeToString[resp.Rcode])
 	}
 
 	if len(resp.Answer) == 0 && len(resp.Ns) > 0 {
@@ -133,23 +119,14 @@ func Iterate(name string, qtype uint16, server string) (*dns.Msg, error) {
 			return nil, fmt.Errorf("no authoritative server found in referral")
 		}
 		// Begin again with new forces
-		newMsg := new(dns.Msg)
-		newMsg.SetQuestion(name, dns.TypeNS)
-		newMsg.RecursionDesired = false
+		newMsg := newMsgFromParts(name, dns.TypeNS)
 		newMsg.Question[0].Qclass = dns.ClassINET
 		newMsg.Question[0].Name = name
 
-		client := &dns.Client{Timeout: 5 * time.Second}
-		client.Net = "tcp"
-		rsp, _, err := client.Exchange(newMsg, nextServer+":53")
-		if err != nil {
+		rsp, _, err := clientTalk(newMsg, nextServer+":53")
+		wwerr := validateResp(rsp, err)
+		if wwerr != nil {
 			return nil, err
-		}
-		if rsp.Truncated {
-			return nil, fmt.Errorf("dns response was truncated")
-		}
-		if rsp.Rcode != dns.RcodeSuccess {
-			return nil, fmt.Errorf("dns response error %s", dns.RcodeToString[rsp.Rcode])
 		}
 		return Iterate(name, qtype, nextServer+":53")
 	}
@@ -157,6 +134,31 @@ func Iterate(name string, qtype uint16, server string) (*dns.Msg, error) {
 	return resp, nil
 }
 
+func newMsgFromParts(qName string, qType uint16) *dns.Msg {
+	msg := new(dns.Msg)
+	msg.SetQuestion(qName, qType)
+	msg.RecursionDesired = false
+	return msg
+}
+
+func validateResp(r *dns.Msg, err error) error {
+	if err != nil {
+		return err
+	}
+	if r.Truncated {
+		return fmt.Errorf("dns response was truncated")
+	}
+	if r.Rcode != dns.RcodeSuccess {
+		return fmt.Errorf("dns response error: %s", dns.RcodeToString[r.Rcode])
+	}
+	return nil
+}
+func clientTalk(msg *dns.Msg, server string) (r *dns.Msg, rtt time.Duration, err error) {
+	client := &dns.Client{}
+	client.Net = "tcp"
+
+	return client.Exchange(msg, server)
+}
 func randint(upper int) int {
 	var result int
 	switch upper {
