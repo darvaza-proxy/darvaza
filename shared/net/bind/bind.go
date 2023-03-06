@@ -249,3 +249,10 @@ func Bind(cfg *Config) ([]*net.TCPListener, []*net.UDPConn, error) {
 	}
 	return cfg.Bind()
 }
+
+// UseListenerConfig sets Bind's Config to use the provided
+// ListenConfig
+func (cfg *Config) UseListenerConfig(lc TCPUDPListenerConfig) {
+	cfg.ListenTCP = lc.ListenTCP
+	cfg.ListenUDP = lc.ListenUDP
+}

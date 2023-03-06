@@ -37,3 +37,10 @@ type UDPListenerConfig interface {
 type AllUDPListenerConfig interface {
 	ListenAllUDP(network string, ladders []*net.UDPAddr) ([]*net.UDPConn, error)
 }
+
+// TCPUDPListenerConfig provides the callbacks used by Bind().
+// ListenTCP() and ListenUDP()
+type TCPUDPListenerConfig interface {
+	TCPListenerConfig
+	UDPListenerConfig
+}
