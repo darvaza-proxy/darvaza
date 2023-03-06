@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/creasty/defaults v1.6.0
 	github.com/darvaza-proxy/darvaza/server v0.0.1
-	github.com/darvaza-proxy/darvaza/shared v0.1.7
+	github.com/darvaza-proxy/darvaza/shared v0.2.1
 	github.com/hashicorp/hcl/v2 v2.16.1
 	github.com/mgechev/revive v1.2.5
 	github.com/miekg/dns v1.1.51
@@ -18,8 +18,8 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8 // indirect
 	github.com/darvaza-proxy/core v0.5.2 // indirect
-	github.com/darvaza-proxy/slog v0.4.4 // indirect
-	github.com/darvaza-proxy/slog/handlers/cblog v0.2.2 // indirect
+	github.com/darvaza-proxy/slog v0.4.5 // indirect
+	github.com/darvaza-proxy/slog/handlers/cblog v0.4.0 // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
