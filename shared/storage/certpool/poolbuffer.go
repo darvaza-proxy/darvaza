@@ -4,15 +4,15 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"sync"
+	"sync/atomic"
 
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
-	"github.com/darvaza-proxy/slog"
 )
 
 // PoolBuffer is a CertPool in the making
 type PoolBuffer struct {
 	mu     sync.Mutex
-	logger slog.Logger
+	logger atomic.Value
 
 	roots pbCerts
 	certs pbCerts

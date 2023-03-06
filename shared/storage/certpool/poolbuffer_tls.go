@@ -21,7 +21,7 @@ func (pb *PoolBuffer) newBundler(base x509utils.CertPooler) (*Bundler, error) {
 
 	b := &Bundler{
 		Roots: base,
-		Inter: pb.roots.pool,
+		Inter: pb.roots.Pool(),
 	}
 
 	return b, nil
@@ -200,7 +200,7 @@ func (pb *PoolBuffer) CertificatesErrors(base x509utils.CertPooler) (
 		case pair.cert == nil:
 			// missing cert
 			panic("unreachable")
-		case certs != nil && certs[pair.cert.Hash]:
+		case certs[pair.cert.Hash]:
 			// duplicate
 			pb.warnPair(pair, "duplicated key")
 		default:
@@ -237,6 +237,7 @@ func (pb *PoolBuffer) CertificatesErrors(base x509utils.CertPooler) (
 
 func (pb *PoolBuffer) bundlePair(b *Bundler, cd *pbCertData, kd *pbKeyData) (
 	*tls.Certificate, error) {
+	//
 	var cert *x509.Certificate
 	var pk x509utils.PrivateKey
 
