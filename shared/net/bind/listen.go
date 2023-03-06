@@ -2,6 +2,7 @@ package bind
 
 import (
 	"context"
+	"io"
 	"net"
 	"time"
 )
@@ -91,73 +92,93 @@ func (lc ListenConfig) ListenUDP(network string, laddr *net.UDPAddr) (*net.UDPCo
 
 // ListenAll acts like Listen but on a list of addresses
 func (lc ListenConfig) ListenAll(network string, addrs []string) ([]net.Listener, error) {
+	var ok bool
 	out := make([]net.Listener, 0, len(addrs))
+
+	// close all on error
+	defer closeAllUnless(ok, out)
 
 	for _, addr := range addrs {
 		lsn, err := lc.Listen(network, addr)
 		if err != nil {
-			for _, lsn := range out {
-				_ = lsn.Close()
-			}
 			return nil, err
 		}
 		out = append(out, lsn)
 	}
 
+	ok = true
 	return out, nil
 }
 
 // ListenAllPacket acts like ListenPacket but on a list of addresses
 func (lc ListenConfig) ListenAllPacket(network string, addrs []string) ([]net.PacketConn, error) {
+	var ok bool
 	out := make([]net.PacketConn, 0, len(addrs))
+
+	// close all on error
+	defer closeAllUnless(ok, out)
 
 	for _, addr := range addrs {
 		lsn, err := lc.ListenPacket(network, addr)
 		if err != nil {
-			for _, lsn := range out {
-				_ = lsn.Close()
-			}
 			return nil, err
 		}
 		out = append(out, lsn)
 	}
 
+	ok = true
 	return out, nil
 }
 
 // ListenAllTCP acts like ListenTCP but on a list of addresses
 func (lc ListenConfig) ListenAllTCP(network string, laddrs []*net.TCPAddr) (
 	[]*net.TCPListener, error) {
+	//
+	var ok bool
 	out := make([]*net.TCPListener, 0, len(laddrs))
+
+	// close all on error
+	defer closeAllUnless(ok, out)
 
 	for _, addr := range laddrs {
 		lsn, err := lc.ListenTCP(network, addr)
 		if err != nil {
-			for _, lsn := range out {
-				_ = lsn.Close()
-			}
 			return nil, err
 		}
 		out = append(out, lsn)
 	}
 
+	ok = true
 	return out, nil
 }
 
 // ListenAllUDP acts like ListenUDP but on a list of addresses
 func (lc ListenConfig) ListenAllUDP(network string, laddrs []*net.UDPAddr) ([]*net.UDPConn, error) {
+	var ok bool
 	out := make([]*net.UDPConn, 0, len(laddrs))
+
+	// close all on error
+	defer closeAllUnless(ok, out)
 
 	for _, addr := range laddrs {
 		lsn, err := lc.ListenUDP(network, addr)
 		if err != nil {
-			for _, lsn := range out {
-				_ = lsn.Close()
-			}
 			return nil, err
 		}
 		out = append(out, lsn)
 	}
 
+	ok = true
 	return out, nil
+}
+
+// revive:disable:flag-parameter
+
+func closeAllUnless[T io.Closer](ok bool, a []T) {
+	// revive:enable:flag-parameter
+	if !ok {
+		for _, v := range a {
+			_ = v.Close()
+		}
+	}
 }

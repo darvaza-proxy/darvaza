@@ -182,16 +182,8 @@ func (cfg *Config) tryListenPort(addrs []net.IP, port int) (
 	udpListeners := make([]*net.UDPConn, 0, n)
 
 	// close all on error
-	defer func() {
-		if !ok {
-			for _, tcpLn := range tcpListeners {
-				_ = tcpLn.Close()
-			}
-			for _, udpLn := range udpListeners {
-				_ = udpLn.Close()
-			}
-		}
-	}()
+	defer closeAllUnless(ok, tcpListeners)
+	defer closeAllUnless(ok, udpListeners)
 
 	for _, ip := range addrs {
 		// TCP
