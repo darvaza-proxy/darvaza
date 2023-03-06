@@ -2,6 +2,7 @@ package gnocco
 
 import (
 	"bufio"
+	"fmt"
 	"math/rand"
 	"net"
 	"os"
@@ -15,8 +16,8 @@ import (
 type resolver struct {
 	Resolvers []net.IP
 	Iterative bool
-
-	Logger slog.Logger
+	roots     []string
+	Logger    slog.Logger
 }
 
 func (cf *Gnocco) newResolver() *resolver {
@@ -45,48 +46,44 @@ func (cf *Gnocco) newResolver() *resolver {
 		}
 	}
 
+	// load the roots in the slice
+	fr, err := os.Open(cf.RootsFile)
+	defer fr.Close()
+	if err != nil {
+		cf.logger.Fatal().Printf("cannot load roots file %s", cf.RootsFile)
+	}
+	rrs := make([]string, 0)
+	scan = bufio.NewScanner(fr)
+	for scan.Scan() {
+		lf := strings.TrimSpace(scan.Text())
+		if len(lf) > 0 {
+			ff := strings.Fields(lf)
+			if len(ff) > 0 {
+				rrs = append(rrs, ff[1])
+			}
+		}
+	}
+
 	resolver := &resolver{
 		Resolvers: resolvers,
 		Iterative: cf.IterateResolv,
 		Logger:    cf.logger,
+		roots:     rrs,
 	}
 	return resolver
 }
 
-func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
+func (r *resolver) Lookup(_ *cache, w dns.ResponseWriter, req *dns.Msg) {
 	if r.Iterative {
-		qn := req.Question[0].Name
-		qt := dns.TypeToString[req.Question[0].Qtype]
-
-		result := new(dns.Msg)
-		result.SetReply(req)
-		slist := newStack()
-		slist.push(qn, qt)
-
-		for !slist.isEmpty() {
-			r.Iterate(c, qn, qt, slist)
-
-			if rcs, err := c.get(c.makeKey(qn, qt)); err == nil {
-				for _, z := range rcs.Value {
-					rc, _ := dns.NewRR(qn + " " + qt + " " + z)
-					result.Answer = append(result.Answer, rc)
-				}
-				w.WriteMsg(result)
-			} else {
-				if crcs, err := c.get(c.makeKey(qn, "CNAME")); err == nil {
-					if a, err := c.get(c.makeKey(crcs.Value[0], "A")); err == nil {
-						for _, rrc := range a.Value {
-							ff, _ := dns.NewRR(qn + " " + qt + " " + rrc)
-							result.Answer = append(result.Answer, ff)
-						}
-						w.WriteMsg(result)
-					} else {
-						r.Logger.Error().Print(err)
-						result.SetRcode(req, 4)
-						w.WriteMsg(result)
-					}
-				}
-			}
+		root := randomfromslice(r.roots)
+		r.Logger.Info().Printf("using root %s", root)
+		root = root + ":53"
+		qn := dns.Fqdn(req.Question[0].Name)
+		qt := req.Question[0].Qtype
+		resp, err := Iterate(qn, qt, root)
+		if err == nil {
+			resp.SetReply(req)
+			w.WriteMsg(resp)
 		}
 	} else {
 		var ip net.IP
@@ -104,128 +101,60 @@ func (r *resolver) Lookup(c *cache, w dns.ResponseWriter, req *dns.Msg) {
 	}
 }
 
-func (r *resolver) Iterate(c *cache, qname string, qtype string, slist *stack) {
-	// We arrived here because original question was not in cache
-	// so we iterate to find a nameserver for our question.
-
-	// Down the rabbit hole!
-	ancestor := getParentinCache(qname, c)
-	if nstoask, ancerr := c.get(ancestor + "/NS"); ancerr == nil {
-		qq := randomfromslice(nstoask.Value)
-		if ns, nserr := c.get(dns.Fqdn(qq) + "/A"); nserr == nil {
-			ans := r.getans(qname, qtype, ns.Value[0])
-
-			switch typify(ans) {
-			case "Delegation":
-				// FIXME: Check bailiwick and observe that Extra can have fewer or more
-				// records than NS
-				c.set(ans.Ns[0].Header().Name, "NS", ans)
-
-				ex := mdRRtoRRs(ans.Extra)
-				for _, x := range ex {
-					c.setVal(x.Name, x.Type, x.TTL, x.Value)
-				}
-				r.Iterate(c, qname, qtype, slist)
-			case "Namezone":
-				c.set(ans.Ns[0].Header().Name, "NS", ans)
-				t := mdRRtoRRs(ans.Ns)
-				for _, z := range t {
-					slist.push(dns.Fqdn(z.Value), "A")
-					r.Iterate(c, dns.Fqdn(z.Value), "A", slist)
-				}
-			case "Answer":
-				c.set(ans.Answer[0].Header().Name, qtype, ans)
-				slist.popFor(ans.Answer[0].Header().Name, qtype)
-				if !slist.isEmpty() {
-					qn, qt := slist.pop()
-					r.Iterate(c, qn, qt, slist)
-				}
-			case "Cname":
-				c.set(ans.Answer[0].Header().Name, "CNAME", ans)
-				slist.popFor(ans.Answer[0].Header().Name, qtype)
-				v := mdRRtoRRs(ans.Answer)
-				for _, g := range v {
-					slist.push(dns.Fqdn(g.Value), "A")
-					r.Iterate(c, dns.Fqdn(g.Value), "A", slist)
-				}
-
-			default:
-				r.Logger.Error().Print(typify(ans))
-			}
-		} else {
-			slist.push(qq, "A")
-			r.Iterate(c, qq, "A", slist)
-		}
-	}
-}
-
-func (r *resolver) getans(qname string, qtype string, nameserver string) (result *dns.Msg) {
-	m := new(dns.Msg)
-	m.Id = dns.Id()
-	m.RecursionDesired = false
-	m.Question = make([]dns.Question, 1)
-	m.Question[0] = dns.Question{
-		Name:   qname,
-		Qtype:  dns.StringToType[qtype],
-		Qclass: dns.ClassINET,
-	}
-	result, err := dns.Exchange(m, nameserver+":53")
+// Iterate will perform an itarative query with given name ant type
+// starting with given nameserver
+func Iterate(name string, qtype uint16, server string) (*dns.Msg, error) {
+	msg := new(dns.Msg)
+	msg.SetQuestion(name, qtype)
+	msg.RecursionDesired = false
+	client := &dns.Client{Timeout: 5 * time.Second}
+	client.Net = "tcp"
+	resp, _, err := client.Exchange(msg, server)
 	if err != nil {
-		r.Logger.Error().Print(err)
+		return nil, err
 	}
-	return result
-}
+	if resp.Truncated {
+		return nil, fmt.Errorf("dns response was truncated")
+	}
+	if resp.Rcode != dns.RcodeSuccess {
+		return nil, fmt.Errorf("dns response error: %s", dns.RcodeToString[resp.Rcode])
+	}
 
-func getParentinCache(domain string, c *cache) string {
-	result := domain
-	x := dns.SplitDomainName(domain)
-
-	for i := 0; i < len(x); i++ {
-		result = strings.TrimPrefix(result, x[i]+".")
-		if _, err := c.get(result + "/NS"); err == nil {
-			break
+	if len(resp.Answer) == 0 && len(resp.Ns) > 0 {
+		// We are in referal mode, get the next server
+		nextServer := ""
+		for _, ns := range resp.Ns {
+			if ns.Header().Rrtype == dns.TypeNS {
+				nextServer = strings.TrimSuffix(ns.(*dns.NS).Ns, ".")
+				break
+			}
 		}
-	}
-
-	// We ALLWAYS have root.
-	if result == "" {
-		result = "."
-	}
-	return result
-}
-
-func typify(m *dns.Msg) string {
-	if m != nil {
-		switch m.Rcode {
-		case dns.RcodeSuccess:
-			if len(m.Answer) > 0 {
-				if m.Answer[0].Header().Rrtype == dns.TypeCNAME {
-					return "Cname"
-				}
-				return "Answer"
-			}
-
-			ns := 0
-			for _, r := range m.Ns {
-				if r.Header().Rrtype == dns.TypeNS {
-					ns++
-				}
-			}
-			if ns > 0 && ns == len(m.Ns) {
-				if len(m.Extra) < 2 {
-					return "Namezone"
-				}
-				return "Delegation"
-			}
-		case dns.RcodeRefused:
-			return "Refused"
-		case dns.RcodeFormatError:
-			return "NoEDNS"
-		default:
-			return "Unknown"
+		if nextServer == "" {
+			return nil, fmt.Errorf("no authoritative server found in referral")
 		}
+		// Begin again with new forces
+		newMsg := new(dns.Msg)
+		newMsg.SetQuestion(name, dns.TypeNS)
+		newMsg.RecursionDesired = false
+		newMsg.Question[0].Qclass = dns.ClassINET
+		newMsg.Question[0].Name = name
+
+		client := &dns.Client{Timeout: 5 * time.Second}
+		client.Net = "tcp"
+		rsp, _, err := client.Exchange(newMsg, nextServer+":53")
+		if err != nil {
+			return nil, err
+		}
+		if rsp.Truncated {
+			return nil, fmt.Errorf("dns response was truncated")
+		}
+		if rsp.Rcode != dns.RcodeSuccess {
+			return nil, fmt.Errorf("dns response error %s", dns.RcodeToString[rsp.Rcode])
+		}
+		return Iterate(name, qtype, nextServer+":53")
 	}
-	return "Nil message"
+	// We got an answer
+	return resp, nil
 }
 
 func randint(upper int) int {
