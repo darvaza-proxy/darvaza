@@ -20,6 +20,7 @@ require (
 	github.com/darvaza-proxy/core v0.5.2 // indirect
 	github.com/darvaza-proxy/slog v0.4.5 // indirect
 	github.com/darvaza-proxy/slog/handlers/cblog v0.4.0 // indirect
+	github.com/darvaza-proxy/slog/handlers/discard v0.3.0 // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
