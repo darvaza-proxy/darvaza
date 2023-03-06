@@ -37,7 +37,9 @@ func NewConfig() *Config {
 	c := &Config{}
 
 	if err := defaults.Set(c); err != nil {
+		// revive:disable:deep-exit
 		log.Fatal(err)
+		// revive:enable:deep-exit
 	}
 
 	return c

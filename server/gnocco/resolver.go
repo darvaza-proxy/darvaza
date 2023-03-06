@@ -70,12 +70,12 @@ func loadFileColumn(file string, column int) ([]string, error) {
 
 func (r *resolver) Lookup(_ *cache, w dns.ResponseWriter, req *dns.Msg) {
 	if r.Iterative {
-		root := randomfromslice(r.roots)
+		root := randomFromSlice(r.roots)
 		r.Logger.Info().Printf("using root %s", root)
 		root = root + ":53"
 		qn := dns.Fqdn(req.Question[0].Name)
 		qt := req.Question[0].Qtype
-		resp, err := Iterate(qn, qt, root)
+		resp, err := r.Iterate(qn, qt, root)
 		if err == nil {
 			resp.SetReply(req)
 			w.WriteMsg(resp)
@@ -96,39 +96,39 @@ func (r *resolver) Lookup(_ *cache, w dns.ResponseWriter, req *dns.Msg) {
 	}
 }
 
+// revive:disable:cognitive-complexity
 // Iterate will perform an itarative query with given name ant type
 // starting with given nameserver
-func Iterate(name string, qtype uint16, server string) (*dns.Msg, error) {
+func (r *resolver) Iterate(name string, qtype uint16, server string) (*dns.Msg, error) {
+	// revive:enable:cognitive-complexity
 	msg := newMsgFromParts(name, qtype)
 	resp, _, err := clientTalk(msg, server)
-	werr := validateResp(resp, err)
-	if werr != nil {
+	if werr := validateResp(resp, err); werr != nil {
 		return nil, err
 	}
 
 	if len(resp.Answer) == 0 && len(resp.Ns) > 0 {
 		// We are in referal mode, get the next server
-		nextServer := ""
+		nextServer := make([]string, 0)
 		for _, ns := range resp.Ns {
 			if ns.Header().Rrtype == dns.TypeNS {
-				nextServer = strings.TrimSuffix(ns.(*dns.NS).Ns, ".")
-				break
+				nextServer = append(nextServer, strings.TrimSuffix(ns.(*dns.NS).Ns, "."))
 			}
 		}
-		if nextServer == "" {
+		if len(nextServer) == 0 {
 			return nil, fmt.Errorf("no authoritative server found in referral")
 		}
 		// Begin again with new forces
 		newMsg := newMsgFromParts(name, dns.TypeNS)
 		newMsg.Question[0].Qclass = dns.ClassINET
-		newMsg.Question[0].Name = name
 
-		rsp, _, err := clientTalk(newMsg, nextServer+":53")
-		wwerr := validateResp(rsp, err)
-		if wwerr != nil {
+		nns := randomFromSlice(nextServer)
+		r.Logger.Info().Printf("using server %s", nns)
+		rsp, _, err := clientTalk(newMsg, nns+":53")
+		if wwerr := validateResp(rsp, err); wwerr != nil {
 			return nil, err
 		}
-		return Iterate(name, qtype, nextServer+":53")
+		return r.Iterate(name, qtype, nns+":53")
 	}
 	// We got an answer
 	return resp, nil
@@ -171,7 +171,7 @@ func randint(upper int) int {
 	return result
 }
 
-func randomfromslice(s []string) string {
+func randomFromSlice(s []string) string {
 	var result string
 
 	switch len(s) {

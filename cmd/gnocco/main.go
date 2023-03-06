@@ -15,12 +15,14 @@ import (
 func main() {
 	var confFile string
 	var vrs bool
-	flag.StringVar(&confFile, "f", "", "specify the config file, if empty will try gnocco.conf and /etc/gnocco/gnocco.conf.")
+	flag.StringVar(&confFile, "f", "",
+		"specify the config file, if empty will try gnocco.conf and /etc/gnocco/gnocco.conf.")
 	flag.BoolVar(&vrs, "v", false, "program version")
 	flag.Parse()
 
 	if vrs {
-		fmt.Fprintf(os.Stdout, "Gnocco version %s, build date %s\n", version.Version, version.BuildDate)
+		fmt.Fprintf(os.Stdout, "Gnocco version %s, build date %s\n",
+			version.Version, version.BuildDate)
 		os.Exit(0)
 	}
 
@@ -46,8 +48,7 @@ func main() {
 			aserver.ShutDown()
 			cf.Logger().Fatal().Print("Got SIGINT, stoping as requested")
 		case syscall.SIGUSR2:
-			cf.Logger().Info().Print("Got SIGUSR2, dumping cache")
-			aserver.DumpCache()
+			cf.Logger().Info().Print("Got SIGUSR2, dumping cache not implemented")
 		case syscall.SIGURG:
 		default:
 			cf.Logger().Warn().Printf("I received %v signal", sign)
