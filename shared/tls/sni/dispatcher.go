@@ -65,6 +65,9 @@ type Dispatcher struct {
 	// instead of passing it to the outer tls.Listener
 	GetHandler func(*tls.ClientHelloInfo) Handler
 
+	// OnAccept is optionally used to configure the inbound net.Conn
+	OnAccept func(net.Conn) (net.Conn, error)
+
 	// OnError let's the use decide if we shut down on critical errors or not
 	// it also allows the user to act accordingly
 	OnError func(err error) bool
@@ -151,6 +154,15 @@ func (d *Dispatcher) spawnHandler(conn net.Conn) {
 }
 
 func (d *Dispatcher) handle(conn net.Conn) error {
+	if d.OnAccept != nil {
+		conn2, err := d.OnAccept(conn)
+		if err != nil {
+			defer conn.Close()
+			return err
+		}
+		conn = conn2
+	}
+
 	if d.GetHandler == nil {
 		// no need to get the ClientHelloInfo here
 		d.debug(conn.RemoteAddr()).
