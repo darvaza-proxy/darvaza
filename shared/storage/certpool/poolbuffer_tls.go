@@ -10,21 +10,47 @@ import (
 	"github.com/darvaza-proxy/slog"
 )
 
-func (pb *PoolBuffer) newBundler(base x509utils.CertPooler) (*Bundler, error) {
-	if base == nil {
-		var err error
-		base, err = SystemCertPool()
+// NewBundler creates a Bundler using the known CAs and provided roots.
+// If no base is given, system certs will be used instead.
+func (pb *PoolBuffer) NewBundler(roots x509utils.CertPooler) (*Bundler, error) {
+	var err error
+
+	if pb.roots.Count() > 0 {
+		// inject self-signed
+		roots, err = pb.newRoots(&pb.roots, roots)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if roots == nil {
+		// no base, use system's
+		roots, err = SystemCertPool()
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	b := &Bundler{
-		Roots: base,
-		Inter: pb.roots.Pool(),
+		Roots: roots,
+		Inter: pb.inter.Clone(),
+	}
+	return b, nil
+}
+
+func (*PoolBuffer) newRoots(ours *CertPool, base x509utils.CertPooler) (*CertPool, error) {
+	if base == nil {
+		// SystemCertPool gives us a fresh clone, so we use that directly
+		pool, err := SystemCertPool()
+		if err != nil {
+			return nil, err
+		}
+		pool.addCertPooler(ours)
+		return pool, nil
 	}
 
-	return b, nil
+	pool := ours.Plus(base).(*CertPool)
+	return pool, nil
 }
 
 type pbPair struct {
@@ -138,12 +164,7 @@ func (pb *PoolBuffer) pairs() []pbPair {
 		}
 
 		// Certificates with matching Public Key
-		certs := pb.certs.findByPublic(pub)
-		if len(certs) == 0 {
-			// try CAs
-			certs = pb.roots.findByPublic(pub)
-		}
-
+		certs := pb.findByPublic(pub)
 		if len(certs) == 0 {
 			// certificate not found
 			out = pb.appendErrKeyNoCerts(out, pk)
@@ -178,19 +199,16 @@ func (pb *PoolBuffer) CertificatesErrors(base x509utils.CertPooler) (
 	// revive:enable:cognitive-complexity
 	// revive:enable:cyclomatic
 
-	b, err := pb.newBundler(base)
+	b, err := pb.NewBundler(base)
 	if err != nil {
 		return nil, []error{err}
 	}
-
-	// Pairs
-	pairs := pb.pairs()
 
 	// deduplication
 	certs := make(map[Hash]bool)
 
 	// pairs
-	for _, pair := range pairs {
+	for _, pair := range pb.pairs() {
 		var err error
 
 		switch {
@@ -199,7 +217,6 @@ func (pb *PoolBuffer) CertificatesErrors(base x509utils.CertPooler) (
 			err = pair.err
 		case pair.cert == nil:
 			// missing cert
-			panic("unreachable")
 		case certs[pair.cert.Hash]:
 			// duplicate
 			pb.warnPair(pair, "duplicated key")
@@ -220,14 +237,16 @@ func (pb *PoolBuffer) CertificatesErrors(base x509utils.CertPooler) (
 	}
 
 	// keyless certificates
-	for _, cert := range pb.certs.certs {
-		if _, known := certs[cert.Hash]; !known {
-			crt, err := pb.bundlePair(b, cert, nil)
-			if crt != nil {
-				out = append(out, crt)
-			}
-			if err != nil {
-				errors = append(errors, err)
+	for hash, cert := range pb.index {
+		if !cert.Cert.IsCA {
+			if _, known := certs[hash]; !known {
+				crt, err := pb.bundlePair(b, cert, nil)
+				if crt != nil {
+					out = append(out, crt)
+				}
+				if err != nil {
+					errors = append(errors, err)
+				}
 			}
 		}
 	}
@@ -260,5 +279,11 @@ func (pb *PoolBuffer) bundlePair(b *Bundler, cd *pbCertData, kd *pbKeyData) (
 // Bundle verifies a leaf x509.Certificate and return a tls.Certificate
 func (pb *PoolBuffer) Bundle(cert *x509.Certificate, key x509utils.PrivateKey,
 	roots x509utils.CertPooler) (*tls.Certificate, error) {
-	return pb.roots.Pool().Bundle(cert, key, roots)
+	//
+	bundler, err := pb.NewBundler(roots)
+	if err != nil {
+		return nil, err
+	}
+
+	return bundler.Bundle(cert, key)
 }

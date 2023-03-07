@@ -14,8 +14,10 @@ type PoolBuffer struct {
 	mu     sync.Mutex
 	logger atomic.Value
 
-	roots pbCerts
-	certs pbCerts
+	index map[Hash]*pbCertData
+	roots CertPool
+	inter CertPool
+	certs CertPool
 	keys  pbKeys
 }
 
@@ -24,7 +26,9 @@ func (pb *PoolBuffer) Reset() {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 
+	pb.index = nil
 	pb.roots.Reset()
+	pb.inter.Reset()
 	pb.certs.Reset()
 	pb.keys.Reset()
 }
@@ -39,6 +43,7 @@ func (pb *PoolBuffer) AddKey(fn string, pk x509utils.PrivateKey) error {
 
 		err = pb.addKeyUnlocked(fn, pk)
 	}
+
 	return err
 }
 
@@ -52,6 +57,7 @@ func (pb *PoolBuffer) AddCert(fn string, cert *x509.Certificate) error {
 
 		err = pb.addCertUnlocked(fn, cert)
 	}
+
 	return err
 }
 
@@ -103,7 +109,7 @@ func (pb *PoolBuffer) Count() int {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 
-	return pb.roots.Count() + pb.certs.Count()
+	return len(pb.index)
 }
 
 // Export returns a new x509.CertPool with the CA certificates
@@ -111,7 +117,7 @@ func (pb *PoolBuffer) Export() *x509.CertPool {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 
-	return pb.roots.Export()
+	return pb.inter.Export()
 }
 
 // Pool returns a new CertPool with the CA certificates
@@ -119,5 +125,5 @@ func (pb *PoolBuffer) Pool() *CertPool {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 
-	return pb.roots.Pool().Clone().(*CertPool)
+	return pb.inter.Clone().(*CertPool)
 }
