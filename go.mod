@@ -4,8 +4,8 @@ go 1.19
 
 require (
 	github.com/creasty/defaults v1.6.0
-	github.com/darvaza-proxy/darvaza/server v0.0.1
-	github.com/darvaza-proxy/darvaza/shared v0.2.1
+	github.com/darvaza-proxy/darvaza/server v0.0.3
+	github.com/darvaza-proxy/darvaza/shared v0.2.2
 	github.com/hashicorp/hcl/v2 v2.16.1
 	github.com/mgechev/revive v1.2.5
 	github.com/miekg/dns v1.1.51
@@ -43,7 +43,7 @@ require (
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
-	golang.org/x/tools v0.6.0 // indirect
+	golang.org/x/tools v0.7.0 // indirect
 )
 
 replace (
