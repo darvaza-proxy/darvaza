@@ -11,11 +11,19 @@ import (
 	"github.com/darvaza-proxy/darvaza/shared/storage"
 	"github.com/darvaza-proxy/darvaza/shared/storage/certpool"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"github.com/darvaza-proxy/slog"
 )
 
 var (
 	_ storage.Store = (*Store)(nil)
 )
+
+// Config is a custom factory for the Store allowing the usage
+// of a Logger and a roots base different that what the system provides
+type Config struct {
+	Base   x509utils.CertPooler
+	Logger slog.Logger
+}
 
 // Store is a darvaza TLS Store that doesn't talk to anyone
 // external service nor monitors for new files
@@ -81,7 +89,18 @@ func (s *Store) findAnyCert(chi *tls.ClientHelloInfo) *tls.Certificate {
 
 // New creates a Store using a list of PEM blocks, filenames, or directories
 func New(blocks ...string) (*Store, error) {
+	var c Config
+	return c.New(blocks...)
+}
+
+// New creates a Store using keys and certificates provided as
+// files, directories, or direct PEM encoded content
+func (c *Config) New(blocks ...string) (*Store, error) {
 	var pb certpool.PoolBuffer
+
+	if c.Logger != nil {
+		pb.SetLogger(c.Logger)
+	}
 
 	for _, s := range blocks {
 		if s != "" {
@@ -91,7 +110,7 @@ func New(blocks ...string) (*Store, error) {
 		}
 	}
 
-	return NewFromBuffer(&pb, nil)
+	return NewFromBuffer(&pb, c.Base)
 }
 
 // revive:disable:cognitive-complexity
