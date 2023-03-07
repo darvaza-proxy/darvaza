@@ -165,28 +165,27 @@ func minus(out, b *CertPool) *CertPool {
 func (s *CertPool) Plus(x x509utils.CertPooler) x509utils.CertPooler {
 	out := s.Clone().(*CertPool)
 	if x != nil {
-		if b, ok := x.(*CertPool); ok {
-			// same type
-			b.mu.RLock()
-			defer b.mu.RUnlock()
-
-			return plus(out, b)
-		}
-
-		// use StoreReader interface
-		ctx := context.Background()
-		x.ForEach(ctx, func(cert *x509.Certificate) error {
-			out.addCertUnsafe(HashCert(cert), "", cert)
-			return nil
-		})
+		out.addCertPooler(x)
 	}
-
 	return out
 }
 
-func plus(out, b *CertPool) *CertPool {
-	for hash, cert := range b.hashed {
-		out.addCertUnsafe(hash, "", cert.cert)
+func (s *CertPool) addCertPooler(x x509utils.CertPooler) {
+	if b, ok := x.(*CertPool); ok {
+		// same type
+		b.mu.RLock()
+		defer b.mu.RUnlock()
+
+		for hash, cert := range b.hashed {
+			s.addCertUnsafe(hash, "", cert.cert)
+		}
+		return
 	}
-	return out
+
+	// use StoreReader interface
+	ctx := context.Background()
+	x.ForEach(ctx, func(cert *x509.Certificate) error {
+		s.addCertUnsafe(HashCert(cert), "", cert)
+		return nil
+	})
 }
