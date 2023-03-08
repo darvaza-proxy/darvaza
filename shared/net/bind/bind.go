@@ -3,6 +3,7 @@ package bind
 
 import (
 	"net"
+	"net/netip"
 
 	"github.com/darvaza-proxy/core"
 )
@@ -31,6 +32,13 @@ type Config struct {
 	PortStrict bool
 	// PortAttempts indicates how many times we will try finding a port
 	PortAttempts int
+	// Defaultport indicates the port to try on the first attempt if Port is zero
+	DefaultPort uint16
+
+	// OnlyTCP tells Bind to skip listening UDP ports
+	OnlyTCP bool
+	// OnlyUDP tells Bind to skip listening TCP ports
+	OnlyUDP bool
 
 	// ListenTCP is the helper to use to listen on TCP ports
 	ListenTCP func(network string, laddr *net.TCPAddr) (*net.TCPListener, error)
@@ -99,24 +107,6 @@ func (cfg *Config) Addrs() ([]net.IP, error) {
 	return out, nil
 }
 
-func (cfg *Config) refresh(lsns []*net.TCPListener) {
-	// Refresh cfg.Addresses
-	addrs := make([]string, len(lsns))
-
-	for i, lsn := range lsns {
-		addr := lsn.Addr().(*net.TCPAddr)
-
-		if i == 0 {
-			// Refresh cfg.Port in case of 0 or non-strict
-			cfg.Port = uint16(addr.Port)
-		}
-
-		addrs[i] = addr.IP.String()
-	}
-
-	cfg.Addresses = addrs
-}
-
 // Bind attempts to listen all specified addresses.
 // TCP and UDP on the same port for all.
 func (cfg *Config) Bind() ([]*net.TCPListener, []*net.UDPConn, error) {
@@ -129,13 +119,7 @@ func (cfg *Config) Bind() ([]*net.TCPListener, []*net.UDPConn, error) {
 		return nil, nil, err
 	}
 
-	tcp, udp, err := cfg.listen(addrs)
-	if err == nil {
-		// on success, refresh Port and Addresses
-		cfg.refresh(tcp)
-	}
-
-	return tcp, udp, err
+	return cfg.listen(addrs)
 }
 
 func (cfg *Config) listen(addrs []net.IP) ([]*net.TCPListener, []*net.UDPConn, error) {
@@ -145,9 +129,11 @@ func (cfg *Config) listen(addrs []net.IP) ([]*net.TCPListener, []*net.UDPConn, e
 
 	port := int(cfg.Port)
 
-	if cfg.Port != 0 && cfg.PortStrict {
-		// strict mode, try only once
-		return cfg.tryListen(0, addrs, port)
+	if cfg.PortStrict {
+		if cfg.Port != 0 || cfg.DefaultPort != 0 {
+			// strict mode, try only once
+			return cfg.tryListen(0, addrs, port)
+		}
 	}
 
 	for i := 0; i < cfg.PortAttempts; i++ {
@@ -165,7 +151,11 @@ func (cfg *Config) tryListen(pass int, addrs []net.IP, port int) (
 	[]*net.TCPListener, []*net.UDPConn, error) {
 	//
 	if port != 0 {
+		// autoincrement
 		port = port + pass
+	} else if cfg.DefaultPort != 0 && pass == 0 {
+		// try the default the first time
+		port = int(cfg.DefaultPort)
 	}
 	return cfg.tryListenPort(addrs, port)
 }
@@ -182,43 +172,44 @@ func (cfg *Config) tryListenPort(addrs []net.IP, port int) (
 	udpListeners := make([]*net.UDPConn, 0, n)
 
 	// close all on error
-	defer func() {
-		if !ok {
-			for _, tcpLn := range tcpListeners {
-				_ = tcpLn.Close()
-			}
-			for _, udpLn := range udpListeners {
-				_ = udpLn.Close()
-			}
-		}
-	}()
+	defer closeAllUnless(ok, tcpListeners)
+	defer closeAllUnless(ok, udpListeners)
 
 	for _, ip := range addrs {
-		// TCP
-		tcpAddr := &net.TCPAddr{IP: ip, Port: port}
-		tcpLn, err := cfg.ListenTCP("tcp", tcpAddr)
-		if err != nil {
-			return nil, nil, err
+		if !cfg.OnlyUDP {
+			// TCP
+			tcpAddr := &net.TCPAddr{IP: ip, Port: port}
+			tcpLn, err := cfg.ListenTCP("tcp", tcpAddr)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			tcpListeners = append(tcpListeners, tcpLn)
+
+			if port == 0 {
+				// port was random, now we stick to it
+				port = tcpLn.Addr().(*net.TCPAddr).Port
+			}
 		}
 
-		tcpListeners = append(tcpListeners, tcpLn)
+		if !cfg.OnlyTCP {
+			// UDP
+			udpAddr := &net.UDPAddr{IP: ip, Port: port}
+			udpLn, err := cfg.ListenUDP("udp", udpAddr)
+			if err != nil {
+				return nil, nil, err
+			}
 
-		if port == 0 {
-			// port was random, now we stick to it
-			port = tcpLn.Addr().(*net.TCPAddr).Port
-		}
+			udpListeners = append(udpListeners, udpLn)
 
-		// UDP
-		udpAddr := &net.UDPAddr{IP: ip, Port: port}
-		udpLn, err := cfg.ListenUDP("udp", udpAddr)
-		if err != nil {
-			return nil, nil, err
-		}
+			if _, err := cfg.setUDPRecvBuffer(udpLn); err != nil {
+				return nil, nil, err
+			}
 
-		udpListeners = append(udpListeners, udpLn)
-
-		if _, err := cfg.setUDPRecvBuffer(udpLn); err != nil {
-			return nil, nil, err
+			if port == 0 {
+				// port was random, now we stick to it
+				port = udpLn.LocalAddr().(*net.UDPAddr).Port
+			}
 		}
 	}
 
@@ -255,4 +246,40 @@ func Bind(cfg *Config) ([]*net.TCPListener, []*net.UDPConn, error) {
 func (cfg *Config) UseListener(lc TCPUDPListener) {
 	cfg.ListenTCP = lc.ListenTCP
 	cfg.ListenUDP = lc.ListenUDP
+}
+
+// Refresh attempts to update a Config based on a given slice of netip.AddrPort
+// corresponding to the listeners
+func (cfg *Config) Refresh(s []netip.AddrPort) bool {
+	port, ok := SamePort(s)
+	if !ok {
+		return false
+	}
+
+	addrs, ok := StringIPAddresses(s)
+	if !ok {
+		return false
+	}
+
+	cfg.Port = port
+	cfg.Addresses = addrs
+	return true
+}
+
+// RefreshFromTCPListeners attempts to update a Config based on a given slice of *net.TCPListener
+func (cfg *Config) RefreshFromTCPListeners(tcpListeners []*net.TCPListener) bool {
+	aps, ok := AddrPortSliceTCPListener(tcpListeners)
+	if ok {
+		return cfg.Refresh(aps)
+	}
+	return ok
+}
+
+// RefreshFromUDPConn attempts to update a Config based on a given slice of *net.UDPConn
+func (cfg *Config) RefreshFromUDPConn(udpListeners []*net.UDPConn) bool {
+	aps, ok := AddrPortSliceUDPConn(udpListeners)
+	if ok {
+		return cfg.Refresh(aps)
+	}
+	return ok
 }
