@@ -35,6 +35,11 @@ type Config struct {
 	// Defaultport indicates the port to try on the first attempt if Port is zero
 	DefaultPort uint16
 
+	// OnlyTCP tells Bind to skip listening UDP ports
+	OnlyTCP bool
+	// OnlyUDP tells Bind to skip listening TCP ports
+	OnlyUDP bool
+
 	// ListenTCP is the helper to use to listen on TCP ports
 	ListenTCP func(network string, laddr *net.TCPAddr) (*net.TCPListener, error)
 	// ListenUDP is the helper to use to listen on UDP ports
@@ -171,31 +176,40 @@ func (cfg *Config) tryListenPort(addrs []net.IP, port int) (
 	defer closeAllUnless(ok, udpListeners)
 
 	for _, ip := range addrs {
-		// TCP
-		tcpAddr := &net.TCPAddr{IP: ip, Port: port}
-		tcpLn, err := cfg.ListenTCP("tcp", tcpAddr)
-		if err != nil {
-			return nil, nil, err
+		if !cfg.OnlyUDP {
+			// TCP
+			tcpAddr := &net.TCPAddr{IP: ip, Port: port}
+			tcpLn, err := cfg.ListenTCP("tcp", tcpAddr)
+			if err != nil {
+				return nil, nil, err
+			}
+
+			tcpListeners = append(tcpListeners, tcpLn)
+
+			if port == 0 {
+				// port was random, now we stick to it
+				port = tcpLn.Addr().(*net.TCPAddr).Port
+			}
 		}
 
-		tcpListeners = append(tcpListeners, tcpLn)
+		if !cfg.OnlyTCP {
+			// UDP
+			udpAddr := &net.UDPAddr{IP: ip, Port: port}
+			udpLn, err := cfg.ListenUDP("udp", udpAddr)
+			if err != nil {
+				return nil, nil, err
+			}
 
-		if port == 0 {
-			// port was random, now we stick to it
-			port = tcpLn.Addr().(*net.TCPAddr).Port
-		}
+			udpListeners = append(udpListeners, udpLn)
 
-		// UDP
-		udpAddr := &net.UDPAddr{IP: ip, Port: port}
-		udpLn, err := cfg.ListenUDP("udp", udpAddr)
-		if err != nil {
-			return nil, nil, err
-		}
+			if _, err := cfg.setUDPRecvBuffer(udpLn); err != nil {
+				return nil, nil, err
+			}
 
-		udpListeners = append(udpListeners, udpLn)
-
-		if _, err := cfg.setUDPRecvBuffer(udpLn); err != nil {
-			return nil, nil, err
+			if port == 0 {
+				// port was random, now we stick to it
+				port = udpLn.LocalAddr().(*net.UDPAddr).Port
+			}
 		}
 	}
 
