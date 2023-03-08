@@ -5,12 +5,12 @@ import (
 )
 
 var (
-	_ ListenerConfig       = (*ListenUpgraderConfig)(nil)
-	_ AllListenerConfig    = (*ListenUpgraderConfig)(nil)
-	_ TCPListenerConfig    = (*ListenUpgraderConfig)(nil)
-	_ UDPListenerConfig    = (*ListenUpgraderConfig)(nil)
-	_ AllTCPListenerConfig = (*ListenUpgraderConfig)(nil)
-	_ AllUDPListenerConfig = (*ListenUpgraderConfig)(nil)
+	_ Listener       = (*ListenUpgraderConfig)(nil)
+	_ AllListener    = (*ListenUpgraderConfig)(nil)
+	_ TCPListener    = (*ListenUpgraderConfig)(nil)
+	_ UDPListener    = (*ListenUpgraderConfig)(nil)
+	_ AllTCPListener = (*ListenUpgraderConfig)(nil)
+	_ AllUDPListener = (*ListenUpgraderConfig)(nil)
 )
 
 // ListenUpgrader represents a tool that keep account of listening ports
