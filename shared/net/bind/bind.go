@@ -3,6 +3,7 @@ package bind
 
 import (
 	"net"
+	"net/netip"
 
 	"github.com/darvaza-proxy/core"
 )
@@ -223,4 +224,40 @@ func Bind(cfg *Config) ([]*net.TCPListener, []*net.UDPConn, error) {
 func (cfg *Config) UseListener(lc TCPUDPListener) {
 	cfg.ListenTCP = lc.ListenTCP
 	cfg.ListenUDP = lc.ListenUDP
+}
+
+// Refresh attempts to update a Config based on a given slice of netip.AddrPort
+// corresponding to the listeners
+func (cfg *Config) Refresh(s []netip.AddrPort) bool {
+	port, ok := SamePort(s)
+	if !ok {
+		return false
+	}
+
+	addrs, ok := StringIPAddresses(s)
+	if !ok {
+		return false
+	}
+
+	cfg.Port = port
+	cfg.Addresses = addrs
+	return true
+}
+
+// RefreshFromTCPListeners attempts to update a Config based on a given slice of *net.TCPListener
+func (cfg *Config) RefreshFromTCPListeners(tcpListeners []*net.TCPListener) bool {
+	aps, ok := AddrPortSliceTCPListener(tcpListeners)
+	if ok {
+		return cfg.Refresh(aps)
+	}
+	return ok
+}
+
+// RefreshFromUDPConn attempts to update a Config based on a given slice of *net.UDPConn
+func (cfg *Config) RefreshFromUDPConn(udpListeners []*net.UDPConn) bool {
+	aps, ok := AddrPortSliceUDPConn(udpListeners)
+	if ok {
+		return cfg.Refresh(aps)
+	}
+	return ok
 }
