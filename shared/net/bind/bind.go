@@ -32,6 +32,8 @@ type Config struct {
 	PortStrict bool
 	// PortAttempts indicates how many times we will try finding a port
 	PortAttempts int
+	// Defaultport indicates the port to try on the first attempt if Port is zero
+	DefaultPort uint16
 
 	// ListenTCP is the helper to use to listen on TCP ports
 	ListenTCP func(network string, laddr *net.TCPAddr) (*net.TCPListener, error)
@@ -122,9 +124,11 @@ func (cfg *Config) listen(addrs []net.IP) ([]*net.TCPListener, []*net.UDPConn, e
 
 	port := int(cfg.Port)
 
-	if cfg.Port != 0 && cfg.PortStrict {
-		// strict mode, try only once
-		return cfg.tryListen(0, addrs, port)
+	if cfg.PortStrict {
+		if cfg.Port != 0 || cfg.DefaultPort != 0 {
+			// strict mode, try only once
+			return cfg.tryListen(0, addrs, port)
+		}
 	}
 
 	for i := 0; i < cfg.PortAttempts; i++ {
@@ -142,7 +146,11 @@ func (cfg *Config) tryListen(pass int, addrs []net.IP, port int) (
 	[]*net.TCPListener, []*net.UDPConn, error) {
 	//
 	if port != 0 {
+		// autoincrement
 		port = port + pass
+	} else if cfg.DefaultPort != 0 && pass == 0 {
+		// try the default the first time
+		port = int(cfg.DefaultPort)
 	}
 	return cfg.tryListenPort(addrs, port)
 }
