@@ -58,7 +58,7 @@ func (pb *PoolBuffer) addKeyUnlocked(fn string, pk x509utils.PrivateKey) error {
 			pb.keys.Reset()
 		}
 
-		pb.keys.keys.PushFront(pd)
+		pb.keys.keys.PushBack(pd)
 		pb.keys.count++
 	}
 	return nil
