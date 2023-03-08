@@ -7,12 +7,12 @@ import (
 )
 
 var (
-	_ ListenerConfig       = (*ListenConfig)(nil)
-	_ AllListenerConfig    = (*ListenConfig)(nil)
-	_ TCPListenerConfig    = (*ListenConfig)(nil)
-	_ AllTCPListenerConfig = (*ListenConfig)(nil)
-	_ UDPListenerConfig    = (*ListenConfig)(nil)
-	_ AllUDPListenerConfig = (*ListenConfig)(nil)
+	_ Listener       = (*ListenConfig)(nil)
+	_ AllListener    = (*ListenConfig)(nil)
+	_ TCPListener    = (*ListenConfig)(nil)
+	_ AllTCPListener = (*ListenConfig)(nil)
+	_ UDPListener    = (*ListenConfig)(nil)
+	_ AllUDPListener = (*ListenConfig)(nil)
 )
 
 // ListenConfig extends the standard net.ListeConfig with a central holder
