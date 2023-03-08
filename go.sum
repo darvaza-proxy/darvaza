@@ -9,8 +9,8 @@ github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8/go.mod h1:gakxgyXa
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creasty/defaults v1.6.0 h1:ltuE9cfphUtlrBeomuu8PEyISTXnxqkBIoQfXgv7BSc=
 github.com/creasty/defaults v1.6.0/go.mod h1:iGzKe6pbEHnpMPtfDXZEr0NVxWnPTjb1bbDy08fPzYM=
-github.com/darvaza-proxy/core v0.5.2 h1:M4QPjMJCs92FbHoPJT3OpYMNvAfHLikJV5vthnJw46I=
-github.com/darvaza-proxy/core v0.5.2/go.mod h1:ZImPFrOKEzwDTU5vS9dC7QpBAzl+3I8XhtnCkB6l5Ss=
+github.com/darvaza-proxy/core v0.5.3 h1:4UVliAeQUsW7KKVC1/zfRqzEONkqtpeodPa+iO3wid4=
+github.com/darvaza-proxy/core v0.5.3/go.mod h1:ZImPFrOKEzwDTU5vS9dC7QpBAzl+3I8XhtnCkB6l5Ss=
 github.com/darvaza-proxy/slog v0.4.5 h1:+tYMBCKGOqrAmQtR5wK+tU1+3WKIpx/h6B09qlph6IU=
 github.com/darvaza-proxy/slog v0.4.5/go.mod h1:g+jWeOsFe+tKAKIgVBaVNmtECf15jYH1P9unVg+2gBI=
 github.com/darvaza-proxy/slog/handlers/cblog v0.4.0 h1:Cv7yZJL0AW5nw53GidAmviUD/kXNthtXEQPWP9yXhR8=
@@ -27,8 +27,8 @@ github.com/fatih/structtag v1.2.0/go.mod h1:mBJUNpUnHmRKrKlQQlmCrh5PuhftFbNv8Ys4
 github.com/go-test/deep v1.0.3 h1:ZrJSEWsXzPOxaZnFteGEfooLba+ju3FYIbOrS+rQd68=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
 github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
-github.com/hashicorp/hcl/v2 v2.16.1 h1:BwuxEMD/tsYgbhIW7UuI3crjovf3MzuFWiVgiv57iHg=
-github.com/hashicorp/hcl/v2 v2.16.1/go.mod h1:JRmR89jycNkrrqnMmvPDMd56n1rQJ2Q6KocSLCMCXng=
+github.com/hashicorp/hcl/v2 v2.16.2 h1:mpkHZh/Tv+xet3sy3F9Ld4FyI2tUpWe9x3XtPx9f1a0=
+github.com/hashicorp/hcl/v2 v2.16.2/go.mod h1:JRmR89jycNkrrqnMmvPDMd56n1rQJ2Q6KocSLCMCXng=
 github.com/inconshreveable/mousetrap v1.0.1/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
