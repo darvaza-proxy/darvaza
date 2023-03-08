@@ -99,24 +99,6 @@ func (cfg *Config) Addrs() ([]net.IP, error) {
 	return out, nil
 }
 
-func (cfg *Config) refresh(lsns []*net.TCPListener) {
-	// Refresh cfg.Addresses
-	addrs := make([]string, len(lsns))
-
-	for i, lsn := range lsns {
-		addr := lsn.Addr().(*net.TCPAddr)
-
-		if i == 0 {
-			// Refresh cfg.Port in case of 0 or non-strict
-			cfg.Port = uint16(addr.Port)
-		}
-
-		addrs[i] = addr.IP.String()
-	}
-
-	cfg.Addresses = addrs
-}
-
 // Bind attempts to listen all specified addresses.
 // TCP and UDP on the same port for all.
 func (cfg *Config) Bind() ([]*net.TCPListener, []*net.UDPConn, error) {
@@ -129,13 +111,7 @@ func (cfg *Config) Bind() ([]*net.TCPListener, []*net.UDPConn, error) {
 		return nil, nil, err
 	}
 
-	tcp, udp, err := cfg.listen(addrs)
-	if err == nil {
-		// on success, refresh Port and Addresses
-		cfg.refresh(tcp)
-	}
-
-	return tcp, udp, err
+	return cfg.listen(addrs)
 }
 
 func (cfg *Config) listen(addrs []net.IP) ([]*net.TCPListener, []*net.UDPConn, error) {
