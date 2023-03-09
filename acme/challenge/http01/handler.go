@@ -8,6 +8,11 @@ import (
 	"github.com/darvaza-proxy/darvaza/acme"
 )
 
+const (
+	// WellKnownPath is the directory handled to resolve this challenge
+	WellKnownPath = "/.well-known/acme-challenge"
+)
+
 var (
 	_ http.Handler = (*ChallengeHandler)(nil)
 )
@@ -56,8 +61,7 @@ func (h *ChallengeHandler) resolveHandler(host, path string) http.Handler {
 // directory and an indicator if the path pointed
 // to the well-known directory or not
 func TokenFromPath(path string) (string, bool) {
-	const base = "/.well-known/acme-challenge"
-	token := strings.TrimPrefix(path, base)
+	token := strings.TrimPrefix(path, WellKnownPath)
 	if token == path {
 		return "", false
 	} else if token == "" {
