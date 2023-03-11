@@ -294,13 +294,13 @@ func (d *Dispatcher) Wait() error {
 	return d.wg.Wait()
 }
 
-// Cancel initiates a shut down
+// Cancel initiates a shut down. it will prevent
+// new dispatchs and cancel existing workers, but
+// the responsibility of closing the listener is on
+// the tls.Listener
 func (d *Dispatcher) Cancel() {
 	if d.cancelled.CompareAndSwap(false, true) {
-		// just once, cancel all workers and close the
-		// listener
 		d.cancel()
-		_ = d.ln.Close()
 	}
 }
 
