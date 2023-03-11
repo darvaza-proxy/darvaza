@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"net/netip"
@@ -10,15 +11,151 @@ import (
 	"github.com/darvaza-proxy/darvaza/shared/net/bind"
 )
 
+// ServerListeners is the list of all listeners on a Server
+type ServerListeners struct {
+	Insecure []*net.TCPListener
+	Secure   []*net.TCPListener
+	Quic     []*net.UDPConn
+}
+
+// Close closes all listeners. Errors are ignored
+func (sl *ServerListeners) Close() error {
+	closeAll(sl.Insecure)
+	closeAll(sl.Secure)
+	closeAll(sl.Quic)
+	return nil
+}
+
 func closeAll[T io.Closer](s []T) {
 	for _, l := range s {
 		_ = l.Close()
 	}
 }
 
+func (*ServerListeners) checkCount(secure, quic, insecure int) error {
+	// same number of secure and quic listeners, and at least one
+	if secure == quic && secure > 0 {
+		// either no insecure listeners, or the same number as secure ones
+		if insecure == 0 || insecure == secure {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("inconsistent listeners count (secure:%v, quic:%v, insecure:%v)",
+		secure, quic, insecure)
+}
+
+func (*ServerListeners) checkSecureMatch(tcpAddr *net.TCPAddr, udpAddr *net.UDPAddr,
+	port int) error {
+	//
+	if !tcpAddr.IP.Equal(udpAddr.IP) ||
+		tcpAddr.Port != udpAddr.Port ||
+		tcpAddr.Port != port {
+		return fmt.Errorf("listener mismatch (secure:%q, quic:%q, port:%v)",
+			tcpAddr.String(), udpAddr.String(), port)
+	}
+
+	return nil
+}
+
+func (*ServerListeners) checkInsecureMatch(tcpAddr *net.TCPAddr, ip net.IP, port int) error {
+	if !tcpAddr.IP.Equal(ip) || tcpAddr.Port != port {
+		expected := &net.TCPAddr{
+			IP:   ip,
+			Port: port,
+		}
+
+		return fmt.Errorf("listener mismatch (insecure:%q expected:%q)",
+			tcpAddr.String(),
+			expected.String())
+	}
+	return nil
+}
+
+// revive:disable:cognitive-complexity
+
+// IPAddresses validates the ServerListeners and provides the list of
+// IP Addresses as string
+func (sl *ServerListeners) IPAddresses() ([]net.IP, error) {
+	// revive:enable:cognitive-complexity
+	nInsecure := len(sl.Insecure)
+	nSecure := len(sl.Secure)
+	nQuic := len(sl.Quic)
+
+	if err := sl.checkCount(nSecure, nQuic, nInsecure); err != nil {
+		return nil, err
+	}
+
+	count := nSecure
+	port, insecure := 0, 0
+	ips := make([]net.IP, count)
+
+	for i := 0; i < count; i++ {
+		tcpAddr := sl.Secure[i].Addr().(*net.TCPAddr)
+		udpAddr := sl.Quic[i].LocalAddr().(*net.UDPAddr)
+
+		if port == 0 {
+			port = tcpAddr.Port
+		}
+
+		if err := sl.checkSecureMatch(tcpAddr, udpAddr, port); err != nil {
+			return nil, err
+		}
+
+		ips[i] = tcpAddr.IP
+	}
+
+	if nInsecure > 0 {
+		for i := 0; i < count; i++ {
+			tcpAddr := sl.Insecure[i].Addr().(*net.TCPAddr)
+
+			if insecure == 0 {
+				insecure = tcpAddr.Port
+			}
+
+			if err := sl.checkInsecureMatch(tcpAddr, ips[i], insecure); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return ips, nil
+}
+
+// StringIPAddresses validates the ServerListeners and provides the list of
+// IP Addresses as string
+func (sl *ServerListeners) StringIPAddresses() ([]string, error) {
+	ips, err := sl.IPAddresses()
+
+	addrs := make([]string, 0, len(ips))
+	for _, ip := range ips {
+		addrs = append(addrs, ip.String())
+	}
+
+	return addrs, err
+}
+
+// Ports returns the port of the first secure listener and optionally
+// the first insecure one
+func (sl *ServerListeners) Ports() (secure uint16, insecure uint16, ok bool) {
+	if len(sl.Secure) == 0 {
+		return 0, 0, false
+	}
+
+	addr := sl.Secure[0].Addr().(*net.TCPAddr)
+	secure = uint16(addr.Port)
+
+	if len(sl.Insecure) > 0 {
+		addr = sl.Insecure[0].Addr().(*net.TCPAddr)
+		insecure = uint16(addr.Port)
+	}
+
+	return secure, insecure, true
+}
+
 // Listen listens to the addresses specified on the Config
 func (srv *Server) Listen() error {
-	if srv.slsn != nil {
+	if srv.sl != nil {
 		return syscall.EBUSY
 	}
 
@@ -26,23 +163,19 @@ func (srv *Server) Listen() error {
 	return srv.ListenWithListener(lc)
 }
 
-// revive:disable:cognitive-complexity
-
 // ListenWithListener uses a given TCPUDPListener to listen to the addresses
 // specified on the Config
 func (srv *Server) ListenWithListener(lc bind.TCPUDPListener) error {
-	// revive:enable:cognitive-complexity
+	var sl ServerListeners
 	var ok bool
 
-	if srv.slsn != nil {
+	if srv.sl != nil {
 		return syscall.EBUSY
 	}
 
 	defer func() {
 		if !ok {
-			closeAll(srv.slsn)
-			closeAll(srv.ilsn)
-			closeAll(srv.ulsn)
+			_ = sl.Close()
 		}
 	}()
 
@@ -64,13 +197,12 @@ func (srv *Server) ListenWithListener(lc bind.TCPUDPListener) error {
 		return err
 	}
 
-	srv.slsn = secure
-	srv.ulsn = quic
+	sl.Secure = secure
+	sl.Quic = quic
 
 	// update config
 	bc.RefreshFromTCPListeners(secure)
 	cfg.Addresses = bc.Addresses
-	cfg.Port = bc.Port
 
 	if cfg.AllowInsecure {
 		// insecure
@@ -83,20 +215,49 @@ func (srv *Server) ListenWithListener(lc bind.TCPUDPListener) error {
 			return err
 		}
 
-		srv.ilsn = insecure
-
-		// update config
-		if len(insecure) == 0 {
-			core.Panic("unreachable")
-		}
-		addr, ok := core.AddrPort(insecure[0].Addr())
-		if !ok {
-			core.Panic("unreachable")
-		}
-		cfg.PortInsecure = addr.Port()
+		sl.Insecure = insecure
 	}
 
+	// update config
+	cfg.Port, cfg.PortInsecure, _ = sl.Ports()
+
 	ok = true
+
+	// Store
+	srv.sl = &sl
+	return nil
+}
+
+// WithListeners validates and attaches provided listeners
+func (srv *Server) WithListeners(sl *ServerListeners) error {
+	if srv.sl != nil {
+		return syscall.EBUSY
+	}
+
+	// Validate
+	addrs, err := sl.StringIPAddresses()
+	if err != nil {
+		return err
+	}
+
+	port, portInsecure, _ := sl.Ports()
+
+	// Update config
+	cfg := &srv.cfg.Bind
+
+	if portInsecure != 0 && !cfg.AllowInsecure {
+		srv.log.Warn().
+			Printf("Insecure was disabled but listeners at %v were provided", portInsecure)
+		cfg.AllowInsecure = true
+	}
+
+	cfg.Addresses = addrs
+	cfg.Port = port
+	cfg.PortInsecure = portInsecure
+
+	// Store
+	srv.sl = sl
+
 	return nil
 }
 

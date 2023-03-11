@@ -3,7 +3,6 @@ package httpserver
 
 import (
 	"context"
-	"net"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -25,10 +24,8 @@ type Server struct {
 	log slog.Logger
 	cfg Config
 
-	mux  *http.ServeMux
-	slsn []*net.TCPListener
-	ilsn []*net.TCPListener
-	ulsn []*net.UDPConn
+	mux *http.ServeMux
+	sl  *ServerListeners
 
 	quicAltSvc string
 }
@@ -147,9 +144,7 @@ func (srv *Server) Serve(h http.Handler) error {
 
 	defer func() {
 		if !ok {
-			closeAll(srv.slsn)
-			closeAll(srv.ilsn)
-			closeAll(srv.ulsn)
+			_ = srv.sl.Close()
 		}
 	}()
 
@@ -159,8 +154,8 @@ func (srv *Server) Serve(h http.Handler) error {
 		srv.Handle("/", h)
 	}
 
-	tlsListeners := srv.prepareSecureListeners(srv.slsn)
-	quicListeners, err := srv.prepareQuicListeners(srv.ulsn)
+	tlsListeners := srv.prepareSecureListeners(srv.sl.Secure)
+	quicListeners, err := srv.prepareQuicListeners(srv.sl.Quic)
 	if err != nil {
 		return err
 	}
@@ -170,7 +165,7 @@ func (srv *Server) Serve(h http.Handler) error {
 	// from here onward we don't need to worry about the listeners
 	ok = true
 	srv.spawnH2(tlsListeners)
-	srv.spawnH2C(srv.ilsn)
+	srv.spawnH2C(srv.sl.Insecure)
 	srv.spawnH3(quicListeners)
 	return srv.wg.Wait()
 }
