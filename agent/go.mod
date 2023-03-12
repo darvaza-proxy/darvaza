@@ -8,7 +8,7 @@ replace (
 )
 
 require (
-	github.com/darvaza-proxy/core v0.6.5
+	github.com/darvaza-proxy/core v0.7.2
 	github.com/darvaza-proxy/darvaza/acme v0.0.4
 	github.com/darvaza-proxy/darvaza/shared v0.4.6
 	github.com/darvaza-proxy/middleware v0.0.5
@@ -27,7 +27,7 @@ require (
 	github.com/quic-go/qtls-go1-19 v0.3.0 // indirect
 	github.com/quic-go/qtls-go1-20 v0.2.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/exp v0.0.0-20230315142452-642cacee5cc0 // indirect
+	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/mod v0.9.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
