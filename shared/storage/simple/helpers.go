@@ -35,19 +35,3 @@ func FindSupportedInMap(chi *tls.ClientHelloInfo,
 
 	return out
 }
-
-func removeKeyless(certs []*tls.Certificate) []*tls.Certificate {
-	var j int
-	for i, c := range certs {
-		if c.PrivateKey == nil {
-			continue
-		}
-
-		if i != j {
-			certs[j] = c
-		}
-		j++
-	}
-
-	return certs[:j]
-}

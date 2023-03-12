@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
-	"log"
 
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
@@ -52,13 +51,7 @@ func (b *Bundler) Bundle(cert *x509.Certificate, key x509utils.PrivateKey) (
 func rawBestChain(chain [][]*x509.Certificate) [][]byte {
 	var best [][]byte
 
-	k := len(chain)
-	log.Printf("%s: %v options", "VerifyCertificate", k)
-
-	for i, ch := range chain {
-		n := len(ch)
-		log.Printf("%s[%v/%v]: %v certificates", "VerifyCertificate", i, k, n)
-
+	for _, ch := range chain {
 		// build list of raw certificates
 		if option, ok := copyRawChain(ch); ok {
 			if l := len(best); l == 0 || l > len(option) {

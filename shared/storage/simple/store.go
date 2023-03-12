@@ -113,32 +113,44 @@ func (c *Config) New(blocks ...string) (*Store, error) {
 	return NewFromBuffer(&pb, c.Base)
 }
 
-// revive:disable:cognitive-complexity
-
 // NewFromBuffer creates a Store from a given PoolBuffer
 func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, error) {
-	// revive:enable:cognitive-complexity
 	certs, err := pb.Certificates(base)
 	if err != nil {
 		return nil, err
 	}
 
 	store := &Store{
-		certs:    removeKeyless(certs),
+		certs:    []*tls.Certificate{},
 		pool:     pb.Pool(),
 		names:    make(map[string]*list.List),
 		patterns: make(map[string]*list.List),
 	}
 
-	for _, c := range store.certs {
-		names, patterns := x509utils.Names(c.Leaf)
-		for _, s := range names {
-			core.MapListAppend(store.names, s, c)
-		}
-		for _, s := range patterns {
-			core.MapListAppend(store.patterns, s, c)
-		}
-	}
-
+	addCerts(store, certs...)
 	return store, nil
+}
+
+func addCerts(s *Store, certs ...*tls.Certificate) {
+	for _, c := range certs {
+		if c.PrivateKey == nil {
+			// drop keyless certificates
+			continue
+		}
+
+		names, patterns := x509utils.Names(c.Leaf)
+		addCertWithNames(s, c, names, patterns)
+	}
+}
+
+func addCertWithNames(s *Store, c *tls.Certificate,
+	names, patterns []string) {
+	//
+	s.certs = append(s.certs, c)
+	for _, name := range names {
+		core.MapListAppend(s.names, name, c)
+	}
+	for _, pattern := range patterns {
+		core.MapListAppend(s.patterns, pattern, c)
+	}
 }
