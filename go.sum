@@ -9,8 +9,10 @@ github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8/go.mod h1:gakxgyXa
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creasty/defaults v1.7.0 h1:eNdqZvc5B509z18lD8yc212CAqJNvfT1Jq6L8WowdBA=
 github.com/creasty/defaults v1.7.0/go.mod h1:iGzKe6pbEHnpMPtfDXZEr0NVxWnPTjb1bbDy08fPzYM=
-github.com/darvaza-proxy/core v0.6.1 h1:ULDFrZLkJ9DZRkiWz/KbVAYzKmbvMDtAWG47/tzEV98=
-github.com/darvaza-proxy/core v0.6.1/go.mod h1:OREVy0VqPnMbZRYBb0RPXl0OFhLTwbLLu1/Vn1SMl9g=
+github.com/darvaza-proxy/core v0.6.3 h1:nRIAbTMW93lqhQ1X3A3ri02e9PKizY959F+HO/iUCnI=
+github.com/darvaza-proxy/core v0.6.3/go.mod h1:OREVy0VqPnMbZRYBb0RPXl0OFhLTwbLLu1/Vn1SMl9g=
+github.com/darvaza-proxy/middleware v0.0.4 h1:/5dnpeFI+VkfQqIcE6WxL+aLCj0TDvt53fCtf8W9Iho=
+github.com/darvaza-proxy/middleware v0.0.4/go.mod h1:xgSpGkn6ZRlFh9VV0NCZd/cuUVRrxl0Fh0Pn9GSsGdk=
 github.com/darvaza-proxy/slog v0.4.6 h1:7q5WjWCd4EU5c9ZRIVYst4sJFh2OYJRS3FqEyRMRrK0=
 github.com/darvaza-proxy/slog v0.4.6/go.mod h1:aFSxsH/VKTwnabhemAb5vJQ5/Q9p1FtQ1P2E+WkVyqk=
 github.com/darvaza-proxy/slog/handlers/cblog v0.4.1 h1:Q1H/AmhEIlMS8oz/yJx/5UsFlJZtZwP1Rudkza84guQ=
