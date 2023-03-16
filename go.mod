@@ -7,7 +7,7 @@ require (
 	github.com/darvaza-proxy/darvaza/server v0.0.3
 	github.com/darvaza-proxy/darvaza/shared v0.3.4
 	github.com/hashicorp/hcl/v2 v2.16.2
-	github.com/mgechev/revive v1.2.5
+	github.com/mgechev/revive v1.3.0
 	github.com/miekg/dns v1.1.52
 	github.com/spf13/cobra v1.6.1
 )
