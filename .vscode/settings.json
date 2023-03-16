@@ -4,5 +4,8 @@
         "agent": true,
         "shared": true,
         "server": true
+    },
+    "gopls": {
+        "build.buildFlags": ["-tags=tools"]
     }
 }
