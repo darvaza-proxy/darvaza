@@ -1,4 +1,5 @@
 .PHONY: all clean generate fmt tidy install
+.PHONY: FORCE
 
 GO ?= go
 GOFMT ?= gofmt
@@ -8,32 +9,39 @@ GOGENERATE_FLAGS = -v
 GOPATH ?= $(shell $(GO) env GOPATH)
 GOBIN ?= $(GOPATH)/bin
 
+TOOLSDIR := $(CURDIR)/tools
+TMPDIR ?= .tmp
+
 REVIVE ?= $(GOBIN)/revive
-REVIVE_CONF ?= $(CURDIR)/tools/revive.toml
+REVIVE_CONF ?= $(TOOLSDIR)/revive.toml
 REVIVE_RUN_ARGS ?= -config $(REVIVE_CONF) -formatter friendly
 REVIVE_INSTALL_URL ?= github.com/mgechev/revive
+
+GO_INSTALL_URLS = \
+	$(REVIVE_INSTALL_URL) \
 
 V = 0
 Q = $(if $(filter 1,$V),,@)
 M = $(shell if [ "$$(tput colors 2> /dev/null || echo 0)" -ge 8 ]; then printf "\033[34;1m▶\033[0m"; else printf "▶"; fi)
-
-PROJECTS = shared acme agent server
 
 MODULE   = $(shell $(GO) list -m)
 DATE    ?= $(shell date +%FT%T%z)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 			cat .version 2> /dev/null || echo v0)
 
-TMPDIR ?= .tmp
-
 all: get generate tidy build
 
 clean: ; $(info $(M) cleaning…)
 	rm -rf $(TMPDIR)
 
-$(TMPDIR)/gen.mk: tools/gen_mk.sh Makefile ; $(info $(M) generating subproject rules)
+$(TMPDIR)/index: $(TOOLSDIR)/gen_index.sh Makefile FORCE ; $(info $(M) generating index…)
 	$Q mkdir -p $(@D)
-	$Q $< $(PROJECTS) > $@~
+	$Q $< > $@~
+	$Q if cmp $@ $@~ 2> /dev/null >&2; then rm $@~; else mv $@~ $@; fi
+
+$(TMPDIR)/gen.mk: $(TOOLSDIR)/gen_mk.sh $(TMPDIR)/index Makefile ; $(info $(M) generating subproject rules…)
+	$Q mkdir -p $(@D)
+	$Q $< $(TMPDIR)/index > $@~
 	$Q if cmp $@ $@~ 2> /dev/null >&2; then rm $@~; else mv $@~ $@; fi
 
 include $(TMPDIR)/gen.mk
