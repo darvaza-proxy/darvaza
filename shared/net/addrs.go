@@ -4,7 +4,6 @@ package net
 
 import (
 	"fmt"
-	"net"
 	"strconv"
 
 	"github.com/darvaza-proxy/core"
@@ -13,7 +12,7 @@ import (
 // SplitHostPort splits a network address into host and port,
 // validating the port in the process
 func SplitHostPort(hostport string) (string, uint16, error) {
-	host, port, err := net.SplitHostPort(hostport)
+	host, port, err := core.SplitHostPort(hostport)
 	if err != nil {
 		return "", 0, err
 	} else if port == "" {

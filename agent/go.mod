@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/darvaza-proxy/core v0.6.1
+	github.com/darvaza-proxy/core v0.6.2
 	github.com/darvaza-proxy/darvaza/acme v0.0.2
 	github.com/darvaza-proxy/slog/handlers/discard v0.3.1
 	github.com/quic-go/quic-go v0.33.0
