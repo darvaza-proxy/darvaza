@@ -41,7 +41,7 @@ gen_revive_exclude() {
 	local self="$1"
 	local dirs= d=
 
-	dirs="$(cut -d: -f2 "$INDEX" | grep -v '^.$')"
+	dirs="$(cut -d: -f2 "$INDEX" | grep -v '^.$' || true)"
 	if [ "." != "$self" ]; then
 		dirs=$(echo "$dirs" | sed -n -e "s;^$self/\(.*\)$;\1;p")
 	fi
@@ -107,10 +107,6 @@ EOT
 		if [ "$name" = root ]; then
 			# special case
 			case "$cmd" in
-			build)
-				cmdx="$cmd -o \$(TMPDIR)/"
-				cmdx="$cmdx -ldflags '-X \$(MODULE)/shared/version.Version=\$(VERSION) -X \$(MODULE)/shared/version.BuildDate=\$(DATE)'"
-				;;
 			get)
 				cmdx="get -tags tools"
 				;;
@@ -134,10 +130,19 @@ $(gen_install_tools)"
 			elif [ -n "$cmdx" ]; then
 				classx="$cmdx"
 			fi
+		fi
 
+		if [ "build" = "$cmd" ]; then
+			# special build flags for cmd/*
+			#
+			callx="if \$(GO) list ./... | grep -e '.*/cmd/[^/]\+\$\$' > /dev/null; then \
+\$(GO_BUILD_CMD) ./...; else \
+\$(GO_BUILD) ./...; fi"
 		fi
 
 		if [ "tidy" = "$cmd" ]; then
+			# exclude submodules when running revive
+			#
 			exclude=$(gen_revive_exclude "$dir")
 			if [ -n "$exclude" ]; then
 				callx=$(echo "$callx" | sed -e "s;\(REVIVE)\);\1 $exclude;")

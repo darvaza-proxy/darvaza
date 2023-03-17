@@ -11,6 +11,7 @@ GOBIN ?= $(GOPATH)/bin
 
 TOOLSDIR := $(CURDIR)/tools
 TMPDIR ?= $(CURDIR)/.tmp
+OUTDIR ?= $(TMPDIR)
 
 REVIVE ?= $(GOBIN)/revive
 REVIVE_CONF ?= $(TOOLSDIR)/revive.toml
@@ -28,6 +29,14 @@ MODULE   = $(shell $(GO) list -m)
 DATE    ?= $(shell date +%FT%T%z)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 			cat .version 2> /dev/null || echo v0)
+
+GO_BUILD_CMD_LDFLAGS = \
+	-X $(MODULE)/shared/version.Version=$(VERSION) \
+	-X $(MODULE)/shared/version.BuildDate=$(DATE)
+GO_BUILD_CMD_FLAGS = -o "$(OUTDIR)" -ldflags "$(GO_BUILD_CMD_LDFLAGS)"
+
+GO_BUILD = $(GO) build -v
+GO_BUILD_CMD = $(GO_BUILD) $(GO_BUILD_CMD_FLAGS)
 
 all: get generate tidy build
 
