@@ -12,6 +12,7 @@ require (
 require (
 	github.com/darvaza-proxy/core v0.6.2
 	github.com/darvaza-proxy/darvaza/acme v0.0.2
+	github.com/darvaza-proxy/middleware v0.0.3
 	github.com/darvaza-proxy/slog/handlers/discard v0.3.1
 	github.com/quic-go/quic-go v0.33.0
 	golang.org/x/net v0.8.0
