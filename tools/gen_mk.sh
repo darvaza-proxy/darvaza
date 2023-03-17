@@ -41,7 +41,7 @@ gen_revive_exclude() {
 	local self="$1"
 	local dirs= d=
 
-	dirs="$(cut -d: -f2 "$INDEX" | grep -v '^.$')"
+	dirs="$(cut -d: -f2 "$INDEX" | grep -v '^.$' || true)"
 	if [ "." != "$self" ]; then
 		dirs=$(echo "$dirs" | sed -n -e "s;^$self/\(.*\)$;\1;p")
 	fi
