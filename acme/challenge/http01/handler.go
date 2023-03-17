@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/darvaza-proxy/darvaza/acme"
+	"github.com/darvaza-proxy/middleware"
 )
 
 const (
@@ -33,7 +34,7 @@ func (h *ChallengeHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	}
 
 	if h.next == nil {
-		h.next = NewHTTPSRedirectHandler()
+		h.next = middleware.NewHTTPSRedirectHandler(0)
 	}
 	h.next.ServeHTTP(rw, req)
 }

@@ -1,0 +1,4 @@
+github.com/darvaza-proxy/core v0.6.2 h1:V57aNLpJDD902KS8x+0RJMHwbOQM+Bc+vgRUu8fa/GE=
+github.com/darvaza-proxy/core v0.6.2/go.mod h1:OREVy0VqPnMbZRYBb0RPXl0OFhLTwbLLu1/Vn1SMl9g=
+github.com/darvaza-proxy/middleware v0.0.3 h1:cev8qQbY0h0AoNaCpfIdlRqsq36fp7uUaUrXVjI7UgA=
+github.com/darvaza-proxy/middleware v0.0.3/go.mod h1:nQSG+7OLlKzjp5dCdRRjb9FS/OofOPKvS9PZuR0scPU=
