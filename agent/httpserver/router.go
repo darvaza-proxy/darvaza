@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/darvaza-proxy/darvaza/acme/challenge/http01"
+	"github.com/darvaza-proxy/middleware"
 )
 
 // Handle registers the handler for the given pattern.
@@ -23,7 +24,9 @@ func (srv *Server) HandleFunc(pattern string, handler func(http.ResponseWriter, 
 // NewHTTPSRedirectHandler creates a new handler that redirects everything to
 // https, optionally handing ACME-HTTP-01
 func (srv *Server) NewHTTPSRedirectHandler() http.Handler {
-	h := http01.NewHTTPSRedirectHandler()
+	port := srv.cfg.Bind.Port
+	h := middleware.NewHTTPSRedirectHandler(int(port))
+
 	// ACME-HTTP-01
 	if r := srv.cfg.AcmeHTTP01; r != nil {
 		m := http01.NewChallengeMiddleware(r)
