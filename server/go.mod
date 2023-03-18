@@ -12,7 +12,7 @@ require (
 )
 
 require (
-	github.com/darvaza-proxy/core v0.6.1 // indirect
+	github.com/darvaza-proxy/core v0.6.2 // indirect
 	github.com/darvaza-proxy/slog/handlers/cblog v0.4.1 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/naoina/go-stringutil v0.1.0 // indirect
