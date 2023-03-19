@@ -3,7 +3,7 @@ module github.com/darvaza-proxy/darvaza/shared
 go 1.19
 
 require (
-	github.com/darvaza-proxy/core v0.6.2
+	github.com/darvaza-proxy/core v0.6.5
 	github.com/darvaza-proxy/slog v0.4.6
 	github.com/darvaza-proxy/slog/handlers/cblog v0.4.1
 	github.com/darvaza-proxy/slog/handlers/discard v0.3.1
@@ -14,5 +14,7 @@ require (
 
 require (
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 )
