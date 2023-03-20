@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"strconv"
 
+	"golang.org/x/net/idna"
+
 	"github.com/darvaza-proxy/core"
 )
 
 // SplitHostPort splits a network address into host and port,
-// validating the port in the process
+// validating the host and port in the process
 func SplitHostPort(hostport string) (string, uint16, error) {
 	host, port, err := core.SplitHostPort(hostport)
 	if err != nil {
@@ -25,7 +27,7 @@ func SplitHostPort(hostport string) (string, uint16, error) {
 }
 
 // JoinHostPort combines a given host address and a port, validating
-// the provided IP address in the process
+// the provided IP address or name in the process
 func JoinHostPort(host string, port uint16) (string, error) {
 	host, err := stringifyAddr(host)
 	if err != nil {
@@ -37,23 +39,32 @@ func JoinHostPort(host string, port uint16) (string, error) {
 
 func stringifyAddr(host string) (string, error) {
 	addr, err := core.ParseAddr(host)
-	if err != nil {
-		return "", err
+	if err == nil {
+		// IP Address
+		switch {
+		case addr.IsUnspecified():
+			host = ""
+		case addr.Is6():
+			host = fmt.Sprintf("[%s]", addr.String())
+		case addr.Is4():
+			host = addr.String()
+		}
+
+		return host, nil
 	}
 
-	if addr.IsUnspecified() {
-		host = ""
-	} else if addr.Is4() {
-		host = addr.String()
-	} else {
-		host = fmt.Sprintf("[%s]", addr.String())
+	s, err := idna.ToASCII(host)
+	if err == nil {
+		// good name
+		return s, nil
 	}
 
-	return host, nil
+	// invalid host
+	return "", err
 }
 
 // JoinAllHostPorts combines a list of addresses and a list of ports, validating
-// the provided IP addresses in the process
+// the provided IP addresses or name in the process
 func JoinAllHostPorts(addresses []string, ports []uint16) ([]string, error) {
 	var out []string
 
