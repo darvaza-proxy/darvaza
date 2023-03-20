@@ -1,4 +1,8 @@
-github.com/darvaza-proxy/core v0.6.3 h1:nRIAbTMW93lqhQ1X3A3ri02e9PKizY959F+HO/iUCnI=
-github.com/darvaza-proxy/core v0.6.3/go.mod h1:OREVy0VqPnMbZRYBb0RPXl0OFhLTwbLLu1/Vn1SMl9g=
-github.com/darvaza-proxy/middleware v0.0.4 h1:/5dnpeFI+VkfQqIcE6WxL+aLCj0TDvt53fCtf8W9Iho=
-github.com/darvaza-proxy/middleware v0.0.4/go.mod h1:xgSpGkn6ZRlFh9VV0NCZd/cuUVRrxl0Fh0Pn9GSsGdk=
+github.com/darvaza-proxy/core v0.6.5 h1:El8PxD6l4MnLq6ofR075Y/4ApJVWTjcRJl0y9K6Hqzc=
+github.com/darvaza-proxy/core v0.6.5/go.mod h1:FHUkT+KktIBMMwtdSwsSzienEncwI7EI9OKaOZvT5IU=
+github.com/darvaza-proxy/middleware v0.0.5 h1:nw8t3KqfTh4ZUnIOFUL+N/N6ZA93QRDb7+ARYP7EICM=
+github.com/darvaza-proxy/middleware v0.0.5/go.mod h1:7fy21UO1A6lrzd1h3JGusCewFpNM3Vpan+MR9GLvyAk=
+golang.org/x/net v0.8.0 h1:Zrh2ngAOFYneWTAIAPethzeaQLuHwhuBkuV6ZiRnUaQ=
+golang.org/x/net v0.8.0/go.mod h1:QVkue5JL9kW//ek3r6jTKnTFis1tRmNAW2P1shuFdJc=
+golang.org/x/text v0.8.0 h1:57P1ETyNKtuIjB4SRd15iJxuhj8Gc416Y78H3qgMh68=
+golang.org/x/text v0.8.0/go.mod h1:e1OnstbJyHTd6l/uOt8jFFHp6TRDWZR/bV3emEE/zU8=
