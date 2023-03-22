@@ -5,6 +5,8 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
+	"io"
 	"io/fs"
 	"path/filepath"
 
@@ -177,4 +179,44 @@ func EncodePKCS8PrivateKey(key PrivateKey) []byte {
 // without optional headers
 func EncodeCertificate(der []byte) []byte {
 	return EncodeBytes("CERTIFICATE", der, nil)
+}
+
+// WriteKey writes a PEM encoded private key
+func WriteKey(w io.Writer, key PrivateKey) (int64, error) {
+	var buf bytes.Buffer
+
+	keyDER, err := x509.MarshalPKCS8PrivateKey(key)
+	if err == nil {
+		err = pem.Encode(&buf, &pem.Block{
+			Type:  "PRIVATE KEY",
+			Bytes: keyDER,
+		})
+
+		if err == nil {
+			return buf.WriteTo(w)
+		}
+	}
+
+	err = core.Wrap(err, "failed to encode certificate key")
+	return 0, err
+}
+
+// WriteCert writes a PEM encoded certificate
+func WriteCert(w io.Writer, cert *x509.Certificate) (int64, error) {
+	var buf bytes.Buffer
+
+	if len(cert.Raw) == 0 {
+		err := errors.New("missing Raw DER certificate")
+		return 0, err
+	}
+
+	if err := pem.Encode(&buf, &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: cert.Raw,
+	}); err != nil {
+		err = core.Wrap(err, "failed to encode certificate")
+		return 0, err
+	}
+
+	return buf.WriteTo(w)
 }
