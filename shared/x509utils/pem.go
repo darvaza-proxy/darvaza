@@ -67,6 +67,30 @@ func ReadStringPEM(s string, cb DecodePEMBlockFunc) error {
 	return fs.ErrNotExist
 }
 
+// ReadFilePEM reads a PEM file calling cb for each block
+func ReadFilePEM(filename string, cb DecodePEMBlockFunc) error {
+	b, err := os.ReadFileWithLock(filename)
+	if err != nil {
+		// read error
+		return err
+	}
+	if len(b) > 0 {
+		block, rest := pem.Decode(b)
+		if block != nil {
+			readBlock(filename, block, rest, cb)
+			return nil
+		}
+	}
+
+	err = &fs.PathError{
+		Op:   "pem.Decode",
+		Path: filename,
+		Err:  fs.ErrInvalid,
+	}
+
+	return err
+}
+
 func readBlock(filename string, block *pem.Block, rest []byte, cb DecodePEMBlockFunc) bool {
 	for block != nil {
 		if cb(filename, block) {
