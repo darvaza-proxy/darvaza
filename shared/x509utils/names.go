@@ -66,7 +66,7 @@ func Hostname(u *url.URL) (string, bool) {
 // we will use for matching certificates
 func SanitiseName(name string) (string, bool) {
 	if name != "" {
-		if host, _, err := net.SplitHostPort(name); err == nil {
+		if host, _, err := core.SplitHostPort(name); err == nil {
 			if addr, err := core.ParseAddr(host); err == nil {
 				// IP
 				addr.Unmap()
