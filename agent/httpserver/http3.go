@@ -70,7 +70,7 @@ func (srv *Server) prepareAndSpawnH3(lsn quic.EarlyListener) error {
 		<-srv.ctx.Done()
 		srv.logClosing("quic", addr)
 		// TODO: h3s.CloseGracefully isn't implemented yet
-		srv.warn(nil).Printf("%s: closing UDP listener abruptly")
+		srv.warn(nil).Printf("%s: closing UDP listener abruptly", addr)
 		return h3s.Close()
 	})
 
