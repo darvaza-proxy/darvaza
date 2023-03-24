@@ -61,9 +61,19 @@ func (srv *Server) prepareAndSpawnH3(lsn quic.EarlyListener) error {
 
 	addr := lsn.Addr()
 
-	srv.wg.Go(func() error {
+	srv.wg.GoCatch(func() error {
 		srv.logListening("quic", addr)
 		return h3s.ServeListener(lsn)
+	}, func(err error) error {
+		switch err {
+		case nil, quic.ErrServerClosed:
+			srv.debug().Printf("%s: done", addr)
+			err = nil
+		default:
+			srv.error(err).Printf("%s: failed", addr)
+		}
+
+		return err
 	})
 
 	srv.wg.Go(func() error {
