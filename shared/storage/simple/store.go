@@ -41,10 +41,17 @@ type Store struct {
 
 	pool     *certpool.CertPool
 	keys     []x509utils.PrivateKey
-	certs    []*tls.Certificate
-	hashed   map[certpool.Hash]*tls.Certificate
+	certs    *list.List
+	hashed   map[certpool.Hash]*certInfo
 	names    map[string]*list.List
 	patterns map[string]*list.List
+}
+
+type certInfo struct {
+	c        *tls.Certificate
+	hash     certpool.Hash
+	names    []string
+	patterns []string
 }
 
 // GetCAPool returns a reference to the Certificates Pool
@@ -154,14 +161,18 @@ func (s *Store) findMatchingCert(chi *tls.ClientHelloInfo, name string) *tls.Cer
 }
 
 func (s *Store) findAnyCert(chi *tls.ClientHelloInfo) *tls.Certificate {
-	for _, c := range s.certs {
+	var cert *tls.Certificate
+
+	core.ListForEach(s.certs, func(c *tls.Certificate) bool {
 		if err := chi.SupportsCertificate(c); err == nil {
 			// works for me
-			return c
+			cert = c
 		}
-	}
 
-	return nil
+		return cert != nil
+	})
+
+	return cert
 }
 
 // New creates a Store using a list of PEM blocks, filenames, or directories
@@ -200,8 +211,8 @@ func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, 
 	store := &Store{
 		pool:     pb.Pool(),
 		keys:     []x509utils.PrivateKey{},
-		certs:    []*tls.Certificate{},
-		hashed:   make(map[certpool.Hash]*tls.Certificate),
+		certs:    list.New(),
+		hashed:   make(map[certpool.Hash]*certInfo),
 		names:    make(map[string]*list.List),
 		patterns: make(map[string]*list.List),
 	}
@@ -228,22 +239,28 @@ func addCerts(s *Store, certs ...*tls.Certificate) {
 		hash := certpool.HashCert(c.Leaf)
 		if _, found := s.hashed[hash]; !found {
 			// new cert
-			s.hashed[hash] = c
 			names, patterns := x509utils.Names(c.Leaf)
-			addCertWithNames(s, c, names, patterns)
+
+			ci := &certInfo{
+				c:        c,
+				hash:     hash,
+				names:    names,
+				patterns: patterns,
+			}
+			addCertInfo(s, ci)
 		}
 	}
 }
 
-func addCertWithNames(s *Store, c *tls.Certificate,
-	names, patterns []string) {
-	//
-	s.certs = append(s.certs, c)
-	for _, name := range names {
-		core.MapListAppend(s.names, name, c)
+func addCertInfo(s *Store, ci *certInfo) {
+	s.hashed[ci.hash] = ci
+	s.certs.PushFront(ci)
+
+	for _, name := range ci.names {
+		core.MapListAppend(s.names, name, ci.c)
 	}
-	for _, pattern := range patterns {
-		core.MapListAppend(s.patterns, pattern, c)
+	for _, pattern := range ci.patterns {
+		core.MapListAppend(s.patterns, pattern, ci.c)
 	}
 }
 
