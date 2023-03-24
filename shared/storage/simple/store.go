@@ -3,9 +3,13 @@ package simple
 
 import (
 	"container/list"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"io/fs"
+	"sync"
+
+	"golang.org/x/sync/singleflight"
 
 	"github.com/darvaza-proxy/core"
 	"github.com/darvaza-proxy/darvaza/shared/storage"
@@ -18,6 +22,10 @@ var (
 	_ storage.Store = (*Store)(nil)
 )
 
+// A Getter is a helper to get a certificate for a name
+type Getter func(ctx context.Context,
+	key x509utils.PrivateKey, name string) (*tls.Certificate, error)
+
 // Config is a custom factory for the Store allowing the usage
 // of a Logger and a roots base different that what the system provides
 type Config struct {
@@ -28,49 +36,112 @@ type Config struct {
 // Store is a darvaza TLS Store that doesn't talk to anyone
 // external service nor monitors for new files
 type Store struct {
+	mu sync.Mutex
+	g  singleflight.Group
+
 	pool     *certpool.CertPool
+	keys     []x509utils.PrivateKey
 	certs    []*tls.Certificate
+	hashed   map[certpool.Hash]*tls.Certificate
 	names    map[string]*list.List
 	patterns map[string]*list.List
 }
 
 // GetCAPool returns a reference to the Certificates Pool
 func (s *Store) GetCAPool() *x509.CertPool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	return s.pool.Export()
 }
 
 // GetCertificate returns the TLS Certificate that should be used
 // for a given TLS request
 func (s *Store) GetCertificate(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
-	if cert := s.findMatchingCert(chi); cert != nil {
-		// found
-		return cert, nil
+	return s.GetCertificateWithCallback(chi, nil)
+}
+
+// GetCertificateWithCallback returns the TLS Certificate that should be used
+// for a given TLS request. If one isn't available it call use
+// a callback to acquire one
+func (s *Store) GetCertificateWithCallback(chi *tls.ClientHelloInfo,
+	getter Getter) (*tls.Certificate, error) {
+	//
+	if name, ok := x509utils.SanitiseName(chi.ServerName); ok {
+		// find name match locally
+		s.mu.Lock()
+		cert := s.findMatchingCert(chi, name)
+		s.mu.Unlock()
+
+		if cert == nil && getter != nil {
+			// try to acquire
+			cert = s.getMatchingCert(chi.Context(), name, getter)
+		}
+
+		if cert != nil {
+			// found or aqcuired
+			return cert, nil
+		}
 	}
 
-	if cert := s.findAnyCert(chi); cert != nil {
-		// better than nothing
+	// get me anything please
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	cert := s.findAnyCert(chi)
+	if cert != nil {
 		return cert, nil
 	}
 
 	return nil, fs.ErrNotExist
 }
 
-func (s *Store) findMatchingCert(chi *tls.ClientHelloInfo) *tls.Certificate {
-	if name, ok := x509utils.SanitiseName(chi.ServerName); ok {
-		// IP
-		if n, ok := x509utils.NameAsIP(name); ok {
-			return FindSupportedInMap(chi, n, s.names)
-		}
+func (s *Store) getMatchingCert(ctx context.Context, name string, getter Getter) *tls.Certificate {
+	var key x509utils.PrivateKey
 
-		// exact
-		if cert := FindSupportedInMap(chi, name, s.names); cert != nil {
+	// attempt to reuse our existing key
+	s.mu.Lock()
+	if len(s.keys) > 0 {
+		key = s.keys[0]
+	}
+	s.mu.Unlock()
+
+	v, err, _ := s.g.Do(name, func() (any, error) {
+		c, e := getter(ctx, key, name)
+		return c, e
+	})
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// singleflight.Do returned once, release them all
+	s.g.Forget(name)
+
+	if err == nil {
+		if cert, ok := v.(*tls.Certificate); ok {
+			// acquired. store
+			addCerts(s, cert)
 			return cert
 		}
+	}
 
-		// wildcard
-		if suffix, ok := x509utils.NameAsSuffix(name); ok {
-			return FindSupportedInMap(chi, suffix, s.patterns)
-		}
+	return nil
+}
+
+func (s *Store) findMatchingCert(chi *tls.ClientHelloInfo, name string) *tls.Certificate {
+	// IP
+	if n, ok := x509utils.NameAsIP(name); ok {
+		return FindSupportedInMap(chi, n, s.names)
+	}
+
+	// exact
+	if cert := FindSupportedInMap(chi, name, s.names); cert != nil {
+		return cert
+	}
+
+	// wildcard
+	if suffix, ok := x509utils.NameAsSuffix(name); ok {
+		return FindSupportedInMap(chi, suffix, s.patterns)
 	}
 
 	return nil
@@ -121,8 +192,10 @@ func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, 
 	}
 
 	store := &Store{
-		certs:    []*tls.Certificate{},
 		pool:     pb.Pool(),
+		keys:     []x509utils.PrivateKey{},
+		certs:    []*tls.Certificate{},
+		hashed:   make(map[certpool.Hash]*tls.Certificate),
 		names:    make(map[string]*list.List),
 		patterns: make(map[string]*list.List),
 	}
@@ -133,13 +206,26 @@ func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, 
 
 func addCerts(s *Store, certs ...*tls.Certificate) {
 	for _, c := range certs {
-		if c.PrivateKey == nil {
+		key, ok := c.PrivateKey.(x509utils.PrivateKey)
+		if !ok {
 			// drop keyless certificates
 			continue
 		}
 
-		names, patterns := x509utils.Names(c.Leaf)
-		addCertWithNames(s, c, names, patterns)
+		// contains key
+		if !core.SliceContainsFn(s.keys, key, pkEqual) {
+			// new key
+			s.keys = append(s.keys, key)
+		}
+
+		// contains cert
+		hash := certpool.HashCert(c.Leaf)
+		if _, found := s.hashed[hash]; !found {
+			// new cert
+			s.hashed[hash] = c
+			names, patterns := x509utils.Names(c.Leaf)
+			addCertWithNames(s, c, names, patterns)
+		}
 	}
 }
 
@@ -153,4 +239,8 @@ func addCertWithNames(s *Store, c *tls.Certificate,
 	for _, pattern := range patterns {
 		core.MapListAppend(s.patterns, pattern, c)
 	}
+}
+
+func pkEqual(a, b x509utils.PrivateKey) bool {
+	return a.Equal(b)
 }
