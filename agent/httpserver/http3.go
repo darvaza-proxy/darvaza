@@ -61,16 +61,26 @@ func (srv *Server) prepareAndSpawnH3(lsn quic.EarlyListener) error {
 
 	addr := lsn.Addr()
 
-	srv.wg.Go(func() error {
+	srv.wg.GoCatch(func() error {
 		srv.logListening("quic", addr)
 		return h3s.ServeListener(lsn)
+	}, func(err error) error {
+		switch err {
+		case nil, quic.ErrServerClosed:
+			srv.debug().Printf("%s: done", addr)
+			err = nil
+		default:
+			srv.error(err).Printf("%s: failed", addr)
+		}
+
+		return err
 	})
 
 	srv.wg.Go(func() error {
 		<-srv.ctx.Done()
 		srv.logClosing("quic", addr)
 		// TODO: h3s.CloseGracefully isn't implemented yet
-		srv.warn(nil).Printf("%s: closing UDP listener abruptly")
+		srv.warn(nil).Printf("%s: closing UDP listener abruptly", addr)
 		return h3s.Close()
 	})
 
