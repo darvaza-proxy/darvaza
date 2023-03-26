@@ -35,3 +35,19 @@ func FindSupportedInMap(chi *tls.ClientHelloInfo,
 
 	return out
 }
+
+// FindInMap attempts to find matching [tls.Certificate]s on a MapList
+func FindInMap(name string, m map[string]*list.List, once bool) []*tls.Certificate {
+	var out []*tls.Certificate
+
+	core.MapListForEach(m, name, func(c *tls.Certificate) bool {
+		if c != nil {
+			out = append(out, c)
+			return once
+		}
+		core.Panic("unreachable")
+		return false
+	})
+
+	return out
+}

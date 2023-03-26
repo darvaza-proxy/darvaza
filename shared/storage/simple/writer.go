@@ -7,22 +7,67 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io/fs"
+	"strings"
 
 	"github.com/darvaza-proxy/core"
 	"github.com/darvaza-proxy/darvaza/shared/storage/certpool"
+	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
+
+// Delete removes a certificate by name
+func (s *Store) Delete(_ context.Context, name string) error {
+	const once = false // all matches
+	var certs []*tls.Certificate
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// find by name
+	if strings.HasPrefix(name, "*.") {
+		// pattern
+		certs = FindInMap(name[1:], s.patterns, once)
+	} else {
+		if n, ok := x509utils.NameAsIP(name); ok {
+			// exact match for IP
+			name = n
+		}
+
+		certs = FindInMap(name, s.names, once)
+	}
+
+	if len(certs) == 0 {
+		// none found
+		return fs.ErrNotExist
+	}
+
+	// delete all matches
+	for _, c := range certs {
+		if ci := s.findCertInfo(c.Leaf); ci != nil {
+			s.deleteByCertInfo(ci)
+		}
+	}
+
+	return nil
+}
 
 // DeleteCert removes a certificate from the store
 func (s *Store) DeleteCert(_ context.Context, cert *x509.Certificate) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	hash := certpool.HashCert(cert)
-	if ci, ok := s.hashed[hash]; ok {
+	if ci := s.findCertInfo(cert); ci != nil {
 		s.deleteByCertInfo(ci)
 		return nil
 	}
 	return fs.ErrNotExist
+}
+
+func (s *Store) findCertInfo(cert *x509.Certificate) *certInfo {
+	hash := certpool.HashCert(cert)
+	if ci, ok := s.hashed[hash]; ok {
+		return ci
+	}
+	return nil
 }
 
 func (s *Store) deleteByCertInfo(ci *certInfo) {
