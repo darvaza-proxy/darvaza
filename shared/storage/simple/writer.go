@@ -14,6 +14,82 @@ import (
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
+var (
+	_ x509utils.WriteStore = (*Store)(nil)
+)
+
+// Put adds a certificate to the store
+func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	hash := certpool.HashCert(cert)
+	if ci, ok := s.hashed[hash]; ok {
+		// known
+		if name != "" {
+			// maybe new name?
+			return s.appendName(ci, name)
+		}
+		return fs.ErrExist
+	}
+
+	key := s.findMatchingKey(cert.PublicKey.(x509utils.PublicKey))
+	if key == nil {
+		err := core.Wrap(fs.ErrNotExist, "no suitable key available")
+		return err
+	}
+
+	c, err := s.bundle(cert, key)
+	if err != nil {
+		err = core.Wrap(err, "failed to bundle certificate")
+		return err
+	}
+
+	addCerts(s, c)
+	return nil
+}
+
+func (s *Store) bundle(cert *x509.Certificate, key x509utils.PrivateKey) (*tls.Certificate, error) {
+	return s.pool.Bundle(cert, key, nil)
+}
+
+func (s *Store) appendName(ci *certInfo, name string) error {
+	if strings.HasPrefix(name, "*.") {
+		// pattern
+		k := name[1:]
+		if mapListContainsHash(s.patterns, k, ci.hash) {
+			return fs.ErrExist
+		}
+
+		ci.patterns = append(ci.patterns, k)
+		core.MapListAppend(s.patterns, k, ci.c)
+		return nil
+	}
+
+	if n, ok := x509utils.NameAsIP(name); ok {
+		// IP
+		name = n
+	}
+
+	if mapListContainsHash(s.names, name, ci.hash) {
+		// already set
+		return fs.ErrExist
+	}
+
+	ci.names = append(ci.names, name)
+	core.MapListAppend(s.names, name, ci.c)
+	return nil
+}
+
+func (s *Store) findMatchingKey(pub x509utils.PublicKey) x509utils.PrivateKey {
+	for _, key := range s.keys {
+		if pub.Equal(key.Public()) {
+			return key
+		}
+	}
+	return nil
+}
+
 // Delete removes a certificate by name
 func (s *Store) Delete(_ context.Context, name string) error {
 	const once = false // all matches

@@ -1,10 +1,12 @@
 package simple
 
 import (
+	"bytes"
 	"container/list"
 	"crypto/tls"
 
 	"github.com/darvaza-proxy/core"
+	"github.com/darvaza-proxy/darvaza/shared/storage/certpool"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
@@ -50,4 +52,18 @@ func FindInMap(name string, m map[string]*list.List, once bool) []*tls.Certifica
 	})
 
 	return out
+}
+
+func mapListContainsHash(m map[string]*list.List, name string, hash certpool.Hash) bool {
+	var found bool
+
+	core.MapListForEach(m, name, func(c *tls.Certificate) bool {
+		h := certpool.HashCert(c.Leaf)
+		if bytes.Equal(hash[:], h[:]) {
+			found = true
+		}
+		return found
+	})
+
+	return found
 }
