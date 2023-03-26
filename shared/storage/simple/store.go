@@ -67,7 +67,13 @@ func (s *Store) GetCertificate(chi *tls.ClientHelloInfo) (*tls.Certificate, erro
 func (s *Store) GetCertificateWithCallback(chi *tls.ClientHelloInfo,
 	getter Getter) (*tls.Certificate, error) {
 	//
-	if name, ok := x509utils.SanitiseName(chi.ServerName); ok {
+	name := chi.ServerName
+	if name == "" {
+		name = chi.Conn.LocalAddr().String()
+	}
+
+	name, ok := x509utils.SanitiseName(name)
+	if ok {
 		// find name match locally
 		s.mu.Lock()
 		cert := s.findMatchingCert(chi, name)
