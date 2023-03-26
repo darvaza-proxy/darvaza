@@ -3,7 +3,7 @@ module github.com/darvaza-proxy/darvaza/shared
 go 1.19
 
 require (
-	github.com/darvaza-proxy/core v0.6.5
+	github.com/darvaza-proxy/core v0.7.4
 	github.com/darvaza-proxy/slog v0.4.6
 	github.com/darvaza-proxy/slog/handlers/cblog v0.4.1
 	github.com/darvaza-proxy/slog/handlers/discard v0.3.1

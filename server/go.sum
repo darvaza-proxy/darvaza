@@ -1,5 +1,5 @@
-github.com/darvaza-proxy/core v0.6.5 h1:El8PxD6l4MnLq6ofR075Y/4ApJVWTjcRJl0y9K6Hqzc=
-github.com/darvaza-proxy/core v0.6.5/go.mod h1:FHUkT+KktIBMMwtdSwsSzienEncwI7EI9OKaOZvT5IU=
+github.com/darvaza-proxy/core v0.7.4 h1:1XXVAkKyyESb7vUnIoC1vaxia/0lvzohOQTKSjfcFW0=
+github.com/darvaza-proxy/core v0.7.4/go.mod h1:M/zLq78zDLacjDXxOdO+TCCk5bUpEJXoVc2HbYS1jKY=
 github.com/darvaza-proxy/slog v0.4.6 h1:7q5WjWCd4EU5c9ZRIVYst4sJFh2OYJRS3FqEyRMRrK0=
 github.com/darvaza-proxy/slog v0.4.6/go.mod h1:aFSxsH/VKTwnabhemAb5vJQ5/Q9p1FtQ1P2E+WkVyqk=
 github.com/darvaza-proxy/slog/handlers/cblog v0.4.1 h1:Q1H/AmhEIlMS8oz/yJx/5UsFlJZtZwP1Rudkza84guQ=
@@ -12,6 +12,7 @@ github.com/naoina/go-stringutil v0.1.0 h1:rCUeRUHjBjGTSHl0VC00jUPLz8/F9dDzYI70Hz
 github.com/naoina/go-stringutil v0.1.0/go.mod h1:XJ2SJL9jCtBh+P9q5btrd/Ylo8XwT/h1USek5+NqSA0=
 github.com/naoina/toml v0.1.1 h1:PT/lllxVVN0gzzSqSlHEmP8MJB4MY2U7STGxiouV4X8=
 github.com/naoina/toml v0.1.1/go.mod h1:NBIhNtsFMo3G2szEBne+bO4gS192HuIYRqfvOWb4i1E=
+golang.org/x/exp v0.0.0-20230321023759-10a507213a29 h1:ooxPy7fPvB4kwsA2h+iBNHkAbp/4JxTSwCmvdjEYmug=
 golang.org/x/mod v0.9.0 h1:KENHtAZL2y3NLMYZeHY9DW8HW8V+kQyJsY/V9JlKvCs=
 golang.org/x/mod v0.9.0/go.mod h1:iBbtSCu2XBx23ZKBPSOrRkjjQPZFPuis4dIYUhu/chs=
 golang.org/x/net v0.8.0 h1:Zrh2ngAOFYneWTAIAPethzeaQLuHwhuBkuV6ZiRnUaQ=
