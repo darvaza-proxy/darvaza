@@ -1,5 +1,10 @@
 # Helpers for implementing http.Handlers
 
+## Response Handlers
+
+Using `respond.WithRequest()` we compute our options and `PreferredContentType()`
+tells one how to encode the data.
+
 ## Content Negotiation
 
 ### QualityList
