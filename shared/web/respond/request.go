@@ -17,7 +17,7 @@ type Request struct {
 }
 
 // WithRequest creates a [Request] from a [http.Request]
-func WithRequest(req http.Request) (*Request, error) {
+func WithRequest(req *http.Request) (*Request, error) {
 	r := &Request{
 		Context: req.Context(),
 	}
