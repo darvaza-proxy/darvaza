@@ -61,12 +61,14 @@ func (s *Store) GetCertificate(chi *tls.ClientHelloInfo) (*tls.Certificate, erro
 	return s.GetCertificateWithCallback(chi, nil)
 }
 
+// revive:disable:cognitive-complexity
+
 // GetCertificateWithCallback returns the TLS Certificate that should be used
 // for a given TLS request. If one isn't available it call use
 // a callback to acquire one
 func (s *Store) GetCertificateWithCallback(chi *tls.ClientHelloInfo,
 	getter Getter) (*tls.Certificate, error) {
-	//
+	// revive:enable:cognitive-complexity
 	name := chi.ServerName
 	if name == "" {
 		name = chi.Conn.LocalAddr().String()
