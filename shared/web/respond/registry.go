@@ -156,3 +156,9 @@ func Register(ct string, h Renderer) error {
 func CloneRegistry() *Registry {
 	return global.Clone()
 }
+
+// GetRenderer retrieves a [Renderer] from the global [Registry],
+// or its Identity.
+func GetRenderer(ct string) (Renderer, bool) {
+	return global.Get(ct)
+}
