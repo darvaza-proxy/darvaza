@@ -3,6 +3,7 @@ package qlist
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -121,13 +122,14 @@ func qualityAttribute(attrs []string) (float32, bool) {
 			q, err := strconv.ParseFloat(v, 32)
 			switch {
 			case v == "":
-			case err != nil:
+			case err != nil || math.IsNaN(q) || math.IsInf(q, 0):
 				return 0., false
 			case q < MinimumQuality+Epsilon:
 				return MinimumQuality, true
 			case q+Epsilon > MaximumQuality:
 				return MaximumQuality, true
 			default:
+				q = math.Round(q/Epsilon) * Epsilon
 				return float32(q), true
 			}
 		}
