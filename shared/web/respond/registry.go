@@ -34,6 +34,25 @@ func NewRegistry(renderer ...Renderer) *Registry {
 	return m
 }
 
+// Clone creates a new [Registry] using the current as starting
+// point.
+func (reg *Registry) Clone() *Registry {
+	reg.mu.Lock()
+	defer reg.mu.Unlock()
+
+	out := &Registry{
+		m: make(map[string]Renderer, len(reg.m)),
+
+		identity: reg.identity,
+	}
+
+	for ct, h := range reg.m {
+		out.m[ct] = h
+	}
+
+	return out
+}
+
 // Register adds a [Renderer] to a particular [Registry]
 func (reg *Registry) Register(ct string, h Renderer) error {
 	if h == nil {
@@ -111,4 +130,10 @@ var global = NewRegistry()
 // Register adds a [Renderer] to the global [Registry]
 func Register(ct string, h Renderer) error {
 	return global.Register(ct, h)
+}
+
+// CloneRegistry creates a new [Registry] using the global
+// as starting point
+func CloneRegistry() *Registry {
+	return global.Clone()
 }
