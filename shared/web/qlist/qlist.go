@@ -117,11 +117,19 @@ func splitFields(s string) []string {
 func qualityAttribute(attrs []string) (float32, bool) {
 	for _, s := range attrs {
 		if strings.HasPrefix(s, "q=") {
-			q, err := strconv.ParseFloat(s[2:], 32)
-			if err != nil || q < MinimumQuality || q > MaximumQuality {
+			v := s[2:]
+			q, err := strconv.ParseFloat(v, 32)
+			switch {
+			case v == "":
+			case err != nil:
 				return 0., false
+			case q < MinimumQuality+Epsilon:
+				return MinimumQuality, true
+			case q+Epsilon > MaximumQuality:
+				return MaximumQuality, true
+			default:
+				return float32(q), true
 			}
-			return float32(q), true
 		}
 	}
 	return MaximumQuality, true
