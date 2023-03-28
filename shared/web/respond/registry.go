@@ -87,6 +87,25 @@ func (reg *Registry) doRegister(ct string, h Renderer) error {
 	return err
 }
 
+// Replace registers or replaces a [Renderer] on the [Registry].
+// Returns the previous Renderer assigned to the specified Content-Type
+func (reg *Registry) Replace(ct string, h Renderer) (Renderer, error) {
+	if h == nil {
+		ct = core.Coalesce(strings.ToLower(ct), h.ContentType())
+		if ct != "" {
+			reg.mu.Lock()
+			defer reg.mu.Unlock()
+
+			prev := reg.m[ct]
+			reg.m[ct] = h
+
+			return prev, nil
+		}
+	}
+
+	return nil, fs.ErrInvalid
+}
+
 // Get retrieves a [Renderer], or the Identity
 func (reg *Registry) Get(ct string) (r Renderer, found bool) {
 	ct = strings.ToLower(ct)
