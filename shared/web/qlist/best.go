@@ -6,10 +6,10 @@ import "net/http"
 // returns its Quality Value
 func FindQuality(s string, ql QualityList) (float32, bool) {
 	for _, qv := range ql {
-		switch qv.Value {
+		switch qv.Value() {
 		case s, "*":
 			// match
-			return qv.Quality, true
+			return qv.quality, true
 		}
 	}
 	// no match

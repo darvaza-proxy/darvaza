@@ -19,15 +19,37 @@ const (
 
 // QualityValue is a parsed item of a [QualityList]
 type QualityValue struct {
-	Value   string
-	Quality float32
+	value   []string
+	quality float32
+}
+
+// IsZero tells if the QualityValue doesn't hold any information
+func (q QualityValue) IsZero() bool {
+	return len(q.value) == 0 && q.quality == 0
+}
+
+// Value tells the entry the quality refers to
+func (q QualityValue) Value() string {
+	switch len(q.value) {
+	case 0:
+		return ""
+	case 1:
+		return q.value[0]
+	default:
+		return strings.Join(q.value, "/")
+	}
+}
+
+// Quality of the Value entry
+func (q QualityValue) Quality() float32 {
+	return q.quality
 }
 
 func (q QualityValue) String() string {
-	if q.Quality+Epsilon > MaximumQuality {
-		return q.Value
+	if q.quality+Epsilon > MaximumQuality {
+		return q.Value()
 	}
-	return fmt.Sprintf("%s;q=%v", q.Value, q.Quality)
+	return fmt.Sprintf("%s;q=%v", q.Value(), q.quality)
 }
 
 // QualityList is a list of [QualityValue]
@@ -71,25 +93,44 @@ func parseQualityHeaders(out QualityList, hdrs []string) (QualityList, error) {
 // Header's content
 func ParseQualityString(qlist string) (out QualityList, err error) {
 	for _, s := range strings.Split(qlist, ",") {
-		fields := splitFields(s)
+		q, err := ParseQualityValue(s)
+		if err != nil {
+			return out, err
+		}
 
-		if len(fields) > 0 {
-			// value
-			v := strings.ToLower(fields[0])
-			// attributes
-			q, ok := qualityAttribute(fields[1:])
+		if !q.IsZero() {
+			out = append(out, q)
+		}
+	}
 
-			if len(v) == 0 || !ok {
-				err = fmt.Errorf("invalid argument: %q", qlist)
-				return out, err
-			}
+	return out, nil
+}
 
-			qv := QualityValue{
-				Value:   v,
-				Quality: q,
-			}
+// ParseQualityValue parses one [QualityValue]
+func ParseQualityValue(s string) (QualityValue, error) {
+	var out QualityValue
 
-			out = append(out, qv)
+	fields := splitFields(s)
+	if len(fields) > 0 {
+		// value
+		v := strings.ToLower(fields[0])
+		// attributes
+		q, ok := qualityAttribute(fields[1:])
+
+		if len(v) == 0 || !ok {
+			err := fmt.Errorf("invalid argument: %q", s)
+			return out, err
+		}
+
+		value := core.SliceReplaceFn(strings.Split(v, "/"),
+			func(_ []string, s string) (string, bool) {
+				s = strings.TrimSpace(s)
+				return s, s != ""
+			})
+
+		out = QualityValue{
+			value:   value,
+			quality: q,
 		}
 	}
 
