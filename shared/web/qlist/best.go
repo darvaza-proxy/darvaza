@@ -2,6 +2,12 @@ package qlist
 
 import "net/http"
 
+const (
+	// AcceptEncoding is the canonical name given to the header used
+	// to indicate compression options
+	AcceptEncoding = "Accept-Encoding"
+)
+
 // FindQuality searches a [QualityList] for a given entry and
 // returns its Quality Value
 func FindQuality(s string, ql QualityList) (float32, bool) {
@@ -65,10 +71,10 @@ done:
 	return bestOption, bestQuality, bestOption != ""
 }
 
-// BestEncoding chooses the best supported Content-Type option considering
-// the Accept header
+// BestEncoding chooses the best supported compression option considering
+// the Accept-Encoding header
 func BestEncoding(supported []string, hdr http.Header) (string, bool) {
-	ql, _ := ParseQualityHeader(hdr, "Accept")
+	ql, _ := ParseQualityHeader(hdr, AcceptEncoding)
 	best, _, ok := BestQualityWithIdentity(supported, ql, "identity")
 	return best, ok
 }
