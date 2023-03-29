@@ -75,6 +75,65 @@ func (q QualityValue) String() string {
 	return strings.Join(s, ";")
 }
 
+// Match answers the question if we match a target.
+// For an entry to match another it needs to have the
+// same number of parts, and each pair of parts be
+// identical or at least one of them a "*" wildcard
+func (q QualityValue) Match(t QualityValue) bool {
+	if l := len(q.value); l == len(t.value) {
+		for i := 0; i < l; i++ {
+			a, b := q.value[i], t.value[i]
+			if a != "*" && b != "*" && a != b {
+				return false
+			}
+		}
+		return true
+	}
+
+	return false
+}
+
+// MatchFitness answers the question of how well we match a target.
+// simple match gives one point, as do matching target attributes.
+// exact matches at the lowest part gives 10, and that grows geometrically
+// as parts we move up in the chain
+func (q QualityValue) MatchFitness(t QualityValue) int {
+	fitness := 0
+	if q.Match(t) {
+		fitness++
+		fitness += matchValues(q.value, t.value)
+		fitness += matchAttributes(q.attrs, t.attrs)
+	}
+
+	return fitness
+}
+
+func matchValues(qv, tv []string) int {
+	fitness := 0
+	l := len(qv)
+	w := 10 * l
+
+	for i := 0; i < l; i++ {
+		if qv[i] == tv[i] {
+			fitness += w
+		}
+		w /= 10
+	}
+	return fitness
+}
+
+func matchAttributes(qa, ta map[string]string) int {
+	fitness := 0
+	for key, tav := range ta {
+		if av, ok := qa[key]; ok {
+			if av == tav {
+				fitness++
+			}
+		}
+	}
+	return fitness
+}
+
 // QualityList is a list of [QualityValue]
 type QualityList []QualityValue
 
