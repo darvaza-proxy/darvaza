@@ -174,6 +174,23 @@ func (reg *Registry) Get(ct string) (r Renderer, found bool) {
 	return r, found
 }
 
+// GetParsed retrieves the parsed [qlist.QualityValue] of a given
+// Media Type if the Registry knows it
+func (reg *Registry) GetParsed(ct string) (qlist.QualityValue, bool) {
+	ct = strings.ToLower(ct)
+
+	reg.mu.Lock()
+	defer reg.mu.Unlock()
+
+	if ct != "" {
+		if re, found := reg.m[ct]; found {
+			return re.qv, true
+		}
+	}
+
+	return qlist.QualityValue{}, false
+}
+
 // SetIdentity defines the default Content-Type for this [Registry].
 // Otherwise it will be the first registered Renderer
 func (reg *Registry) SetIdentity(ct string) error {
