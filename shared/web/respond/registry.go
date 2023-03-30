@@ -206,6 +206,14 @@ func (reg *Registry) SetIdentity(ct string) error {
 	return fs.ErrInvalid
 }
 
+// Supports creates a new Responder supporting the given media types
+func (reg *Registry) Supports(types ...string) *Responder {
+	res := &Responder{
+		registry: reg,
+	}
+	return res.Supports(types...)
+}
+
 // global is the global Renderer registry
 var global = NewRegistry()
 
@@ -224,4 +232,10 @@ func CloneRegistry() *Registry {
 // or its Identity.
 func GetRenderer(ct string) (Renderer, bool) {
 	return global.Get(ct)
+}
+
+// Supports creates a new Responder supporting the given media types,
+// using the global [Registry]
+func Supports(types ...string) *Responder {
+	return global.Supports(types...)
 }
