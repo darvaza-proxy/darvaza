@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/darvaza-proxy/core"
-	"github.com/darvaza-proxy/middleware"
 )
 
 var (
@@ -42,7 +41,7 @@ func (err *HTTPError) Status() int {
 // ServeHTTP is a very primitive handler that will try to pass the error
 // to a [middleware.ErrorHandlerFunc] provided via the request's context.Context
 func (err *HTTPError) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	if h, ok := middleware.ErrorHandler(req.Context()); ok {
+	if h, ok := ErrorHandler(req.Context()); ok {
 		// pass over to the error handler
 		h(rw, req, err)
 		return
