@@ -8,37 +8,69 @@ const (
 	AcceptEncoding = "Accept-Encoding"
 )
 
-// FindQuality searches a [QualityList] for a given entry and
-// returns its Quality Value
-func FindQuality(s string, ql QualityList) (float32, bool) {
-	for _, qv := range ql {
-		switch qv.Value() {
-		case s, "*":
-			// match
-			return qv.quality, true
+// FitnessAndQualityParsed finds the best accepted match
+// for a target, returning fitness and quality.
+// (-1, 0) if no match was found
+func FitnessAndQualityParsed(target QualityValue,
+	accepted QualityList) (fitness int, quality float32) {
+	//
+	bestfitness := -1
+	bestquality := float32(0.0)
+
+	for _, r := range accepted {
+		if fitness := r.MatchFitness(target); fitness > 0 {
+			if fitness > bestfitness {
+				bestfitness = fitness
+				bestquality = r.Quality()
+			}
 		}
 	}
-	// no match
-	return 0.0, false
+
+	return bestfitness, bestquality
+}
+
+// FitnessAndQuality finds the best accepted match
+// for a target, returning fitness and quality.
+// (-1, 0) if no match was found
+func FitnessAndQuality(target string,
+	accepted QualityList) (fitness int, quality float32) {
+	q, err := ParseQualityValue(target)
+	if err == nil {
+		return FitnessAndQualityParsed(q, accepted)
+	}
+	return -1, 0.
+}
+
+// BestQualityParsed takes a list of supported and accepted quality entries
+// and finds the best match among all combinations.
+func BestQualityParsed(supported, accepted []QualityValue) (string, float32, bool) {
+	var bestQuality float32
+	var bestOption string
+
+	for _, v := range supported {
+		_, quality := FitnessAndQualityParsed(v, accepted)
+		if quality > bestQuality {
+			bestQuality = quality
+			bestOption = v.String()
+		}
+	}
+
+	return bestOption, bestQuality, bestOption != ""
 }
 
 // BestQuality searches for the best option among supported values
 // based on the provided QualityList
 func BestQuality(supported []string, ql QualityList) (string, float32, bool) {
-	bestOption := ""
-	bestQuality := float32(0.0)
+	var sql QualityList
 
-	if len(ql) > 0 {
-		for _, option := range supported {
-			quality, _ := FindQuality(option, ql)
-			if quality > bestQuality {
-				bestQuality = quality
-				bestOption = option
-			}
+	for _, s := range supported {
+		q, err := ParseQualityValue(s)
+		if err != nil {
+			sql = append(sql, q)
 		}
 	}
 
-	return bestOption, bestQuality, bestOption != ""
+	return BestQualityParsed(sql, ql)
 }
 
 // BestQualityWithIdentity searches for the best option among supported values
@@ -52,11 +84,11 @@ func BestQualityWithIdentity(supported []string,
 
 	if identity != "" {
 		// test for identity
-		quality, ok := FindQuality(identity, ql)
+		fitness, quality := FitnessAndQuality(identity, ql)
 		switch {
 		case quality > bestQuality:
 			// identity is best
-		case bestOption == "" && !ok:
+		case bestOption == "" && fitness >= 0:
 			// nothing chosen, but identity wasn't forbidden
 		default:
 			// no luck with the identity
