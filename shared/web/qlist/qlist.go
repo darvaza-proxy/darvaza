@@ -149,15 +149,8 @@ func (ql QualityList) String() string {
 
 // ParseQualityHeader extracts a [QualityList] from the headers of a request
 func ParseQualityHeader(hdr http.Header, name string) (out QualityList, err error) {
-	for k, v := range hdr {
-		if strings.EqualFold(name, k) {
-			out, err = parseQualityHeaders(out, v)
-			if err != nil {
-				return out, err
-			}
-		}
-	}
-	return out, nil
+	hdrs := hdr.Values(name)
+	return parseQualityHeaders(out, hdrs)
 }
 
 func parseQualityHeaders(out QualityList, hdrs []string) (QualityList, error) {
