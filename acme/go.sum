@@ -1,9 +1,9 @@
-github.com/darvaza-proxy/core v0.8.1 h1:1ngmbUqQWaKWhC8LwdobJMhJgQi/NLpy7cRa6XmPp24=
-github.com/darvaza-proxy/core v0.8.1/go.mod h1:M/zLq78zDLacjDXxOdO+TCCk5bUpEJXoVc2HbYS1jKY=
-github.com/darvaza-proxy/darvaza/shared/web v0.2.1 h1:eZGGzUR3xMpxusnWAwYOwXavhWAyYT1Y8Dt8LXPy6xM=
-github.com/darvaza-proxy/darvaza/shared/web v0.2.1/go.mod h1:HwRyh+k9VeNdUKA6h/fRJA4K8PMcAvh2QxSjRnyF6ig=
-github.com/darvaza-proxy/middleware v0.1.1 h1:+5Yzww9z/RO5qPQXJ5qTe28DdzAr2iC4oTRVFsx/q5w=
-github.com/darvaza-proxy/middleware v0.1.1/go.mod h1:rW1JrGzVcEZf9xp4TKLLVFVlAxl/07b2jBceaJachro=
+darvaza.org/core v0.9.0 h1:3Vkmhr5n5/cQ89BpjWwQArqt3QdCRcEUc6F3Tnb7Dus=
+darvaza.org/core v0.9.0/go.mod h1:QyzYp1eWsgHJIHyaRZcLSc2LLjCvLFugHXfZLWD9JNU=
+darvaza.org/darvaza/shared/web v0.3.1 h1:JqOURYUZNFNiRJru8J/HGU1v+GEk248rpiV+Bh9uzQU=
+darvaza.org/darvaza/shared/web v0.3.1/go.mod h1:v0rV8Xo+fCwVWt2OxMzYj5vpPjgmXZbvk9COs6FO/gQ=
+darvaza.org/middleware v0.2.0 h1:vdN2arn3K9e7PHdZYizg2YAtUKLxV9lPVJ/A/XDXsDA=
+darvaza.org/middleware v0.2.0/go.mod h1:IpNbUQA9mmKhqmnz8biuwsQb9x0c1Od7S4WHmOiGIaU=
 golang.org/x/exp v0.0.0-20230321023759-10a507213a29 h1:ooxPy7fPvB4kwsA2h+iBNHkAbp/4JxTSwCmvdjEYmug=
 golang.org/x/net v0.8.0 h1:Zrh2ngAOFYneWTAIAPethzeaQLuHwhuBkuV6ZiRnUaQ=
 golang.org/x/net v0.8.0/go.mod h1:QVkue5JL9kW//ek3r6jTKnTFis1tRmNAW2P1shuFdJc=

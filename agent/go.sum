@@ -1,5 +1,9 @@
 darvaza.org/core v0.9.0 h1:3Vkmhr5n5/cQ89BpjWwQArqt3QdCRcEUc6F3Tnb7Dus=
 darvaza.org/core v0.9.0/go.mod h1:QyzYp1eWsgHJIHyaRZcLSc2LLjCvLFugHXfZLWD9JNU=
+darvaza.org/darvaza/shared/web v0.3.1 h1:JqOURYUZNFNiRJru8J/HGU1v+GEk248rpiV+Bh9uzQU=
+darvaza.org/darvaza/shared/web v0.3.1/go.mod h1:v0rV8Xo+fCwVWt2OxMzYj5vpPjgmXZbvk9COs6FO/gQ=
+darvaza.org/middleware v0.2.0 h1:vdN2arn3K9e7PHdZYizg2YAtUKLxV9lPVJ/A/XDXsDA=
+darvaza.org/middleware v0.2.0/go.mod h1:IpNbUQA9mmKhqmnz8biuwsQb9x0c1Od7S4WHmOiGIaU=
 darvaza.org/slog v0.5.0 h1:hs8GPd04rpm0v3xhXexLYnLknrQ8cxguPQZtw/F8Qkk=
 darvaza.org/slog v0.5.0/go.mod h1:Qk9S2DX8Uk38TtBqAJasaL9MSGozD5F3AyVcVCTGMW0=
 darvaza.org/slog/handlers/discard v0.4.0 h1:Zii9a4Jwq3wUPlVrmGY0FDaow6sR4iIavVYVava8R2M=

@@ -19,6 +19,8 @@ require (
 )
 
 require (
+	darvaza.org/darvaza/shared/web v0.3.1 // indirect
+	darvaza.org/middleware v0.2.0 // indirect
 	github.com/darvaza-proxy/core v0.8.1 // indirect
 	github.com/darvaza-proxy/darvaza/shared/web v0.2.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect

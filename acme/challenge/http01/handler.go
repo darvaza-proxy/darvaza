@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"darvaza.org/darvaza/acme"
-	"github.com/darvaza-proxy/middleware"
+	"darvaza.org/middleware"
 )
 
 const (
