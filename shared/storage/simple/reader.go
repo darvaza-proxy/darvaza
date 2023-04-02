@@ -7,7 +7,7 @@ import (
 	"io/fs"
 
 	"darvaza.org/core"
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"darvaza.org/darvaza/shared/x509utils"
 )
 
 var (

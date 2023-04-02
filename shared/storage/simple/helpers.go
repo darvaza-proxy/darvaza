@@ -6,8 +6,8 @@ import (
 	"crypto/tls"
 
 	"darvaza.org/core"
-	"github.com/darvaza-proxy/darvaza/shared/storage/certpool"
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"darvaza.org/darvaza/shared/storage/certpool"
+	"darvaza.org/darvaza/shared/x509utils"
 )
 
 // FindSupportedInMap attempts to find a matching supported tls.Certificate

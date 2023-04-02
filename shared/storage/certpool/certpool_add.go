@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"darvaza.org/core"
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"darvaza.org/darvaza/shared/x509utils"
 )
 
 // Put adds a certificate by name

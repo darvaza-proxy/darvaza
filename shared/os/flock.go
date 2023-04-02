@@ -5,7 +5,7 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/darvaza-proxy/darvaza/shared/os/flock"
+	"darvaza.org/darvaza/shared/os/flock"
 )
 
 // ReadDirWithLock reads a directory using a syscall.Flock

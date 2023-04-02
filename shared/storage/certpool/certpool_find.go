@@ -4,7 +4,7 @@ import (
 	"container/list"
 
 	"darvaza.org/core"
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"darvaza.org/darvaza/shared/x509utils"
 )
 
 func (s *CertPool) getAllHashByName(name string) []Hash {

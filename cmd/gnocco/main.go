@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/darvaza-proxy/darvaza/server/gnocco"
-	"github.com/darvaza-proxy/darvaza/shared/version"
+	"darvaza.org/darvaza/server/gnocco"
+	"darvaza.org/darvaza/shared/version"
 )
 
 func main() {

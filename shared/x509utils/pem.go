@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 
 	"darvaza.org/core"
-	"github.com/darvaza-proxy/darvaza/shared/os"
+	"darvaza.org/darvaza/shared/os"
 )
 
 // DecodePEMBlockFunc is called for each PEM block coded. it returns true

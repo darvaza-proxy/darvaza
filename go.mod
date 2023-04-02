@@ -1,14 +1,14 @@
-module github.com/darvaza-proxy/darvaza
+module darvaza.org/darvaza
 
 go 1.19
 
 require (
+	darvaza.org/darvaza/server v0.0.4
+	darvaza.org/darvaza/shared v0.4.13
 	github.com/creasty/defaults v1.7.0
-	github.com/darvaza-proxy/darvaza/server v0.0.4
-	github.com/darvaza-proxy/darvaza/shared v0.4.3
 	github.com/hashicorp/hcl/v2 v2.16.2
 	github.com/mgechev/revive v1.3.1
-	github.com/miekg/dns v1.1.52
+	github.com/miekg/dns v1.1.53
 	github.com/spf13/cobra v1.6.1
 )
 
@@ -48,8 +48,8 @@ require (
 )
 
 replace (
-	github.com/darvaza-proxy/darvaza/acme => ./acme
-	github.com/darvaza-proxy/darvaza/agent => ./agent
-	github.com/darvaza-proxy/darvaza/server => ./server
-	github.com/darvaza-proxy/darvaza/shared => ./shared
+	darvaza.org/darvaza/acme => ./acme
+	darvaza.org/darvaza/agent => ./agent
+	darvaza.org/darvaza/server => ./server
+	darvaza.org/darvaza/shared => ./shared
 )

@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 
-	"github.com/darvaza-proxy/darvaza/shared/tls/server"
+	"darvaza.org/darvaza/shared/tls/server"
 )
 
 // Config is the main configuration item containig all

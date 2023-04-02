@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"darvaza.org/core"
-	"github.com/darvaza-proxy/darvaza/shared/net/bind"
+	"darvaza.org/darvaza/shared/net/bind"
 )
 
 // ServerListeners is the list of all listeners on a Server

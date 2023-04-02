@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"io/fs"
 
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"darvaza.org/darvaza/shared/x509utils"
 )
 
 // ForEach iterates over all certificates

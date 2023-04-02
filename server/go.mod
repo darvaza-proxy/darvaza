@@ -1,13 +1,13 @@
-module github.com/darvaza-proxy/darvaza/server
+module darvaza.org/darvaza/server
 
 go 1.19
 
-replace github.com/darvaza-proxy/darvaza/shared => ../shared
+replace darvaza.org/darvaza/shared => ../shared
 
 require (
+	darvaza.org/darvaza/shared v0.4.13
 	darvaza.org/slog v0.5.0
-	github.com/darvaza-proxy/darvaza/shared v0.4.3
-	github.com/miekg/dns v1.1.52
+	github.com/miekg/dns v1.1.53
 	github.com/naoina/toml v0.1.1
 )
 

@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"darvaza.org/core"
+	"darvaza.org/darvaza/shared/x509utils"
 	"darvaza.org/slog"
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
 // NewBundler creates a Bundler using the known CAs and provided roots.

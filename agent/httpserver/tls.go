@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/darvaza-proxy/darvaza/shared/tls/sni"
+	"darvaza.org/darvaza/shared/tls/sni"
 )
 
 // NewTLSConfig returns the tls.Config to be used on the Server

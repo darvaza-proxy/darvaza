@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"io/fs"
 
-	"github.com/darvaza-proxy/darvaza/shared/os"
-	"github.com/darvaza-proxy/darvaza/shared/os/flock"
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"darvaza.org/darvaza/shared/os"
+	"darvaza.org/darvaza/shared/os/flock"
+	"darvaza.org/darvaza/shared/x509utils"
 )
 
 var (

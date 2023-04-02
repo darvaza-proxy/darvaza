@@ -1,4 +1,4 @@
-module github.com/darvaza-proxy/darvaza/shared
+module darvaza.org/darvaza/shared
 
 go 1.19
 

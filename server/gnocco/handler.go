@@ -7,7 +7,7 @@ import (
 
 	"darvaza.org/slog"
 
-	"github.com/darvaza-proxy/darvaza/shared/version"
+	"darvaza.org/darvaza/shared/version"
 )
 
 type question struct {

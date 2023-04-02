@@ -3,7 +3,7 @@ package httpserver
 import (
 	"net/http"
 
-	"github.com/darvaza-proxy/darvaza/acme/challenge/http01"
+	"darvaza.org/darvaza/acme/challenge/http01"
 	"github.com/darvaza-proxy/middleware"
 )
 

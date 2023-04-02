@@ -3,7 +3,7 @@ package gnocco
 import (
 	"darvaza.org/slog"
 
-	"github.com/darvaza-proxy/darvaza/shared/cblog"
+	"darvaza.org/darvaza/shared/cblog"
 )
 
 // Logger returns the internal slog.Logger

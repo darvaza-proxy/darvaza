@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/darvaza-proxy/darvaza/shared/web/qlist"
+	"darvaza.org/darvaza/shared/web/qlist"
 )
 
 // Request is a processed representation of [http.Request]

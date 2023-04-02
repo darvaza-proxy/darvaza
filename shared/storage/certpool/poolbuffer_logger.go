@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"strings"
 
+	"darvaza.org/darvaza/shared/x509utils"
 	"darvaza.org/slog"
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
 // SetLogger binds a slog.Logger to the buffer

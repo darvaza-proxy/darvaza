@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"errors"
 
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"darvaza.org/darvaza/shared/x509utils"
 )
 
 var (

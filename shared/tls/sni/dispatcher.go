@@ -9,9 +9,9 @@ import (
 	"sync/atomic"
 
 	"darvaza.org/core"
+	"darvaza.org/darvaza/shared/sync/httpgroup"
 	"darvaza.org/slog"
 	"darvaza.org/slog/handlers/discard"
-	"github.com/darvaza-proxy/darvaza/shared/sync/httpgroup"
 )
 
 var (

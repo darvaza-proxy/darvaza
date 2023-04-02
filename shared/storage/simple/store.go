@@ -12,10 +12,10 @@ import (
 	"golang.org/x/sync/singleflight"
 
 	"darvaza.org/core"
+	"darvaza.org/darvaza/shared/storage"
+	"darvaza.org/darvaza/shared/storage/certpool"
+	"darvaza.org/darvaza/shared/x509utils"
 	"darvaza.org/slog"
-	"github.com/darvaza-proxy/darvaza/shared/storage"
-	"github.com/darvaza-proxy/darvaza/shared/storage/certpool"
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 
 var (

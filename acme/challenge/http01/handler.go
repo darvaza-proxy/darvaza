@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/darvaza-proxy/darvaza/acme"
+	"darvaza.org/darvaza/acme"
 	"github.com/darvaza-proxy/middleware"
 )
 

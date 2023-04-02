@@ -3,7 +3,7 @@ package certpool
 import (
 	"crypto/x509"
 
-	"github.com/darvaza-proxy/darvaza/shared/x509utils"
+	"darvaza.org/darvaza/shared/x509utils"
 )
 
 type pbCertData struct {
