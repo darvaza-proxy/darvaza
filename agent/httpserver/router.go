@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"darvaza.org/darvaza/acme/challenge/http01"
-	"github.com/darvaza-proxy/middleware"
+	"darvaza.org/middleware"
 )
 
 // Handle registers the handler for the given pattern.
