@@ -3,7 +3,7 @@ package x
 import (
 	"container/list"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // CloneMapList duplicates a map containing a list.List

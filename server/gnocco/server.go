@@ -5,7 +5,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/darvaza-proxy/slog"
+	"darvaza.org/slog"
 	"github.com/miekg/dns"
 )
 

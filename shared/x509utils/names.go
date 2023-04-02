@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // Names returns a list of exact names and patterns the certificate

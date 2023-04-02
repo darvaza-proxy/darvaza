@@ -9,8 +9,8 @@ import (
 	"sync/atomic"
 	"syscall"
 
-	"github.com/darvaza-proxy/core"
-	"github.com/darvaza-proxy/slog"
+	"darvaza.org/core"
+	"darvaza.org/slog"
 )
 
 var (

@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/darvaza-proxy/slog"
-	"github.com/darvaza-proxy/slog/handlers/cblog"
+	"darvaza.org/slog"
+	"darvaza.org/slog/handlers/cblog"
 )
 
 var (

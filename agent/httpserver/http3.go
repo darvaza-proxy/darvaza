@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
 )

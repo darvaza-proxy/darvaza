@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"io/fs"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // Delete removes a certificate by name

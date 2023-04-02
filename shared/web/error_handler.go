@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // ErrorHandlerFunc is the signature of a function used as ErrorHandler

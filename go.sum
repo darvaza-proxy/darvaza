@@ -1,3 +1,11 @@
+darvaza.org/core v0.9.0 h1:3Vkmhr5n5/cQ89BpjWwQArqt3QdCRcEUc6F3Tnb7Dus=
+darvaza.org/core v0.9.0/go.mod h1:QyzYp1eWsgHJIHyaRZcLSc2LLjCvLFugHXfZLWD9JNU=
+darvaza.org/slog v0.5.0 h1:hs8GPd04rpm0v3xhXexLYnLknrQ8cxguPQZtw/F8Qkk=
+darvaza.org/slog v0.5.0/go.mod h1:Qk9S2DX8Uk38TtBqAJasaL9MSGozD5F3AyVcVCTGMW0=
+darvaza.org/slog/handlers/cblog v0.5.0 h1:7WNhx3rLdjTW38uHbAQe56zhL2YhbfP+0ATWje4vx1Q=
+darvaza.org/slog/handlers/cblog v0.5.0/go.mod h1:oeDk1HdMTj1BQRlHBGPMa7x66i/b6YhZeFJ8XzG01bE=
+darvaza.org/slog/handlers/discard v0.4.0 h1:Zii9a4Jwq3wUPlVrmGY0FDaow6sR4iIavVYVava8R2M=
+darvaza.org/slog/handlers/discard v0.4.0/go.mod h1:Bhrzwz1zAJTyxXeOcCsK7EfWndPQYdF0e3BAFu10jW0=
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
@@ -9,14 +17,6 @@ github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8/go.mod h1:gakxgyXa
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creasty/defaults v1.7.0 h1:eNdqZvc5B509z18lD8yc212CAqJNvfT1Jq6L8WowdBA=
 github.com/creasty/defaults v1.7.0/go.mod h1:iGzKe6pbEHnpMPtfDXZEr0NVxWnPTjb1bbDy08fPzYM=
-github.com/darvaza-proxy/core v0.7.4 h1:1XXVAkKyyESb7vUnIoC1vaxia/0lvzohOQTKSjfcFW0=
-github.com/darvaza-proxy/core v0.7.4/go.mod h1:M/zLq78zDLacjDXxOdO+TCCk5bUpEJXoVc2HbYS1jKY=
-github.com/darvaza-proxy/slog v0.4.6 h1:7q5WjWCd4EU5c9ZRIVYst4sJFh2OYJRS3FqEyRMRrK0=
-github.com/darvaza-proxy/slog v0.4.6/go.mod h1:aFSxsH/VKTwnabhemAb5vJQ5/Q9p1FtQ1P2E+WkVyqk=
-github.com/darvaza-proxy/slog/handlers/cblog v0.4.1 h1:Q1H/AmhEIlMS8oz/yJx/5UsFlJZtZwP1Rudkza84guQ=
-github.com/darvaza-proxy/slog/handlers/cblog v0.4.1/go.mod h1:mlrLhuOCOAq2YGYvK5DO6oMKk/YwaYrA/3+tmwkBn9Y=
-github.com/darvaza-proxy/slog/handlers/discard v0.3.1 h1:XjAAqYnxf4Bxxx1uYQ62O/+cCcrThCiSrqhQ6EHaVpc=
-github.com/darvaza-proxy/slog/handlers/discard v0.3.1/go.mod h1:CRbvHVRyng5+4a7IQ5ft9tuSHCAa+Y97Q7ikNkuJ4wE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -38,8 +38,8 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=
 github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovkB8vQcUbaXHg=
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
-github.com/mattn/go-isatty v0.0.17 h1:BTarxUcIeDqL27Mc+vyvdWYSL28zpIhv3RoTdsLMPng=
-github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
+github.com/mattn/go-isatty v0.0.18 h1:DOKFKCQ7FNG2L1rbrmstDN4QVRdS89Nkh85u68Uwp98=
+github.com/mattn/go-isatty v0.0.18/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/mattn/go-runewidth v0.0.14 h1:+xnbZSEeDbOIg5/mE6JF0w6n9duR1l3/WmbinWVwUuU=
 github.com/mattn/go-runewidth v0.0.14/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=

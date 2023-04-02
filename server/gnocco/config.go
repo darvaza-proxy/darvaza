@@ -8,7 +8,7 @@ import (
 
 	"github.com/naoina/toml"
 
-	"github.com/darvaza-proxy/slog"
+	"darvaza.org/slog"
 )
 
 // ListenCfg is a host:port combination

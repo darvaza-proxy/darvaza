@@ -4,7 +4,7 @@ import (
 	"net"
 	"net/netip"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // AddrPortSliceTCPListener attempts to extract netip.AddrPort from a slice of

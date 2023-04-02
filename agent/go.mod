@@ -8,17 +8,18 @@ replace (
 )
 
 require (
-	github.com/darvaza-proxy/core v0.7.4
+	darvaza.org/core v0.9.0
+	darvaza.org/slog v0.5.0
+	darvaza.org/slog/handlers/discard v0.4.0
 	github.com/darvaza-proxy/darvaza/acme v0.0.4
 	github.com/darvaza-proxy/darvaza/shared v0.4.6
 	github.com/darvaza-proxy/middleware v0.0.5
-	github.com/darvaza-proxy/slog v0.4.6
-	github.com/darvaza-proxy/slog/handlers/discard v0.3.1
 	github.com/quic-go/quic-go v0.33.0
 	golang.org/x/net v0.8.0
 )
 
 require (
+	github.com/darvaza-proxy/core v0.6.5 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/pprof v0.0.0-20230309165930-d61513b1440d // indirect

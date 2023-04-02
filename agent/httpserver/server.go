@@ -7,8 +7,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/darvaza-proxy/core"
-	"github.com/darvaza-proxy/slog"
+	"darvaza.org/core"
+	"darvaza.org/slog"
 )
 
 // Server is an instance of our H1/H2C/H2/H3 server

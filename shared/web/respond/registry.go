@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // A Registry is a collection of Renderers

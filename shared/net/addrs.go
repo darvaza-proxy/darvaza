@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/net/idna"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // SplitHostPort splits a network address into host and port,

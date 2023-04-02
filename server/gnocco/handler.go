@@ -5,7 +5,7 @@ import (
 
 	"github.com/miekg/dns"
 
-	"github.com/darvaza-proxy/slog"
+	"darvaza.org/slog"
 
 	"github.com/darvaza-proxy/darvaza/shared/version"
 )

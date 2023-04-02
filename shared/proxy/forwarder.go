@@ -8,7 +8,7 @@ import (
 	"net"
 	"net/netip"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // Forward will take a context, a "downstream" net.Conn and a netip.Addr it will

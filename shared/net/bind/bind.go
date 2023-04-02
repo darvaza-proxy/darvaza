@@ -5,7 +5,7 @@ import (
 	"net"
 	"net/netip"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 const (

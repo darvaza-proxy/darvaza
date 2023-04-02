@@ -5,7 +5,7 @@ import (
 	"container/list"
 	"crypto/tls"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 	"github.com/darvaza-proxy/darvaza/shared/storage/certpool"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )

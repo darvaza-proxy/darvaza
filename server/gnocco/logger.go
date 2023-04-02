@@ -1,7 +1,7 @@
 package gnocco
 
 import (
-	"github.com/darvaza-proxy/slog"
+	"darvaza.org/slog"
 
 	"github.com/darvaza-proxy/darvaza/shared/cblog"
 )

@@ -3,7 +3,7 @@ package httpserver
 import (
 	"net"
 
-	"github.com/darvaza-proxy/slog"
+	"darvaza.org/slog"
 )
 
 func (srv *Server) error(err error) slog.Logger {

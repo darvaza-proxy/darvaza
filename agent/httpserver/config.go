@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
+	"darvaza.org/slog"
+	"darvaza.org/slog/handlers/discard"
 	"github.com/darvaza-proxy/darvaza/acme"
 	"github.com/darvaza-proxy/darvaza/shared/tls/sni"
-	"github.com/darvaza-proxy/slog"
-	"github.com/darvaza-proxy/slog/handlers/discard"
 )
 
 // Config describes how Server needs to be set up

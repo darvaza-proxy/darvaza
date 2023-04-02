@@ -7,7 +7,7 @@ import (
 	"net/netip"
 	"syscall"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 	"github.com/darvaza-proxy/darvaza/shared/net/bind"
 )
 

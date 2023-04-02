@@ -7,7 +7,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 )
 
 // SubjectPublicKeySHA1 returns the SHA1 hash of the SubjectPublicKey

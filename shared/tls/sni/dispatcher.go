@@ -8,10 +8,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
+	"darvaza.org/slog"
+	"darvaza.org/slog/handlers/discard"
 	"github.com/darvaza-proxy/darvaza/shared/sync/httpgroup"
-	"github.com/darvaza-proxy/slog"
-	"github.com/darvaza-proxy/slog/handlers/discard"
 )
 
 var (

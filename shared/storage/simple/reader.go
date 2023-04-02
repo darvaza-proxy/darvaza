@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"io/fs"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
 )
 

@@ -5,9 +5,9 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
+	"darvaza.org/slog"
 	"github.com/darvaza-proxy/darvaza/shared/x509utils"
-	"github.com/darvaza-proxy/slog"
 )
 
 // NewBundler creates a Bundler using the known CAs and provided roots.

@@ -10,7 +10,7 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"github.com/darvaza-proxy/core"
+	"darvaza.org/core"
 	"github.com/darvaza-proxy/darvaza/shared/os"
 )
 

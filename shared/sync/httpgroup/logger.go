@@ -1,6 +1,6 @@
 package httpgroup
 
-import "github.com/darvaza-proxy/slog"
+import "darvaza.org/slog"
 
 func (heg *Group) withLogger(level slog.LogLevel) (slog.Logger, bool) {
 	l, ok := heg.logger.Load().(slog.Logger)
