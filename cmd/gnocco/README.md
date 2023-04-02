@@ -1,8 +1,8 @@
 # Gnocco
 ## a small cache of goodness
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/darvaza-proxy/gnocco)](https://goreportcard.com/report/github.com/darvaza-proxy/gnocco)
-[![Unlicensed](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://github.com/darvaza-proxy/gnocco/blob/master/UNLICENSE)
+[![Go Report Card](https://goreportcard.com/badge/darvaza.org/gnocco)](https://goreportcard.com/report/darvaza.org/gnocco)
+[![Unlicensed](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://darvaza.org/gnocco/blob/master/UNLICENSE)
 
 Gnocco is a DNS cache with resolver, it is based on the wonderful DNS library from Miek Gieben
 [dns](https://github.com/miekg/dns) and it is heavily inspired from the DNS cache implemented
@@ -13,7 +13,7 @@ in [dnscache](http://cr.yp.to/djbdns/dnscache.html).
 Gnocco is in very early stages of development with most of its features not implemented yet.
 
 ## Quick start
-Since commit [09908c2](https://github.com/darvaza-proxy/gnocco/commit/09908c25aa2acd05b93b68d041ee4959cccf80a7) Gnocco removed the code for running under a certain user.
+Since commit [09908c2](https://darvaza.org/gnocco/commit/09908c25aa2acd05b93b68d041ee4959cccf80a7) Gnocco removed the code for running under a certain user.
 For now the propper way of running Gnocco is:
 
 0. Keep in mind that Gnocco is NOT production state
