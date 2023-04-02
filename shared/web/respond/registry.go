@@ -6,21 +6,48 @@ import (
 	"sync"
 
 	"darvaza.org/core"
+	"darvaza.org/darvaza/shared/web/qlist"
 )
 
 // A Registry is a collection of Renderers
 type Registry struct {
 	mu sync.Mutex
-	m  map[string]Renderer
+	m  map[string]registryEntry
 
 	identity string
+}
+
+type registryEntry struct {
+	Renderer
+
+	ct string
+	qv qlist.QualityValue
+}
+
+func (re registryEntry) Clone() registryEntry {
+	return re
+}
+
+func newRegistryEntry(ct string, h Renderer) (registryEntry, error) {
+	qv, err := qlist.ParseMediaRange(ct)
+	if err == nil {
+		re := registryEntry{
+			Renderer: h,
+
+			ct: ct,
+			qv: qv,
+		}
+
+		return re, nil
+	}
+	return registryEntry{}, err
 }
 
 // NewRegistry creates a new Renderers Registry optionally
 // starting with a given set of Renderers
 func NewRegistry(renderer ...Renderer) *Registry {
 	m := &Registry{
-		m: make(map[string]Renderer),
+		m: make(map[string]registryEntry),
 	}
 
 	for _, h := range renderer {
@@ -41,13 +68,13 @@ func (reg *Registry) Clone() *Registry {
 	defer reg.mu.Unlock()
 
 	out := &Registry{
-		m: make(map[string]Renderer, len(reg.m)),
+		m: make(map[string]registryEntry, len(reg.m)),
 
 		identity: reg.identity,
 	}
 
-	for ct, h := range reg.m {
-		out.m[ct] = h
+	for ct, re := range reg.m {
+		out.m[ct] = re.Clone()
 	}
 
 	return out
@@ -74,12 +101,18 @@ func (reg *Registry) doRegister(ct string, h Renderer) error {
 	switch {
 	case !found:
 		// new
-		reg.m[ct] = h
-		if len(reg.m) == 1 {
-			// first, make it the identity
-			reg.identity = ct
+		var re registryEntry
+
+		re, err = newRegistryEntry(ct, h)
+		if err == nil {
+			// good media type parsed
+			reg.m[ct] = re
+			if len(reg.m) == 1 {
+				// first, make it the identity
+				reg.identity = ct
+			}
 		}
-	case prev != h:
+	case prev.Renderer != h:
 		// won't override, sorry
 		err = fs.ErrExist
 	}
@@ -96,14 +129,27 @@ func (reg *Registry) Replace(ct string, h Renderer) (Renderer, error) {
 			reg.mu.Lock()
 			defer reg.mu.Unlock()
 
-			prev := reg.m[ct]
-			reg.m[ct] = h
-
-			return prev, nil
+			return reg.doReplace(ct, h)
 		}
 	}
 
 	return nil, fs.ErrInvalid
+}
+
+func (reg *Registry) doReplace(ct string, h Renderer) (Renderer, error) {
+	re, err := newRegistryEntry(ct, h)
+	if err != nil {
+		return nil, err
+	}
+
+	prev, ok := reg.m[ct]
+	reg.m[ct] = re
+
+	if ok {
+		return prev.Renderer, nil
+	}
+
+	return nil, nil
 }
 
 // Get retrieves a [Renderer], or the Identity
@@ -119,13 +165,30 @@ func (reg *Registry) Get(ct string) (r Renderer, found bool) {
 
 	if !found {
 		if ct = reg.identity; ct != "" {
-			if h, ok := reg.m[reg.identity]; ok {
-				r = h
+			if re, ok := reg.m[reg.identity]; ok {
+				r = re.Renderer
 			}
 		}
 	}
 
 	return r, found
+}
+
+// GetParsed retrieves the parsed [qlist.QualityValue] of a given
+// Media Type if the Registry knows it
+func (reg *Registry) GetParsed(ct string) (qlist.QualityValue, bool) {
+	ct = strings.ToLower(ct)
+
+	reg.mu.Lock()
+	defer reg.mu.Unlock()
+
+	if ct != "" {
+		if re, found := reg.m[ct]; found {
+			return re.qv, true
+		}
+	}
+
+	return qlist.QualityValue{}, false
 }
 
 // SetIdentity defines the default Content-Type for this [Registry].
@@ -141,6 +204,14 @@ func (reg *Registry) SetIdentity(ct string) error {
 		}
 	}
 	return fs.ErrInvalid
+}
+
+// Supports creates a new Responder supporting the given media types
+func (reg *Registry) Supports(types ...string) *Responder {
+	res := &Responder{
+		registry: reg,
+	}
+	return res.Supports(types...)
 }
 
 // global is the global Renderer registry
@@ -161,4 +232,10 @@ func CloneRegistry() *Registry {
 // or its Identity.
 func GetRenderer(ct string) (Renderer, bool) {
 	return global.Get(ct)
+}
+
+// Supports creates a new Responder supporting the given media types,
+// using the global [Registry]
+func Supports(types ...string) *Responder {
+	return global.Supports(types...)
 }
