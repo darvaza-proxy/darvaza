@@ -3,8 +3,8 @@ module darvaza.org/darvaza
 go 1.19
 
 require (
-	darvaza.org/darvaza/server v0.0.4
-	darvaza.org/darvaza/shared v0.4.13
+	darvaza.org/darvaza/server v0.1.0
+	darvaza.org/darvaza/shared v0.5.0
 	github.com/creasty/defaults v1.7.0
 	github.com/hashicorp/hcl/v2 v2.16.2
 	github.com/mgechev/revive v1.3.1
