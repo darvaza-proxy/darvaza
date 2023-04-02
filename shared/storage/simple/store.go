@@ -94,7 +94,7 @@ func (s *Store) GetCertificateWithCallback(chi *tls.ClientHelloInfo,
 		}
 
 		if cert != nil {
-			// found or aqcuired
+			// found or acquired
 			return cert, nil
 		}
 	}

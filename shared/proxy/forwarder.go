@@ -36,7 +36,7 @@ func Forward(ctx context.Context, conn net.Conn, addr netip.AddrPort) error {
 	var wg core.WaitGroup
 
 	wg.Go(func() error {
-		// We just want to CloseWrite to signal that we finished writting
+		// We just want to CloseWrite to signal that we finished writing
 		// but naked net.Conn does not have it so we transform to TCPConn
 		if cw, ok := conn.(interface{ CloseWrite() error }); ok {
 			defer cw.CloseWrite()
