@@ -172,8 +172,12 @@ func (cfg *Config) tryListenPort(addrs []net.IP, port int) (
 	udpListeners := make([]*net.UDPConn, 0, n)
 
 	// close all on error
-	defer closeAllUnless(ok, tcpListeners)
-	defer closeAllUnless(ok, udpListeners)
+	defer func() {
+		if !ok {
+			closeAll(tcpListeners)
+			closeAll(udpListeners)
+		}
+	}()
 
 	for _, ip := range addrs {
 		if !cfg.OnlyUDP {
