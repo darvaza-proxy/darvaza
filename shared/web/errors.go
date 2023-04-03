@@ -24,6 +24,7 @@ type Error interface {
 type HTTPError struct {
 	Err  error
 	Code int
+	Hdr  http.Header
 }
 
 // Status returns the StatusCode associated with the Error
@@ -36,6 +37,29 @@ func (err *HTTPError) Status() int {
 	default:
 		return err.Code
 	}
+}
+
+// Header returns a [http.Header] attached to this error for custom fields
+func (err *HTTPError) Header() http.Header {
+	if err.Hdr == nil {
+		err.Hdr = make(http.Header)
+	}
+	return err.Hdr
+}
+
+// AddHeader appends a value to an HTTP header entry of the HTTPError
+func (err *HTTPError) AddHeader(key, value string) {
+	err.Header().Add(key, value)
+}
+
+// SetHeader sets the value of a header key of the HTTPError
+func (err *HTTPError) SetHeader(key, value string) {
+	err.Header().Set(key, value)
+}
+
+// DeleteHeader removes a header key from the HTTPError if present
+func (err *HTTPError) DeleteHeader(key string) {
+	err.Header().Del(key)
 }
 
 // ServeHTTP is a very primitive handler that will try to pass the error
@@ -55,16 +79,27 @@ func (err *HTTPError) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	case code < http.StatusBadRequest:
 		rw.WriteHeader(code)
 	default:
-		hdr := rw.Header()
-		hdr["Content-Type"] = []string{"text/plain; charset=UTF-8"}
+		err.writeError(rw)
+	}
+}
 
-		rw.WriteHeader(code)
-		fmt.Fprintln(rw, ErrorText(code))
+func (err *HTTPError) writeError(rw http.ResponseWriter) {
+	hdr := rw.Header()
+	for k, s := range err.Hdr {
+		// apply headers
+		hdr[k] = append(hdr[k], s...)
+	}
+	// override media type
+	hdr["Content-Type"] = []string{"text/plain; charset=UTF-8"}
 
-		if err.Err != nil {
-			if msg := err.Err.Error(); msg != "" {
-				fmt.Fprint(rw, "\n", msg)
-			}
+	code := err.Status()
+
+	rw.WriteHeader(code)
+	fmt.Fprintln(rw, ErrorText(code))
+
+	if err.Err != nil {
+		if msg := err.Err.Error(); msg != "" {
+			fmt.Fprint(rw, "\n", msg)
 		}
 	}
 }
@@ -89,7 +124,7 @@ func (err *HTTPError) Unwrap() error {
 
 // NewHTTPError creates a new HTTPError with a given StatusCode
 // and optional cause and annotation
-func NewHTTPError(code int, err error, note string) error {
+func NewHTTPError(code int, err error, note string) *HTTPError {
 	switch {
 	case err != nil:
 		err = core.Wrap(err, note)
@@ -102,7 +137,7 @@ func NewHTTPError(code int, err error, note string) error {
 
 // NewHTTPErrorf creates a new HTTPError with a given StatusCode
 // and optional cause and formated annotation
-func NewHTTPErrorf(code int, err error, format string, args ...any) error {
+func NewHTTPErrorf(code int, err error, format string, args ...any) *HTTPError {
 	switch {
 	case err != nil:
 		err = core.Wrapf(err, format, args...)
