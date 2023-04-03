@@ -2,7 +2,6 @@
 package respond
 
 import (
-	"context"
 	"net/http"
 
 	"darvaza.org/core"
@@ -43,7 +42,7 @@ func (res *Responder) Supports(types ...string) *Responder {
 // Response is the stage to build and send the response for a particular request
 type Response struct {
 	res  *Responder
-	ctx  context.Context
+	req  *http.Request
 	rw   http.ResponseWriter
 	hdrs http.Header
 	code int
@@ -136,6 +135,20 @@ func (r *Response) Render(v any) error {
 		core.Panic("call to Render without having provided the writer")
 	}
 
+	if err, ok := v.(error); ok {
+		if h, ok := web.ErrorHandler(r.req.Context()); ok {
+			// pass errors to the designated error handler
+			wee := web.NewHTTPError(r.code, err, "")
+			for k, s := range r.hdrs {
+				// copy headers
+				wee.Hdr[k] = append(wee.Hdr[k], s...)
+			}
+
+			h(r.rw, r.req, wee)
+			return nil
+		}
+	}
+
 	r.writeHeaders()
 	r.rw.WriteHeader(r.Code())
 	return r.h.Render(r.rw, v)
@@ -145,7 +158,7 @@ func (r *Response) Render(v any) error {
 func (res *Responder) WithRequest(req *http.Request) (*Response, error) {
 	accepted, err := qlist.ParseMediaRangeHeader(req.Header)
 	if err != nil {
-		return nil, web.NewHTTPError(http.StatusBadRequest, err, "Invalid Accept Header")
+		err = web.NewHTTPError(http.StatusBadRequest, err, "Invalid Accept Header")
 	}
 
 	preferred, _, _ := qlist.BestQualityParsed(res.ql, accepted)
@@ -160,9 +173,9 @@ func (res *Responder) WithRequest(req *http.Request) (*Response, error) {
 
 	r := &Response{
 		res: res,
-		ctx: req.Context(),
+		req: req,
 		h:   h,
 	}
 
-	return r, nil
+	return r, err
 }
