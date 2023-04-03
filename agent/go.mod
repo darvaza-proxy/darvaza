@@ -8,10 +8,10 @@ replace (
 )
 
 require (
-	darvaza.org/core v0.9.0
+	darvaza.org/core v0.9.1
 	darvaza.org/darvaza/acme v0.1.0
 	darvaza.org/darvaza/shared v0.5.0
-	darvaza.org/middleware v0.2.0
+	darvaza.org/middleware v0.2.1
 	darvaza.org/slog v0.5.0
 	darvaza.org/slog/handlers/discard v0.4.0
 	github.com/quic-go/quic-go v0.33.0
@@ -19,7 +19,7 @@ require (
 )
 
 require (
-	darvaza.org/darvaza/shared/web v0.3.1 // indirect
+	darvaza.org/darvaza/shared/web v0.3.6 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/pprof v0.0.0-20230323073829-e72429f035bd // indirect
