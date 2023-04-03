@@ -25,7 +25,7 @@ func (cf *Gnocco) newResolver() *resolver {
 
 	ccfg, err := dns.ClientConfigFromFile("/etc/resolv.conf")
 	if err != nil {
-		cf.logger.Warn().Print("attemting to parse resolv.conf resulted in %s", err)
+		cf.logger.Warn().Print("attempting to parse resolv.conf resulted in %s", err)
 	}
 	for _, s := range ccfg.Servers {
 		myIP := net.ParseIP(s)
@@ -37,7 +37,7 @@ func (cf *Gnocco) newResolver() *resolver {
 	// load the roots in the slice
 	rrs, err := loadFileColumn(cf.RootsFile, 1)
 	if err != nil {
-		cf.logger.Fatal().Print("attemting to parse %s resulted in %s", cf.RootsFile, err)
+		cf.logger.Fatal().Print("attempting to parse %s resulted in %s", cf.RootsFile, err)
 	}
 	resolver := &resolver{
 		Resolvers: resolvers,
@@ -108,7 +108,7 @@ func (r *resolver) Iterate(name string, qtype uint16, server string) (*dns.Msg, 
 	}
 
 	if len(resp.Answer) == 0 && len(resp.Ns) > 0 {
-		// We are in referal mode, get the next server
+		// We are in referral mode, get the next server
 		nextServer := make([]string, 0)
 		for _, ns := range resp.Ns {
 			if ns.Header().Rrtype == dns.TypeNS {
