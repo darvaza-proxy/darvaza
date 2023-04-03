@@ -158,7 +158,7 @@ func (r *Response) Render(v any) error {
 func (res *Responder) WithRequest(req *http.Request) (*Response, error) {
 	accepted, err := qlist.ParseMediaRangeHeader(req.Header)
 	if err != nil {
-		return nil, web.NewHTTPError(http.StatusBadRequest, err, "Invalid Accept Header")
+		err = web.NewHTTPError(http.StatusBadRequest, err, "Invalid Accept Header")
 	}
 
 	preferred, _, _ := qlist.BestQualityParsed(res.ql, accepted)
@@ -177,5 +177,5 @@ func (res *Responder) WithRequest(req *http.Request) (*Response, error) {
 		h:   h,
 	}
 
-	return r, nil
+	return r, err
 }
