@@ -9,8 +9,8 @@ replace (
 
 require (
 	darvaza.org/core v0.9.1
-	darvaza.org/darvaza/acme v0.1.0
-	darvaza.org/darvaza/shared v0.5.0
+	darvaza.org/darvaza/acme v0.1.1
+	darvaza.org/darvaza/shared v0.5.1
 	darvaza.org/middleware v0.2.1
 	darvaza.org/slog v0.5.0
 	darvaza.org/slog/handlers/discard v0.4.0
