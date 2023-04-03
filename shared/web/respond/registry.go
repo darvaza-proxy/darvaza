@@ -82,7 +82,7 @@ func (reg *Registry) Clone() *Registry {
 
 // Register adds a [Renderer] to a particular [Registry]
 func (reg *Registry) Register(ct string, h Renderer) error {
-	if h == nil {
+	if h != nil {
 		ct = core.Coalesce(strings.ToLower(ct), h.ContentType())
 		if ct != "" {
 			reg.mu.Lock()
@@ -123,7 +123,7 @@ func (reg *Registry) doRegister(ct string, h Renderer) error {
 // Replace registers or replaces a [Renderer] on the [Registry].
 // Returns the previous Renderer assigned to the specified Content-Type
 func (reg *Registry) Replace(ct string, h Renderer) (Renderer, error) {
-	if h == nil {
+	if h != nil {
 		ct = core.Coalesce(strings.ToLower(ct), h.ContentType())
 		if ct != "" {
 			reg.mu.Lock()
