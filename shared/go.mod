@@ -3,7 +3,7 @@ module darvaza.org/darvaza/shared
 go 1.19
 
 require (
-	darvaza.org/core v0.9.0
+	darvaza.org/core v0.9.2
 	darvaza.org/slog v0.5.0
 	darvaza.org/slog/handlers/cblog v0.5.0
 	darvaza.org/slog/handlers/discard v0.4.0
