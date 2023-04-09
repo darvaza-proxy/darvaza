@@ -4,16 +4,16 @@ go 1.19
 
 require (
 	darvaza.org/darvaza/server v0.1.0
-	darvaza.org/darvaza/shared v0.5.0
+	darvaza.org/darvaza/shared v0.5.1
 	github.com/creasty/defaults v1.7.0
 	github.com/hashicorp/hcl/v2 v2.16.2
 	github.com/mgechev/revive v1.3.1
 	github.com/miekg/dns v1.1.53
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 )
 
 require (
-	darvaza.org/core v0.9.0 // indirect
+	darvaza.org/core v0.9.2 // indirect
 	darvaza.org/slog v0.5.0 // indirect
 	darvaza.org/slog/handlers/cblog v0.5.0 // indirect
 	darvaza.org/slog/handlers/discard v0.4.0 // indirect
@@ -25,6 +25,7 @@ require (
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
@@ -38,13 +39,13 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/zclconf/go-cty v1.13.1 // indirect
-	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/mod v0.9.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/crypto v0.8.0 // indirect
+	golang.org/x/mod v0.10.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
-	golang.org/x/tools v0.7.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/tools v0.8.0 // indirect
 )
 
 replace (
