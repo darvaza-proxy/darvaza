@@ -44,7 +44,7 @@ func (s *CertPool) AppendCertsFromPEM(b []byte) bool {
 	return added
 }
 
-// AddCert adds parsed certificates to the CertPool
+// AddCert adds parsed CA certificates to the CertPool
 func (s *CertPool) AddCert(cert *x509.Certificate) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
