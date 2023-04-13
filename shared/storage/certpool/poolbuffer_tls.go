@@ -178,30 +178,21 @@ func (pb *PoolBuffer) pairs() []pbPair {
 	return out
 }
 
-// Certificates exports all the Certificates it contains bundled considering
-// a given base
-func (pb *PoolBuffer) Certificates(base x509utils.CertPooler) ([]*tls.Certificate, error) {
-	certs, errors := pb.CertificatesErrors(base)
-	if len(errors) > 0 {
-		// return first error and bundled certs
-		return certs, errors[0]
-	}
-	return certs, nil
-}
-
 // revive:disable:cognitive-complexity
 // revive:disable:cyclomatic
 
-// CertificatesErrors exports all the Certificates it contains bundled considering
-// a given base, but collecting all errors
-func (pb *PoolBuffer) CertificatesErrors(base x509utils.CertPooler) (
-	out []*tls.Certificate, errors []error) {
+// Certificates exports all the Certificates it contains bundled considering
+// a given base
+func (pb *PoolBuffer) Certificates(base x509utils.CertPooler) ([]*tls.Certificate, error) {
 	// revive:enable:cognitive-complexity
 	// revive:enable:cyclomatic
+	var out []*tls.Certificate
+	var errors core.CompoundError
 
 	b, err := pb.NewBundler(base)
 	if err != nil {
-		return nil, []error{err}
+		err = core.Wrap(err, "failed to create certpool.Bundler")
+		return nil, err
 	}
 
 	// deduplication
@@ -231,9 +222,7 @@ func (pb *PoolBuffer) CertificatesErrors(base x509utils.CertPooler) (
 			}
 		}
 
-		if err != nil {
-			errors = append(errors, err)
-		}
+		errors.AppendError(err)
 	}
 
 	// keyless certificates
@@ -245,13 +234,13 @@ func (pb *PoolBuffer) CertificatesErrors(base x509utils.CertPooler) (
 					out = append(out, crt)
 				}
 				if err != nil {
-					errors = append(errors, err)
+					errors.AppendError(err)
 				}
 			}
 		}
 	}
 
-	return out, errors
+	return out, errors.AsError()
 }
 
 func (pb *PoolBuffer) bundlePair(b *Bundler, cd *pbCertData, kd *pbKeyData) (
