@@ -62,25 +62,30 @@ func (pb *PoolBuffer) AddCert(fn string, cert *x509.Certificate) error {
 }
 
 // Add loads private keys and certificates from PEM files, directories, and direct text
-func (pb *PoolBuffer) Add(s string) error {
-	var readErr, addErr error
-
+func (pb *PoolBuffer) Add(data ...string) error {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 
-	readErr = x509utils.ReadStringPEM(s, func(fn string, block *pem.Block) bool {
-		if err := pb.addBlock(fn, block); err != nil {
-			addErr = err
-			return true // abort
+	for _, s := range data {
+		var addErr error
+
+		readErr := x509utils.ReadStringPEM(s, func(fn string, block *pem.Block) bool {
+			if err := pb.addBlock(fn, block); err != nil {
+				addErr = err
+			}
+
+			return addErr != nil
+		})
+
+		switch {
+		case addErr != nil:
+			return addErr
+		case readErr != nil:
+			return readErr
 		}
-
-		return false // continue
-	})
-
-	if readErr != nil {
-		return readErr
 	}
-	return addErr
+
+	return nil
 }
 
 func (pb *PoolBuffer) addBlock(fn string, block *pem.Block) error {

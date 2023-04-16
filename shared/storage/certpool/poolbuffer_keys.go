@@ -3,6 +3,7 @@ package certpool
 import (
 	"container/list"
 
+	"darvaza.org/core"
 	"darvaza.org/darvaza/shared/x509utils"
 )
 
@@ -62,4 +63,17 @@ func (pb *PoolBuffer) addKeyUnlocked(fn string, pk x509utils.PrivateKey) error {
 		pb.keys.count++
 	}
 	return nil
+}
+
+// Keys returns an array of all stored Private Keys
+func (pb *PoolBuffer) Keys() []x509utils.PrivateKey {
+	out := make([]x509utils.PrivateKey, 0, pb.keys.count)
+	core.ListForEach(pb.keys.keys, func(pk x509utils.PrivateKey) bool {
+		if pk != nil {
+			out = append(out, pk)
+		}
+
+		return false // continue
+	})
+	return out
 }
