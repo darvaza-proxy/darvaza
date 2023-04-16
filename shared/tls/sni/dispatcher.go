@@ -203,7 +203,6 @@ func (d *Dispatcher) catch(peer net.Addr, err error) error {
 	}
 
 	if err != nil {
-		// just log and close.
 		// don't propagate connection errors
 
 		d.error(peer, err).Print(err)
