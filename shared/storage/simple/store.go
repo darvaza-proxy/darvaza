@@ -232,7 +232,7 @@ func addCerts(s *Store, certs ...*tls.Certificate) {
 		}
 
 		// contains key
-		if !core.SliceContainsFn(s.keys, key, pkEqual) {
+		if !core.SliceContainsFn(s.keys, key, PrivateKeyEqual) {
 			// new key
 			s.keys = append(s.keys, key)
 		}
@@ -264,8 +264,4 @@ func addCertInfo(s *Store, ci *certInfo) {
 	for _, pattern := range ci.patterns {
 		core.MapListAppend(s.patterns, pattern, ci.c)
 	}
-}
-
-func pkEqual(a, b x509utils.PrivateKey) bool {
-	return a.Equal(b)
 }

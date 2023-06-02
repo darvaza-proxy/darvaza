@@ -67,3 +67,8 @@ func mapListContainsHash(m map[string]*list.List, name string, hash certpool.Has
 
 	return found
 }
+
+// PrivateKeyEqual tells if two private keys are the same
+func PrivateKeyEqual(a, b x509utils.PrivateKey) bool {
+	return a.Equal(b)
+}
