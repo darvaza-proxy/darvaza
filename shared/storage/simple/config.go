@@ -22,6 +22,15 @@ func New(blocks ...string) (*Store, error) {
 // New creates a Store using keys and certificates provided as
 // files, directories, or direct PEM encoded content
 func (c *Config) New(blocks ...string) (*Store, error) {
+	pb, err := c.newPoolBuffer(blocks...)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewFromBuffer(pb, c.Base)
+}
+
+func (c *Config) newPoolBuffer(blocks ...string) (*certpool.PoolBuffer, error) {
 	var pb certpool.PoolBuffer
 
 	if c.Logger != nil {
@@ -36,5 +45,5 @@ func (c *Config) New(blocks ...string) (*Store, error) {
 		}
 	}
 
-	return NewFromBuffer(&pb, c.Base)
+	return &pb, nil
 }
