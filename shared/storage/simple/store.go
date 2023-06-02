@@ -21,7 +21,7 @@ func (s *Store) GetCAPool() *x509.CertPool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	return s.pool.Export()
+	return s.roots.Export()
 }
 
 // GetCertificate returns the TLS Certificate that should be used

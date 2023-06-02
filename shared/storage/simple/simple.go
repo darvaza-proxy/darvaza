@@ -27,7 +27,10 @@ type Store struct {
 
 	logger slog.Logger
 
-	pool     *certpool.CertPool
+	roots   certpool.CertPool
+	inter   certpool.CertPool
+	bundler certpool.Bundler
+
 	keys     []x509utils.PrivateKey
 	certs    *list.List
 	hashed   map[certpool.Hash]*certInfo
@@ -43,21 +46,30 @@ type certInfo struct {
 }
 
 func newStore(roots *certpool.CertPool) *Store {
-	if roots == nil {
-		roots = new(certpool.CertPool)
-		roots.Reset()
-	}
-
-	return &Store{
+	s := &Store{
 		logger: defaultLogger(),
 
-		pool:     roots,
 		keys:     []x509utils.PrivateKey{},
 		certs:    list.New(),
 		hashed:   make(map[certpool.Hash]*certInfo),
 		names:    make(map[string]*list.List),
 		patterns: make(map[string]*list.List),
 	}
+
+	switch {
+	case roots != nil:
+		// given roots
+		roots.Copy(&s.roots)
+	default:
+		// no roots
+		s.roots.Reset()
+	}
+
+	s.inter.Reset()
+	s.bundler.Roots = &s.roots
+	s.bundler.Inter = &s.inter
+
+	return s
 }
 
 // NewFromBuffer creates a Store from a given PoolBuffer

@@ -39,7 +39,7 @@ func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) erro
 		return err
 	}
 
-	c, err := s.bundle(cert, key)
+	c, err := s.bundler.Bundle(cert, key)
 	if err != nil {
 		err = core.Wrap(err, "failed to bundle certificate")
 		return err
@@ -47,10 +47,6 @@ func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) erro
 
 	addCerts(s, c)
 	return nil
-}
-
-func (s *Store) bundle(cert *x509.Certificate, key x509utils.PrivateKey) (*tls.Certificate, error) {
-	return s.pool.Bundle(cert, key, nil)
 }
 
 func (s *Store) appendName(ci *certInfo, name string) error {
