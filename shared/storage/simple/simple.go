@@ -7,8 +7,11 @@ import (
 	"sync"
 
 	"darvaza.org/core"
+	"darvaza.org/slog"
+
 	"darvaza.org/darvaza/shared/storage/certpool"
 	"darvaza.org/darvaza/shared/x509utils"
+
 	"golang.org/x/sync/singleflight"
 )
 
@@ -21,6 +24,8 @@ type Getter func(ctx context.Context,
 type Store struct {
 	mu sync.Mutex
 	g  singleflight.Group
+
+	logger slog.Logger
 
 	pool     *certpool.CertPool
 	keys     []x509utils.PrivateKey
@@ -44,6 +49,8 @@ func newStore(roots *certpool.CertPool) *Store {
 	}
 
 	return &Store{
+		logger: defaultLogger(),
+
 		pool:     roots,
 		keys:     []x509utils.PrivateKey{},
 		certs:    list.New(),
