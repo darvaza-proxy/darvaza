@@ -37,6 +37,22 @@ type certInfo struct {
 	patterns []string
 }
 
+func newStore(roots *certpool.CertPool) *Store {
+	if roots == nil {
+		roots = new(certpool.CertPool)
+		roots.Reset()
+	}
+
+	return &Store{
+		pool:     roots,
+		keys:     []x509utils.PrivateKey{},
+		certs:    list.New(),
+		hashed:   make(map[certpool.Hash]*certInfo),
+		names:    make(map[string]*list.List),
+		patterns: make(map[string]*list.List),
+	}
+}
+
 // NewFromBuffer creates a Store from a given PoolBuffer
 func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, error) {
 	certs, err := pb.Certificates(base)
@@ -44,17 +60,9 @@ func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, 
 		return nil, err
 	}
 
-	store := &Store{
-		pool:     pb.Pool(),
-		keys:     []x509utils.PrivateKey{},
-		certs:    list.New(),
-		hashed:   make(map[certpool.Hash]*certInfo),
-		names:    make(map[string]*list.List),
-		patterns: make(map[string]*list.List),
-	}
-
-	addCerts(store, certs...)
-	return store, nil
+	s := newStore(pb.Pool())
+	addCerts(s, certs...)
+	return s, nil
 }
 
 func addCerts(s *Store, certs ...*tls.Certificate) {
