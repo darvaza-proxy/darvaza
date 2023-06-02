@@ -33,7 +33,7 @@ func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) erro
 		return fs.ErrExist
 	}
 
-	key := s.findMatchingKey(cert.PublicKey.(x509utils.PublicKey))
+	key := s.findMatchingKey(cert)
 	if key == nil {
 		err := core.Wrap(fs.ErrNotExist, "no suitable key available")
 		return err
@@ -81,9 +81,9 @@ func (s *Store) appendName(ci *certInfo, name string) error {
 	return nil
 }
 
-func (s *Store) findMatchingKey(pub x509utils.PublicKey) x509utils.PrivateKey {
+func (s *Store) findMatchingKey(cert *x509.Certificate) x509utils.PrivateKey {
 	for _, key := range s.keys {
-		if pub.Equal(key.Public()) {
+		if PairMatch(cert, key) {
 			return key
 		}
 	}
