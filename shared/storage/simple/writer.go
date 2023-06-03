@@ -20,7 +20,7 @@ var (
 
 // Put adds a certificate to the store
 func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) error {
-	s.mu.Lock()
+	s.lockInit()
 	defer s.mu.Unlock()
 
 	hash := certpool.HashCert(cert)
@@ -91,7 +91,7 @@ func (s *Store) Delete(_ context.Context, name string) error {
 	const once = false // all matches
 	var certs []*tls.Certificate
 
-	s.mu.Lock()
+	s.lockInit()
 	defer s.mu.Unlock()
 
 	// find by name
@@ -124,7 +124,7 @@ func (s *Store) Delete(_ context.Context, name string) error {
 
 // DeleteCert removes a certificate from the store
 func (s *Store) DeleteCert(_ context.Context, cert *x509.Certificate) error {
-	s.mu.Lock()
+	s.lockInit()
 	defer s.mu.Unlock()
 
 	if ci := s.findCertInfo(cert); ci != nil {

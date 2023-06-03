@@ -22,7 +22,7 @@ func (s *Store) Get(_ context.Context, name string) (*x509.Certificate, error) {
 	var out *x509.Certificate
 
 	if name, ok := x509utils.SanitiseName(name); ok {
-		s.mu.Lock()
+		s.lockInit()
 		defer s.mu.Unlock()
 
 		// IP
@@ -74,7 +74,8 @@ func (s *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
 	var err error
 
 	if f != nil {
-		s.mu.Lock()
+		s.lockInit()
+
 		core.ListForEach(s.certs, func(ci *certInfo) bool {
 			if ci.c.Leaf != nil {
 				s.mu.Unlock()

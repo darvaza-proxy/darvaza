@@ -18,7 +18,7 @@ var (
 
 // GetCAPool returns a reference to the Certificates Pool
 func (s *Store) GetCAPool() *x509.CertPool {
-	s.mu.Lock()
+	s.lockInit()
 	defer s.mu.Unlock()
 
 	return s.roots.Export()
@@ -46,7 +46,7 @@ func (s *Store) GetCertificateWithCallback(chi *tls.ClientHelloInfo,
 	name, ok := x509utils.SanitiseName(name)
 	if ok {
 		// find name match locally
-		s.mu.Lock()
+		s.lockInit()
 		cert := s.findMatchingCert(chi, name)
 		s.mu.Unlock()
 
@@ -62,7 +62,7 @@ func (s *Store) GetCertificateWithCallback(chi *tls.ClientHelloInfo,
 	}
 
 	// get me anything please
-	s.mu.Lock()
+	s.lockInit()
 	defer s.mu.Unlock()
 
 	cert := s.findAnyCert(chi)

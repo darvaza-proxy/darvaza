@@ -45,42 +45,43 @@ type certInfo struct {
 	patterns []string
 }
 
-func newStore(roots *certpool.CertPool) *Store {
-	s := &Store{
-		logger: defaultLogger(),
+// init unconditionaly initialises the Store
+func (s *Store) init() {
+	s.logger = defaultLogger()
 
-		keys:     []x509utils.PrivateKey{},
-		certs:    list.New(),
-		hashed:   make(map[certpool.Hash]*certInfo),
-		names:    make(map[string]*list.List),
-		patterns: make(map[string]*list.List),
-	}
-
-	switch {
-	case roots != nil:
-		// given roots
-		roots.Copy(&s.roots)
-	default:
-		// no roots
-		s.roots.Reset()
-	}
-
+	s.roots.Reset()
 	s.inter.Reset()
 	s.bundler.Roots = &s.roots
 	s.bundler.Inter = &s.inter
 
-	return s
+	s.keys = []x509utils.PrivateKey{}
+	s.certs = list.New()
+	s.hashed = make(map[certpool.Hash]*certInfo)
+	s.names = make(map[string]*list.List)
+	s.patterns = make(map[string]*list.List)
+}
+
+// lockInit will acquire a lock and initialise the Store if needed
+func (s *Store) lockInit() {
+	s.mu.Lock()
+	if s.hashed == nil {
+		s.init()
+	}
 }
 
 // NewFromBuffer creates a Store from a given PoolBuffer
 func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, error) {
-	certs, err := pb.Certificates(base)
-	if err != nil {
-		return nil, err
-	}
+	s := new(Store)
+	s.init()
+	if pb != nil {
+		certs, err := pb.Certificates(base)
+		if err != nil {
+			return nil, err
+		}
 
-	s := newStore(pb.Pool())
-	addCerts(s, certs...)
+		pb.CopyPool(&s.roots)
+		addCerts(s, certs...)
+	}
 	return s, nil
 }
 
