@@ -30,8 +30,8 @@ func (*Server) NewQuicConfig() *quic.Config {
 
 // prepareQuicListeners wraps a set of UDP listeners to
 // be used for the HTTP/3 server
-func (srv *Server) prepareQuicListeners(listeners []*net.UDPConn) ([]quic.EarlyListener, error) {
-	var out []quic.EarlyListener
+func (srv *Server) prepareQuicListeners(listeners []*net.UDPConn) ([]*quic.EarlyListener, error) {
+	var out []*quic.EarlyListener
 
 	if len(listeners) > 0 {
 		config := srv.NewQuicConfig()
@@ -53,7 +53,7 @@ func (srv *Server) prepareQuicListeners(listeners []*net.UDPConn) ([]quic.EarlyL
 
 // prepareAndSpawnH3 binds a quic.EarlyListener to an
 // HTTP/3 server and spawn the corresponding worker
-func (srv *Server) prepareAndSpawnH3(lsn quic.EarlyListener) error {
+func (srv *Server) prepareAndSpawnH3(lsn *quic.EarlyListener) error {
 	h3s := &http3.Server{
 		Addr:    lsn.Addr().String(),
 		Handler: srv.mux,
@@ -91,7 +91,7 @@ func (srv *Server) prepareAndSpawnH3(lsn quic.EarlyListener) error {
 	return nil
 }
 
-func (srv *Server) spawnH3(listeners []quic.EarlyListener) {
+func (srv *Server) spawnH3(listeners []*quic.EarlyListener) {
 	for _, lsn := range listeners {
 		srv.wg.Go(func() error {
 			return srv.prepareAndSpawnH3(lsn)
