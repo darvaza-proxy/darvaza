@@ -5,7 +5,7 @@ go 1.19
 require (
 	darvaza.org/darvaza/server v0.1.0
 	darvaza.org/darvaza/shared v0.5.1
-	github.com/creasty/defaults v1.7.0
+	darvaza.org/darvaza/shared/config v0.2.0
 	github.com/hashicorp/hcl/v2 v2.16.2
 	github.com/mgechev/revive v1.3.1
 	github.com/miekg/dns v1.1.53
@@ -19,13 +19,19 @@ require (
 	darvaza.org/slog/handlers/discard v0.4.0 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/amery/defaults v0.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-playground/validator/v10 v10.14.1 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
+	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect

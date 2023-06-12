@@ -5,11 +5,11 @@ import (
 	"io"
 	"log"
 
-	"github.com/creasty/defaults"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 
+	"darvaza.org/darvaza/shared/config"
 	"darvaza.org/darvaza/shared/tls/server"
 )
 
@@ -23,10 +23,10 @@ type Config struct {
 // in a Config.
 func (c *Config) SetDefaults() {
 	defaultProxy := &server.ProxyConfig{}
-	if err := defaults.Set(defaultProxy); err != nil {
+	if err := config.SetDefaults(defaultProxy); err != nil {
 		log.Println(err)
 	}
-	if defaults.CanUpdate(c.Proxies) {
+	if config.CanUpdate(c.Proxies) {
 		c.Proxies = append(c.Proxies, *defaultProxy)
 	}
 }
@@ -36,7 +36,7 @@ func (c *Config) SetDefaults() {
 func NewConfig() *Config {
 	c := &Config{}
 
-	if err := defaults.Set(c); err != nil {
+	if err := config.SetDefaults(c); err != nil {
 		// revive:disable:deep-exit
 		log.Fatal(err)
 		// revive:enable:deep-exit
