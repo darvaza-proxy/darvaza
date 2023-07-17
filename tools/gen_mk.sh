@@ -66,8 +66,7 @@ EOT
 	tidy)
 		call="$(cat <<EOT | sed -e '/^$/d;'
 \$(GO) mod tidy
-\$(GO) vet ./...
-\$(REVIVE) \$(REVIVE_RUN_ARGS) ./...
+if [ -n "\$\$(\$(GO) list -f '{{len .GoFiles}}' ./... 2> /dev/null)" ]; then \$(GO) vet ./...; \$(REVIVE) \$(REVIVE_RUN_ARGS) ./...; fi
 EOT
 )"
 		depsx="fmt \$(REVIVE)"
@@ -130,14 +129,14 @@ $(gen_install_tools)"
 			elif [ -n "$cmdx" ]; then
 				classx="$cmdx"
 			fi
+
 		fi
 
 		if [ "build" = "$cmd" ]; then
 			# special build flags for cmd/*
 			#
-			callx="if \$(GO) list ./... | grep -e '.*/cmd/[^/]\+\$\$' > /dev/null; then \
-\$(GO_BUILD_CMD) ./...; else \
-\$(GO_BUILD) ./...; fi"
+			callx="MOD=\$\$(\$(GO) list -f '{{.ImportPath}}' ./... 2> /dev/null); if echo \"\$\$MOD\" | grep -q -e '.*/cmd/[^/]\+\$\$'; then \
+\$(GO_BUILD_CMD) ./...; elif [ -n \"\$\$MOD\" ]; then \$(GO_BUILD) ./...; fi"
 		fi
 
 		if [ "tidy" = "$cmd" ]; then
