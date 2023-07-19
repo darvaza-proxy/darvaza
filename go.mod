@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	darvaza.org/darvaza/server v0.1.0
-	darvaza.org/darvaza/shared v0.5.2
+	darvaza.org/darvaza/shared v0.5.3
 	darvaza.org/darvaza/shared/config v0.2.0
 	github.com/hashicorp/hcl/v2 v2.17.0
 	github.com/mgechev/revive v1.3.2
@@ -15,7 +15,7 @@ require (
 require (
 	darvaza.org/core v0.9.4 // indirect
 	darvaza.org/slog v0.5.2 // indirect
-	darvaza.org/slog/handlers/cblog v0.5.0 // indirect
+	darvaza.org/slog/handlers/cblog v0.5.4 // indirect
 	darvaza.org/slog/handlers/discard v0.4.0 // indirect
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
