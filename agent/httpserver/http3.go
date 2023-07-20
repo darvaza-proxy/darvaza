@@ -138,14 +138,21 @@ func (srv *Server) grabQuicHeaders(ctx context.Context, h3s *http3.Server) error
 }
 
 func (srv *Server) appendQuicHeaders(altSvcs []string) {
+	var s []string
+
 	srv.mu.Lock()
 	defer srv.mu.Unlock()
 
-	s := strings.Split(",", srv.quicAltSvc)
+	if srv.quicAltSvc != "" {
+		s = strings.Split(srv.quicAltSvc, ",")
+	}
+
 	for i, hdr := range altSvcs {
 		srv.debug().Printf("%s[%v]: %s", AltSvcHeader, i, hdr)
 
-		for _, part := range strings.Split(",", hdr) {
+		for _, part := range strings.Split(hdr, ",") {
+			part = strings.TrimSpace(part)
+
 			if !core.SliceContains(s, part) {
 				s = append(s, part)
 			}
