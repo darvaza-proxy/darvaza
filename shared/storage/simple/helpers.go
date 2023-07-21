@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"container/list"
 	"crypto/tls"
+	"crypto/x509"
 
 	"darvaza.org/core"
 	"darvaza.org/darvaza/shared/storage/certpool"
@@ -66,4 +67,18 @@ func mapListContainsHash(m map[string]*list.List, name string, hash certpool.Has
 	})
 
 	return found
+}
+
+// PairMatch tells if the public key of a PrivateKey is the
+// same as included in a *x509.Certificate
+func PairMatch(cert *x509.Certificate, pk x509utils.PrivateKey) bool {
+	if pub, ok := pk.Public().(x509utils.PublicKey); ok {
+		return pub.Equal(cert.PublicKey)
+	}
+	return false
+}
+
+// PrivateKeyEqual tells if two private keys are the same
+func PrivateKeyEqual(a, b x509utils.PrivateKey) bool {
+	return a.Equal(b)
 }
