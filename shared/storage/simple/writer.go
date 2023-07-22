@@ -18,8 +18,8 @@ var (
 	_ x509utils.WriteStore = (*Store)(nil)
 )
 
-// Put adds a certificate to the store
-func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) error {
+// AddCert adds a Certificate to be paired with a key and bundled
+func (s *Store) AddCert(name string, cert *x509.Certificate) error {
 	s.lockInit()
 	defer s.mu.Unlock()
 
@@ -47,6 +47,11 @@ func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) erro
 
 	addCerts(s, c)
 	return nil
+}
+
+// Put adds a Certificate to be paired with a key and bundled
+func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) error {
+	return s.AddCert(name, cert)
 }
 
 func (s *Store) appendName(ci *certInfo, name string) error {
