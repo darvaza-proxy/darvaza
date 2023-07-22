@@ -3,7 +3,7 @@ module darvaza.org/darvaza/shared/config
 go 1.19
 
 require (
-	darvaza.org/core v0.9.4
+	darvaza.org/core v0.9.5
 	github.com/amery/defaults v0.1.0
 	github.com/go-playground/validator/v10 v10.14.1
 	mvdan.cc/sh/v3 v3.7.0
