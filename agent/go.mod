@@ -8,7 +8,7 @@ replace (
 )
 
 require (
-	darvaza.org/core v0.9.4
+	darvaza.org/core v0.9.5
 	darvaza.org/darvaza/acme v0.1.2
 	darvaza.org/darvaza/shared v0.5.3
 	darvaza.org/middleware v0.2.3
