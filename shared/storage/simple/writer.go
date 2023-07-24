@@ -18,9 +18,9 @@ var (
 	_ x509utils.WriteStore = (*Store)(nil)
 )
 
-// Put adds a certificate to the store
-func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) error {
-	s.mu.Lock()
+// AddCert adds a Certificate to be paired with a key and bundled
+func (s *Store) AddCert(name string, cert *x509.Certificate) error {
+	s.lockInit()
 	defer s.mu.Unlock()
 
 	hash := certpool.HashCert(cert)
@@ -39,7 +39,7 @@ func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) erro
 		return err
 	}
 
-	c, err := s.bundle(cert, key)
+	c, err := s.bundler.Bundle(cert, key)
 	if err != nil {
 		err = core.Wrap(err, "failed to bundle certificate")
 		return err
@@ -49,8 +49,9 @@ func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) erro
 	return nil
 }
 
-func (s *Store) bundle(cert *x509.Certificate, key x509utils.PrivateKey) (*tls.Certificate, error) {
-	return s.pool.Bundle(cert, key, nil)
+// Put adds a Certificate to be paired with a key and bundled
+func (s *Store) Put(_ context.Context, name string, cert *x509.Certificate) error {
+	return s.AddCert(name, cert)
 }
 
 func (s *Store) appendName(ci *certInfo, name string) error {
@@ -95,7 +96,7 @@ func (s *Store) Delete(_ context.Context, name string) error {
 	const once = false // all matches
 	var certs []*tls.Certificate
 
-	s.mu.Lock()
+	s.lockInit()
 	defer s.mu.Unlock()
 
 	// find by name
@@ -128,7 +129,7 @@ func (s *Store) Delete(_ context.Context, name string) error {
 
 // DeleteCert removes a certificate from the store
 func (s *Store) DeleteCert(_ context.Context, cert *x509.Certificate) error {
-	s.mu.Lock()
+	s.lockInit()
 	defer s.mu.Unlock()
 
 	if ci := s.findCertInfo(cert); ci != nil {

@@ -27,7 +27,16 @@ func (c *Config) New(blocks ...string) (*Store, error) {
 		return nil, err
 	}
 
-	return NewFromBuffer(pb, c.Base)
+	s, err := NewFromBuffer(pb, c.Base)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.Logger != nil {
+		s.SetLogger(c.Logger)
+	}
+
+	return s, nil
 }
 
 func (c *Config) newPoolBuffer(blocks ...string) (*certpool.PoolBuffer, error) {

@@ -7,8 +7,11 @@ import (
 	"sync"
 
 	"darvaza.org/core"
+	"darvaza.org/slog"
+
 	"darvaza.org/darvaza/shared/storage/certpool"
 	"darvaza.org/darvaza/shared/x509utils"
+
 	"golang.org/x/sync/singleflight"
 )
 
@@ -22,7 +25,12 @@ type Store struct {
 	mu sync.Mutex
 	g  singleflight.Group
 
-	pool     *certpool.CertPool
+	logger slog.Logger
+
+	roots   certpool.CertPool
+	inter   certpool.CertPool
+	bundler certpool.Bundler
+
 	keys     []x509utils.PrivateKey
 	certs    *list.List
 	hashed   map[certpool.Hash]*certInfo
@@ -37,31 +45,43 @@ type certInfo struct {
 	patterns []string
 }
 
-func newStore(roots *certpool.CertPool) *Store {
-	if roots == nil {
-		roots = new(certpool.CertPool)
-		roots.Reset()
-	}
+// init unconditionaly initialises the Store
+func (s *Store) init() {
+	s.logger = defaultLogger()
 
-	return &Store{
-		pool:     roots,
-		keys:     []x509utils.PrivateKey{},
-		certs:    list.New(),
-		hashed:   make(map[certpool.Hash]*certInfo),
-		names:    make(map[string]*list.List),
-		patterns: make(map[string]*list.List),
+	s.roots.Reset()
+	s.inter.Reset()
+	s.bundler.Roots = &s.roots
+	s.bundler.Inter = &s.inter
+
+	s.keys = []x509utils.PrivateKey{}
+	s.certs = list.New()
+	s.hashed = make(map[certpool.Hash]*certInfo)
+	s.names = make(map[string]*list.List)
+	s.patterns = make(map[string]*list.List)
+}
+
+// lockInit will acquire a lock and initialise the Store if needed
+func (s *Store) lockInit() {
+	s.mu.Lock()
+	if s.hashed == nil {
+		s.init()
 	}
 }
 
 // NewFromBuffer creates a Store from a given PoolBuffer
 func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, error) {
-	certs, err := pb.Certificates(base)
-	if err != nil {
-		return nil, err
-	}
+	s := new(Store)
+	s.init()
+	if pb != nil {
+		certs, err := pb.Certificates(base)
+		if err != nil {
+			return nil, err
+		}
 
-	s := newStore(pb.Pool())
-	addCerts(s, certs...)
+		pb.CopyPool(&s.roots)
+		addCerts(s, certs...)
+	}
 	return s, nil
 }
 

@@ -45,16 +45,19 @@ func (s *CertPool) init() {
 
 // Clone creates a copy of the CertPool
 func (s *CertPool) Clone() x509utils.CertPooler {
+	return s.Copy(nil)
+}
+
+// Copy replicate itself into a given CertPool
+func (s *CertPool) Copy(out *CertPool) *CertPool {
+	if out == nil {
+		out = new(CertPool)
+	}
+
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	clone := &CertPool{
-		cached:   s.exportUnlocked(),
-		hashed:   make(map[Hash]*certPoolEntry, len(s.hashed)),
-		names:    x.CloneMapList(s.names),
-		patterns: x.CloneMapList(s.patterns),
-		subjects: x.CloneMapList(s.subjects),
-	}
+	*out = preClone(s)
 
 	for hash, d := range s.hashed {
 		names := make([]string, len(d.names))
@@ -63,7 +66,7 @@ func (s *CertPool) Clone() x509utils.CertPooler {
 		copy(names, d.names)
 		copy(patterns, d.patterns)
 
-		clone.hashed[hash] = &certPoolEntry{
+		out.hashed[hash] = &certPoolEntry{
 			hash:     hash,
 			cert:     d.cert,
 			names:    names,
@@ -71,7 +74,17 @@ func (s *CertPool) Clone() x509utils.CertPooler {
 		}
 	}
 
-	return clone
+	return out
+}
+
+func preClone(s *CertPool) CertPool {
+	return CertPool{
+		cached:   s.exportUnlocked(),
+		hashed:   make(map[Hash]*certPoolEntry, len(s.hashed)),
+		names:    x.CloneMapList(s.names),
+		patterns: x.CloneMapList(s.patterns),
+		subjects: x.CloneMapList(s.subjects),
+	}
 }
 
 // Count tells how many certificates are stored in the CertPool
