@@ -68,16 +68,11 @@ func (opt Options) NameSplit(name string) (string, string) {
 }
 
 // NewOpener creates an opener funcion considering Options.Create and the given permissions
-func (opt Options) NewOpener(perm fs.FileMode) func(string) (int, error) {
-	mode := os.O_RDONLY
-	if opt.Create {
-		mode |= os.O_CREATE
-	}
-
+func (opt Options) NewOpener(perm fs.FileMode) func(string) (Handle, error) {
 	perm = coalesceMode(perm, DefaultFileMode)
 
-	fn := func(path string) (int, error) {
-		return syscall.Open(path, mode, uint32(perm))
+	fn := func(path string) (Handle, error) {
+		return openHandle(path, opt.Create, perm)
 	}
 
 	return fn
@@ -94,11 +89,7 @@ func (opt Options) newFileLock(name string, perm fs.FileMode) (*Flock, error) {
 		}
 	}
 
-	fl := &Flock{
-		filename: filepath.Join(dir, file),
-		opener:   opt.NewOpener(perm),
-		fd:       -1,
-	}
+	fl := NewWithOpener(filepath.Join(dir, file), opt.NewOpener(perm))
 	return fl, nil
 }
 
@@ -116,10 +107,7 @@ func (opt Options) newDirLock(name string, dmode fs.FileMode) (*Flock, error) {
 		}
 	}
 
-	fl := &Flock{
-		filename: name,
-		fd:       -1,
-	}
+	fl := NewWithOpener(name, nil)
 	return fl, nil
 }
 

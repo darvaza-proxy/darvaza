@@ -5,19 +5,37 @@ import (
 	"syscall"
 )
 
+// OpenerFunc is a function that opens a file
+type OpenerFunc func(string) (Handle, error)
+
 // Flock implements a simple wrapper around syscall.Flock
 type Flock struct {
 	filename string
-	opener   func(string) (int, error)
-	fd       int
+	opener   OpenerFunc
+	h        Handle
 }
 
 // New instantiates a Flock for a given filename
 func New(filename string) *Flock {
-	return &Flock{
-		filename: filename,
-		fd:       -1,
+	return NewWithOpener(filename, nil)
+}
+
+// NewWithOpener instantiates a Flock for a given filename
+func NewWithOpener(filename string, opener OpenerFunc) *Flock {
+	if opener == nil {
+		opener = defaultOpener
 	}
+
+	fl := &Flock{
+		filename: filename,
+		opener:   opener,
+		h:        deadHandle,
+	}
+	return fl
+}
+
+func defaultOpener(path string) (Handle, error) {
+	return openHandle(path, false, DefaultFileMode)
 }
 
 // Lock flocks a file by name
@@ -30,36 +48,25 @@ func Lock(filename string) (*Flock, error) {
 }
 
 func (lock *Flock) open() error {
-	var fd int
-	var err error
-
-	if lock.fd >= 0 {
+	if lock.h > deadHandle {
 		// already open
 		return syscall.EBUSY
 	}
 
-	if lock.opener != nil {
-		// use given opener
-		fd, err = lock.opener(lock.filename)
-	} else {
-		// default opener
-		fd, err = syscall.Open(lock.filename, syscall.O_RDONLY, 0)
-	}
-
+	h, err := lock.opener(lock.filename)
 	if err != nil {
 		// failed to open
 		return err
 	}
 
-	// openned
-	lock.fd = fd
+	lock.h = h
 	return nil
 }
 
 func (lock *Flock) close() {
-	if fd := lock.fd; fd >= 0 {
-		defer syscall.Close(fd)
-		lock.fd = -1
+	if h := lock.h; h > deadHandle {
+		defer closeHandle(h)
+		lock.h = deadHandle
 	}
 }
 
@@ -68,14 +75,13 @@ func (lock *Flock) Lock() error {
 	if err := lock.open(); err != nil {
 		// failed to open
 		return err
-	} else if err := syscall.Flock(lock.fd, syscall.LOCK_EX); err != nil {
-		// failed to clock
+	} else if err := lockHandle(lock.h); err != nil {
+		// failed to flock
 		defer lock.close()
 		return err
-	} else {
-		// success
-		return nil
 	}
+
+	return nil
 }
 
 // Unlock releases the flock
