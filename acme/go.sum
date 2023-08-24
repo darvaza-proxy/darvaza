@@ -1,9 +1,9 @@
-darvaza.org/core v0.9.4 h1:HYKmYiWehDtqATF0vBv2i/DvdpNP7YJPu3pOW7h0CWI=
-darvaza.org/core v0.9.4/go.mod h1:O3tHBMlw+xB47uGh5CUx7dXAujBAMmD8BCRFPZmIw54=
-darvaza.org/darvaza/shared/web v0.3.7 h1:kVc7hhAsQKyZUHfUooYWF9i499VVddSXAx63zFmPYp8=
-darvaza.org/darvaza/shared/web v0.3.7/go.mod h1:Yyt1qqFb6fmGUsTlr8cFs7ysqb5KbXWkZ14vcUKTvQ4=
-darvaza.org/middleware v0.2.3 h1:8WlGkFhXiRClXZNHli0V8VF8qV6AR4wsvQ4Hpc6O6H0=
-darvaza.org/middleware v0.2.3/go.mod h1:VKG0aoHi7FLVdf+a8gcKyR/dCpyb1M2yjY6Co95SpXI=
+darvaza.org/core v0.9.7 h1:06htj8yzZ5xIrcYpmjdPBmTg1+y1oHbpzCXDOd7j3jo=
+darvaza.org/core v0.9.7/go.mod h1:4zYtG5ArBmdZ1n7Gw6e6ZwkEQiPFWIYjsQfSmTYCTMc=
+darvaza.org/darvaza/shared/web v0.3.9 h1:2pQQGC109WVIXdm+bs3HoCIFu/pK8MjHo/GfWlXDusY=
+darvaza.org/darvaza/shared/web v0.3.9/go.mod h1:1VvNmcBXNBTZEzfIGnh7cJaoHD0iIPvZLLhxnu2gpzw=
+darvaza.org/middleware v0.2.4 h1:6F33E3qbOGcwFn6ohiE/TkwhXir285KakrIesSsnAB0=
+darvaza.org/middleware v0.2.4/go.mod h1:2BtMsOJcMkVoAW8r4u8Gd59uBxaacpc4/d0qPspCoTE=
 golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1 h1:MGwJjxBy0HJshjDNfLsYO8xppfqWlA5ZT9OhtUUhTNw=
 golang.org/x/net v0.14.0 h1:BONx9s002vGdD9umnlX1Po8vOZmrgH34qlHcD1MfK14=
 golang.org/x/net v0.14.0/go.mod h1:PpSgVXXLK0OxS0F31C1/tv6XNguvCrnXIDrFMspZIUI=

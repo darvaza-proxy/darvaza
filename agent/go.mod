@@ -11,7 +11,7 @@ require (
 	darvaza.org/core v0.9.7
 	darvaza.org/darvaza/acme v0.1.2
 	darvaza.org/darvaza/shared v0.5.3
-	darvaza.org/middleware v0.2.3
+	darvaza.org/middleware v0.2.4
 	darvaza.org/slog v0.5.3
 	darvaza.org/slog/handlers/discard v0.4.5
 	github.com/quic-go/quic-go v0.36.2
@@ -19,7 +19,7 @@ require (
 )
 
 require (
-	darvaza.org/darvaza/shared/web v0.3.7 // indirect
+	darvaza.org/darvaza/shared/web v0.3.9 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8 // indirect
