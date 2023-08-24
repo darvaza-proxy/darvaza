@@ -3,9 +3,9 @@ module darvaza.org/darvaza
 go 1.19
 
 require (
-	darvaza.org/darvaza/server v0.1.0
+	darvaza.org/darvaza/server v0.1.2
 	darvaza.org/darvaza/shared v0.5.8
-	darvaza.org/darvaza/shared/config v0.2.1
+	darvaza.org/darvaza/shared/config v0.2.3
 	github.com/hashicorp/hcl/v2 v2.17.0
 	github.com/mgechev/revive v1.3.2
 	github.com/miekg/dns v1.1.55

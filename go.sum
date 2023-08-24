@@ -1,7 +1,7 @@
 darvaza.org/core v0.9.7 h1:06htj8yzZ5xIrcYpmjdPBmTg1+y1oHbpzCXDOd7j3jo=
 darvaza.org/core v0.9.7/go.mod h1:4zYtG5ArBmdZ1n7Gw6e6ZwkEQiPFWIYjsQfSmTYCTMc=
-darvaza.org/darvaza/shared/config v0.2.1 h1:857mKi4IC+caH3GvC9iH6Mb3fCfhfrf9A86jbDuqqWU=
-darvaza.org/darvaza/shared/config v0.2.1/go.mod h1:3s6abeCy47ajk57I7rIVBQo+tJ3NMoUbndosvMVqiEg=
+darvaza.org/darvaza/shared/config v0.2.3 h1:iGaBmsbHr7vmBDjRG+NG5bKG+2Nfs+yd6NQy43t9w14=
+darvaza.org/darvaza/shared/config v0.2.3/go.mod h1:I4hO+BIQz8r2bEGLbIAsXNjifN+Q9mpqblydXUu+JW4=
 darvaza.org/slog v0.5.3 h1:sQzmZXgqRh9oFMKBwEYrEpucLvKJVZxaxa2bHIA6GJ0=
 darvaza.org/slog v0.5.3/go.mod h1:59d+yi+C7gn4pDDuwbbOKawERpdXthFFk1Yc+Sv6XB0=
 darvaza.org/slog/handlers/cblog v0.5.5 h1:aTE65jGUGTudUcbgapveQl68sdS/qqCZpNxY62huSF8=
