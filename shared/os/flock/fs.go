@@ -41,14 +41,17 @@ type Options struct {
 
 // JoinName joins the given name with the Options.Base when not qualified
 func (opt Options) JoinName(name string) string {
-	if name == "" {
+	switch {
+	case name == "":
 		// empty
 		return opt.Base
-	} else if opt.Base == "" || strings.HasPrefix(name, slash) ||
-		strings.HasPrefix(name, dotSlash) || strings.HasPrefix(name, dotDotSlash) {
+	case opt.Base == "",
+		strings.HasPrefix(name, slash),
+		strings.HasPrefix(name, dotSlash),
+		strings.HasPrefix(name, dotDotSlash):
 		// ignore Base
 		return filepath.Clean(name)
-	} else {
+	default:
 		return filepath.Join(opt.Base, filepath.Clean(name))
 	}
 }
@@ -144,13 +147,16 @@ func mkdirAllCoalesceMode(fullname string, dmode ...fs.FileMode) error {
 
 // ReadDir reads the entries of a directory, flocked
 func (opt Options) ReadDir(name string) ([]fs.DirEntry, error) {
-	if fl, err := opt.newDirLock(name, 0); err != nil {
+	fl, err := opt.newDirLock(name, 0)
+	if err != nil {
 		return nil, err
-	} else if err := fl.Lock(); err != nil {
-		return nil, err
-	} else {
-		defer fl.Unlock()
 	}
+
+	err = fl.Lock()
+	if err != nil {
+		return nil, err
+	}
+	defer fl.Unlock()
 
 	return os.ReadDir(name)
 }
@@ -159,13 +165,16 @@ func (opt Options) ReadDir(name string) ([]fs.DirEntry, error) {
 func (opt Options) ReadFile(name string, perm fs.FileMode) ([]byte, error) {
 	perm = coalesceMode(perm, DefaultFileMode)
 
-	if fl, err := opt.newFileLock(name, perm); err != nil {
+	fl, err := opt.newFileLock(name, perm)
+	if err != nil {
 		return nil, err
-	} else if err := fl.Lock(); err != nil {
-		return nil, err
-	} else {
-		defer fl.Unlock()
 	}
+
+	err = fl.Lock()
+	if err != nil {
+		return nil, err
+	}
+	defer fl.Unlock()
 
 	return os.ReadFile(name)
 }
@@ -174,13 +183,16 @@ func (opt Options) ReadFile(name string, perm fs.FileMode) ([]byte, error) {
 func (opt Options) WriteFile(name string, data []byte, perm fs.FileMode) error {
 	perm = coalesceMode(perm, DefaultFileMode)
 
-	if fl, err := opt.newFileLock(name, perm); err != nil {
+	fl, err := opt.newFileLock(name, perm)
+	if err != nil {
 		return err
-	} else if err := fl.Lock(); err != nil {
-		return err
-	} else {
-		defer fl.Unlock()
 	}
+
+	err = fl.Lock()
+	if err != nil {
+		return err
+	}
+	defer fl.Unlock()
 
 	return os.WriteFile(name, data, perm)
 }
