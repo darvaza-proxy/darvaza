@@ -77,9 +77,9 @@ func BlockToCertificate(block *pem.Block) (*x509.Certificate, error) {
 			return nil, err
 		} else if cert != nil {
 			return cert, nil
-		} else {
-			panic("unreachable")
 		}
+
+		panic("unreachable")
 	}
 	return nil, ErrIgnored
 }
