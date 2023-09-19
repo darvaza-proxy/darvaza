@@ -24,19 +24,19 @@ func SystemCertPool() (*CertPool, error) {
 		return nil, systemRootsErr
 	} else if systemRoots != nil {
 		return systemRoots.Clone().(*CertPool), nil
-	} else {
-		// first call
-		roots, err := loadSystemRoots()
-		if err != nil {
-			// memoize error
-			systemRootsErr = err
-			return nil, err
-		}
-
-		// memoize roots
-		systemRoots = roots
-		return roots.Clone().(*CertPool), nil
 	}
+
+	// first call
+	roots, err := loadSystemRoots()
+	if err != nil {
+		// memoize error
+		systemRootsErr = err
+		return nil, err
+	}
+
+	// memoize roots
+	systemRoots = roots
+	return roots.Clone().(*CertPool), nil
 }
 
 // revive:disable:cognitive-complexity
