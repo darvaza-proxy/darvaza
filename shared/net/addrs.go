@@ -15,13 +15,17 @@ import (
 // validating the host and port in the process
 func SplitHostPort(hostport string) (string, uint16, error) {
 	host, port, err := core.SplitHostPort(hostport)
-	if err != nil {
+	switch {
+	case err != nil:
 		return "", 0, err
-	} else if port == "" {
+	case port == "":
 		return host, 0, nil
-	} else if u, err := strconv.ParseUint(port, 10, 16); err != nil {
-		return "", 0, err
-	} else {
+	default:
+		u, err := strconv.ParseUint(port, 10, 16)
+		if err != nil {
+			return "", 0, err
+		}
+
 		return host, uint16(u & 0xffff), nil
 	}
 }
