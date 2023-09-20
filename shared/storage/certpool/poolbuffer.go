@@ -130,7 +130,7 @@ func (pb *PoolBuffer) Pool() *CertPool {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 
-	return pb.inter.Clone().(*CertPool)
+	return pb.inter.Copy(nil)
 }
 
 // CopyPool copies the CA certificates into the given CertPool

@@ -72,6 +72,30 @@ func (*ServerListeners) checkInsecureMatch(tcpAddr *net.TCPAddr, ip net.IP, port
 	return nil
 }
 
+func (sl *ServerListeners) secureAddress(i int) *net.TCPAddr {
+	p, ok := sl.Secure[i].Addr().(*net.TCPAddr)
+	if !ok {
+		panic("unreachable")
+	}
+	return p
+}
+
+func (sl *ServerListeners) quicAddress(i int) *net.UDPAddr {
+	p, ok := sl.Quic[i].LocalAddr().(*net.UDPAddr)
+	if !ok {
+		panic("unreachable")
+	}
+	return p
+}
+
+func (sl *ServerListeners) insecureAddress(i int) *net.TCPAddr {
+	p, ok := sl.Insecure[i].Addr().(*net.TCPAddr)
+	if !ok {
+		panic("unreachable")
+	}
+	return p
+}
+
 // revive:disable:cognitive-complexity
 
 // IPAddresses validates the ServerListeners and provides the list of
@@ -91,8 +115,8 @@ func (sl *ServerListeners) IPAddresses() ([]net.IP, error) {
 	ips := make([]net.IP, count)
 
 	for i := 0; i < count; i++ {
-		tcpAddr := sl.Secure[i].Addr().(*net.TCPAddr)
-		udpAddr := sl.Quic[i].LocalAddr().(*net.UDPAddr)
+		tcpAddr := sl.secureAddress(i)
+		udpAddr := sl.quicAddress(i)
 
 		if port == 0 {
 			port = tcpAddr.Port
@@ -107,7 +131,7 @@ func (sl *ServerListeners) IPAddresses() ([]net.IP, error) {
 
 	if nInsecure > 0 {
 		for i := 0; i < count; i++ {
-			tcpAddr := sl.Insecure[i].Addr().(*net.TCPAddr)
+			tcpAddr := sl.insecureAddress(i)
 
 			if insecure == 0 {
 				insecure = tcpAddr.Port
@@ -142,11 +166,11 @@ func (sl *ServerListeners) Ports() (secure uint16, insecure uint16, ok bool) {
 		return 0, 0, false
 	}
 
-	addr := sl.Secure[0].Addr().(*net.TCPAddr)
+	addr := sl.secureAddress(0)
 	secure = uint16(addr.Port)
 
 	if len(sl.Insecure) > 0 {
-		addr = sl.Insecure[0].Addr().(*net.TCPAddr)
+		addr := sl.insecureAddress(0)
 		insecure = uint16(addr.Port)
 	}
 

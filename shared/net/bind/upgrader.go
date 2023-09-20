@@ -61,7 +61,12 @@ func (lu UpgraderListenConfig) ListenTCP(network string, laddr *net.TCPAddr) (
 	if err != nil {
 		return nil, err
 	}
-	return ln.(*net.TCPListener), nil
+
+	if ln, ok := ln.(*net.TCPListener); ok {
+		return ln, nil
+	}
+
+	panic("unreachable")
 }
 
 // ListenUDP acts like the standard net.ListenUDP but using our ListenConfig and
@@ -76,7 +81,12 @@ func (lu UpgraderListenConfig) ListenUDP(network string, laddr *net.UDPAddr) (
 	if err != nil {
 		return nil, err
 	}
-	return ln.(*net.UDPConn), nil
+
+	if ln, ok := ln.(*net.UDPConn); ok {
+		return ln, nil
+	}
+
+	panic("unreachable")
 }
 
 // ListenAll acts like Listen but on a list of addresses

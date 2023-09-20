@@ -73,7 +73,12 @@ func (lc ListenConfig) ListenTCP(network string, laddr *net.TCPAddr) (*net.TCPLi
 	if err != nil {
 		return nil, err
 	}
-	return ln.(*net.TCPListener), nil
+
+	if ln, ok := ln.(*net.TCPListener); ok {
+		return ln, nil
+	}
+
+	panic("unreachable")
 }
 
 // ListenUDP acts like the standard net.ListenUDP but using the context.Context,
@@ -87,7 +92,12 @@ func (lc ListenConfig) ListenUDP(network string, laddr *net.UDPAddr) (*net.UDPCo
 	if err != nil {
 		return nil, err
 	}
-	return ln.(*net.UDPConn), nil
+
+	if ln, ok := ln.(*net.UDPConn); ok {
+		return ln, nil
+	}
+
+	panic("unreachable")
 }
 
 // ListenAll acts like Listen but on a list of addresses

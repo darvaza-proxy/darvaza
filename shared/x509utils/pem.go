@@ -24,17 +24,19 @@ func ReadPEM(b []byte, cb DecodePEMBlockFunc) error {
 	if len(b) == 0 {
 		// empty
 		return nil
-	} else if block, rest := pem.Decode(b); block != nil {
+	}
+
+	if block, rest := pem.Decode(b); block != nil {
 		// PEM chain
 		_ = readBlock("", block, rest, cb)
 		return nil
-	} else {
-		// Not PEM
-		return fs.ErrInvalid
 	}
+
+	// Not PEM
+	return fs.ErrInvalid
 }
 
-// ReadStringPEM invoques a callback for each PEM block found
+// ReadStringPEM invokes a callback for each PEM block found
 // it can receive raw PEM data, a filename or a directory to scan
 func ReadStringPEM(s string, cb DecodePEMBlockFunc) error {
 	if ReadPEM([]byte(s), cb) == nil {
@@ -99,10 +101,10 @@ func readBlock(filename string, block *pem.Block, rest []byte, cb DecodePEMBlock
 		} else if len(rest) == 0 {
 			// EOF
 			break
-		} else {
-			// next
-			block, rest = pem.Decode(rest)
 		}
+
+		// next
+		block, rest = pem.Decode(rest)
 	}
 
 	return false

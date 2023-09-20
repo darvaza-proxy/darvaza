@@ -49,8 +49,11 @@ func (*PoolBuffer) newRoots(ours *CertPool, base x509utils.CertPooler) (*CertPoo
 		return pool, nil
 	}
 
-	pool := ours.Plus(base).(*CertPool)
-	return pool, nil
+	if pool, ok := ours.Plus(base).(*CertPool); ok {
+		return pool, nil
+	}
+
+	panic("unreachable")
 }
 
 type pbPair struct {

@@ -63,13 +63,14 @@ func (h *ChallengeHandler) resolveHandler(host, path string) http.Handler {
 // to the well-known directory or not
 func TokenFromPath(path string) (string, bool) {
 	token := strings.TrimPrefix(path, WellKnownPath)
-	if token == path {
+	switch {
+	case token == path:
 		return "", false
-	} else if token == "" {
+	case token == "":
 		return "", true
-	} else if token[0] != '/' {
+	case token[0] != '/':
 		return "", false
-	} else {
+	default:
 		return token[1:], true
 	}
 }

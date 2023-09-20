@@ -134,9 +134,21 @@ func newFileHandler() loggerHandler {
 	return new(fileHandler)
 }
 
+func getConfigString(config map[string]any, key string) (string, bool) {
+	if config != nil {
+		if v, ok := config[key]; ok {
+			if s, ok := v.(string); ok {
+				return s, true
+			}
+		}
+	}
+	return "", false
+}
+
 func (h *fileHandler) setup(config map[string]any) error {
-	if file, ok := config["file"]; ok {
-		h.file = file.(string)
+	if file, ok := getConfigString(config, "file"); ok {
+		h.file = file
+
 		if _, err := os.Stat(h.file); os.IsNotExist(err) {
 			_ = os.MkdirAll(filepath.Dir(h.file), 0755)
 			if _, err := os.Create(h.file); err != nil {

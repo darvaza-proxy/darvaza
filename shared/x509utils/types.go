@@ -45,15 +45,28 @@ func BlockToPrivateKey(block *pem.Block) (PrivateKey, error) {
 			return pk, nil
 		}
 
-		pk, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+		pk, err := parsePKCS8PrivateKey(block.Bytes)
 		if err != nil {
 			return nil, err
 		}
 
-		return pk.(PrivateKey), nil
+		return pk, nil
 	}
 
 	return nil, ErrIgnored
+}
+
+func parsePKCS8PrivateKey(b []byte) (PrivateKey, error) {
+	pk, err := x509.ParsePKCS8PrivateKey(b)
+	if err != nil {
+		return nil, err
+	}
+
+	if pk, ok := pk.(PrivateKey); ok {
+		return pk, nil
+	}
+
+	panic("unreachable")
 }
 
 // BlockToRSAPrivateKey attempts to parse a pem.Block to extract an rsa.PrivateKey
@@ -77,9 +90,9 @@ func BlockToCertificate(block *pem.Block) (*x509.Certificate, error) {
 			return nil, err
 		} else if cert != nil {
 			return cert, nil
-		} else {
-			panic("unreachable")
 		}
+
+		panic("unreachable")
 	}
 	return nil, ErrIgnored
 }
