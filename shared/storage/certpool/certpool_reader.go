@@ -129,7 +129,7 @@ func equal(a *CertPool, b *CertPool) bool {
 
 // Minus produces a new CertPool without any certificate on the given Pool
 func (s *CertPool) Minus(x x509utils.CertPooler) x509utils.CertPooler {
-	out := s.Clone().(*CertPool)
+	out := s.Copy(nil)
 
 	if x == nil {
 		// nothing to remove
@@ -163,7 +163,7 @@ func minus(out, b *CertPool) *CertPool {
 
 // Plus produces a new CertPool with all certificate on the given Pool
 func (s *CertPool) Plus(x x509utils.CertPooler) x509utils.CertPooler {
-	out := s.Clone().(*CertPool)
+	out := s.Copy(nil)
 	if x != nil {
 		out.addCertPooler(x)
 	}

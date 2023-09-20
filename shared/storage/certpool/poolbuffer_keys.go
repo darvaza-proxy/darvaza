@@ -27,7 +27,11 @@ type pbKeyData struct {
 }
 
 func (d *pbKeyData) Public() x509utils.PublicKey {
-	return d.pk.Public().(x509utils.PublicKey)
+	pub, ok := d.pk.Public().(x509utils.PublicKey)
+	if !ok {
+		panic("unreachable")
+	}
+	return pub
 }
 
 func (d *pbKeyData) Validate() error {
