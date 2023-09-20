@@ -4,9 +4,9 @@ go 1.19
 
 require (
 	darvaza.org/darvaza/server v0.1.2
-	darvaza.org/darvaza/shared v0.5.8
-	darvaza.org/darvaza/shared/config v0.2.3
-	github.com/hashicorp/hcl/v2 v2.17.0
+	darvaza.org/darvaza/shared v0.5.9
+	darvaza.org/darvaza/shared/config v0.2.4
+	github.com/hashicorp/hcl/v2 v2.18.0
 	github.com/mgechev/revive v1.3.4
 	github.com/miekg/dns v1.1.55
 	github.com/spf13/cobra v1.7.0
@@ -20,7 +20,7 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/amery/defaults v0.1.0 // indirect
-	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
+	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
@@ -45,7 +45,7 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.10.1-0.20230524175051-ec119421bb97 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/zclconf/go-cty v1.13.2 // indirect
+	github.com/zclconf/go-cty v1.14.0 // indirect
 	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.15.0 // indirect
