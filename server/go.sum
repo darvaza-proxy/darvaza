@@ -1,9 +1,9 @@
 darvaza.org/core v0.9.9 h1:nUNvkGJzWUEQcFSCMjZU8L+yQml8OPWGg7xh7MlSpM4=
 darvaza.org/core v0.9.9/go.mod h1:5YJ2YovkxdjgXd7xMGbg4/cBf0i8Y2Qv80twxl1yf4s=
-darvaza.org/slog v0.5.3 h1:sQzmZXgqRh9oFMKBwEYrEpucLvKJVZxaxa2bHIA6GJ0=
-darvaza.org/slog v0.5.3/go.mod h1:59d+yi+C7gn4pDDuwbbOKawERpdXthFFk1Yc+Sv6XB0=
-darvaza.org/slog/handlers/cblog v0.5.5 h1:aTE65jGUGTudUcbgapveQl68sdS/qqCZpNxY62huSF8=
-darvaza.org/slog/handlers/cblog v0.5.5/go.mod h1:p6Zw6S0DnMcRATi1sAqDQHyI19s9G2UGb7ZdUyobnYM=
+darvaza.org/slog v0.5.4 h1:xzlWVzYh4tuZLnj4A9tOHXfn/SAEIkApXPvK3YDiW9g=
+darvaza.org/slog v0.5.4/go.mod h1:QFtY3QoQ7xxww85umlEKPcMCNzqNrHYqnj53KehsmBU=
+darvaza.org/slog/handlers/cblog v0.5.6 h1:6cwpqC7AdSFGjuz5P16vWv0Fl1Z+y6N54xZI1ynXJy8=
+darvaza.org/slog/handlers/cblog v0.5.6/go.mod h1:ZdNnVGf6rjjVS6dKp+KV4e1cYb5FXTBdgGL38taYxrw=
 github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0SNc=
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/miekg/dns v1.1.55 h1:GoQ4hpsj0nFLYe+bWiCToyrBEJXkQfOOIvFGFy0lEgo=
