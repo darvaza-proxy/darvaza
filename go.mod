@@ -7,13 +7,13 @@ require (
 	darvaza.org/darvaza/shared v0.5.8
 	darvaza.org/darvaza/shared/config v0.2.3
 	github.com/hashicorp/hcl/v2 v2.17.0
-	github.com/mgechev/revive v1.3.2
+	github.com/mgechev/revive v1.3.4
 	github.com/miekg/dns v1.1.55
 	github.com/spf13/cobra v1.7.0
 )
 
 require (
-	darvaza.org/core v0.9.7 // indirect
+	darvaza.org/core v0.9.9 // indirect
 	darvaza.org/slog v0.5.3 // indirect
 	darvaza.org/slog/handlers/cblog v0.5.5 // indirect
 	darvaza.org/slog/handlers/discard v0.4.5 // indirect
@@ -21,13 +21,13 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/amery/defaults v0.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
-	github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8 // indirect
+	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.15.1 // indirect
+	github.com/go-playground/validator/v10 v10.15.4 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
@@ -46,13 +46,13 @@ require (
 	github.com/rogpeppe/go-internal v1.10.1-0.20230524175051-ec119421bb97 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/zclconf/go-cty v1.13.2 // indirect
-	golang.org/x/crypto v0.12.0 // indirect
+	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
-	golang.org/x/text v0.12.0 // indirect
-	golang.org/x/tools v0.12.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/tools v0.13.0 // indirect
 )
 
 replace (

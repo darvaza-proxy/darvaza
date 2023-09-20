@@ -8,7 +8,7 @@ replace (
 )
 
 require (
-	darvaza.org/core v0.9.8
+	darvaza.org/core v0.9.9
 	darvaza.org/darvaza/acme v0.1.3
 	darvaza.org/darvaza/shared v0.5.8
 	darvaza.org/middleware v0.2.4
@@ -26,6 +26,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.12.1 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/quic-go/qtls-go1-20 v0.3.4 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
 	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/mod v0.12.0 // indirect
