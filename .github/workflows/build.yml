@@ -1,23 +1,26 @@
-name: Darvaza build
+name: Build
 
 on:
   push:
-    branches:
-      - master
+    branches-ignore:
+      - '**-wip'
   pull_request:
     branches:
       - '*'
+
 jobs:
-  build:
+  make:
     name: Build
     runs-on: ubuntu-latest
+    # Pull requests from the same repository won't trigger this checks as they were already triggered by the push
+    if: (github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository)
     strategy:
       matrix:
         go: [ '1.20', '1.21' ]
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Go ${{ matrix.go }}
         uses: actions/setup-go@v4
         with:
