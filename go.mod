@@ -4,11 +4,11 @@ go 1.19
 
 require (
 	darvaza.org/darvaza/server v0.1.2
-	darvaza.org/darvaza/shared v0.5.9
+	darvaza.org/darvaza/shared v0.5.10
 	darvaza.org/darvaza/shared/config v0.2.4
 	github.com/hashicorp/hcl/v2 v2.18.0
 	github.com/mgechev/revive v1.3.4
-	github.com/miekg/dns v1.1.55
+	github.com/miekg/dns v1.1.56
 	github.com/spf13/cobra v1.7.0
 )
 
