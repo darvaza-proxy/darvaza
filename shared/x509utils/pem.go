@@ -44,29 +44,30 @@ func ReadStringPEM(s string, cb DecodePEMBlockFunc) error {
 		return nil
 	}
 
-	if st, _ := os.Stat(s); st != nil {
-		switch {
-		case st.IsDir():
-			// Directory
-			_, err := dirReadPEM(s, cb)
-			return err
-		case !st.Mode().IsRegular():
-			// Invalid file type
-			return &fs.PathError{
-				Op:   "read",
-				Path: s,
-				Err:  fs.ErrInvalid,
-			}
-		case st.Size() == 0:
-			// Empty File
-			return nil
-		default:
-			// Non-Empty File
-			_, err := fileReadPEM(s, cb)
-			return err
+	st, err := os.Stat(s)
+	switch {
+	case err != nil:
+		// not found
+		return err
+	case st.IsDir():
+		// Directory
+		_, err := dirReadPEM(s, cb)
+		return err
+	case !st.Mode().IsRegular():
+		// Invalid file type
+		return &fs.PathError{
+			Op:   "read",
+			Path: s,
+			Err:  fs.ErrInvalid,
 		}
+	case st.Size() == 0:
+		// Empty File
+		return nil
+	default:
+		// Non-Empty File
+		_, err := fileReadPEM(s, cb)
+		return err
 	}
-	return fs.ErrNotExist
 }
 
 // ReadFilePEM reads a PEM file calling cb for each block
