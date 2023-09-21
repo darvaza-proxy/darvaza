@@ -9,7 +9,7 @@ replace (
 
 require (
 	darvaza.org/core v0.9.9
-	darvaza.org/darvaza/acme v0.1.4
+	darvaza.org/darvaza/acme v0.1.5
 	darvaza.org/darvaza/shared v0.5.10
 	darvaza.org/middleware v0.2.5
 	darvaza.org/slog v0.5.4
