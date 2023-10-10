@@ -136,11 +136,11 @@ func NewHTTPError(code int, err error, note string) *HTTPError {
 }
 
 // NewHTTPErrorf creates a new HTTPError with a given StatusCode
-// and optional cause and formated annotation
+// and optional cause and formatted annotation
 func NewHTTPErrorf(code int, err error, format string, args ...any) *HTTPError {
 	switch {
 	case err != nil:
-		err = core.Wrapf(err, format, args...)
+		err = core.Wrap(err, format, args...)
 	default:
 		err = fmt.Errorf(format, args...)
 		if err.Error() == "" {
