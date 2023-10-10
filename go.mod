@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	darvaza.org/core v0.9.9 // indirect
+	darvaza.org/core v0.10.0 // indirect
 	darvaza.org/slog v0.5.4 // indirect
 	darvaza.org/slog/handlers/cblog v0.5.6 // indirect
 	darvaza.org/slog/handlers/discard v0.4.6 // indirect
@@ -46,11 +46,11 @@ require (
 	github.com/rogpeppe/go-internal v1.10.1-0.20230524175051-ec119421bb97 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/zclconf/go-cty v1.14.0 // indirect
-	golang.org/x/crypto v0.13.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.15.0 // indirect
-	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sync v0.4.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 )

@@ -82,7 +82,7 @@ func (pb *PoolBuffer) errCertPair(cd *pbCertData, err error, msg string) error {
 
 	if err != nil {
 		log, ok = pb.error(err)
-		err = core.Wrapf(err, "%q: %s", cd.Filename, msg)
+		err = core.Wrap(err, "%q: %s", cd.Filename, msg)
 	} else {
 		log, ok = pb.warn()
 		err = fmt.Errorf("%q: %s", cd.Filename, msg)
