@@ -2,7 +2,7 @@ module darvaza.org/darvaza/acme
 
 go 1.19
 
-require darvaza.org/middleware v0.2.5
+require darvaza.org/middleware v0.2.6
 
 require (
 	darvaza.org/core v0.10.0 // indirect

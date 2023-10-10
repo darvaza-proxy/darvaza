@@ -5,7 +5,7 @@ go 1.19
 require (
 	darvaza.org/core v0.10.0
 	github.com/amery/defaults v0.1.0
-	github.com/go-playground/validator/v10 v10.15.4
+	github.com/go-playground/validator/v10 v10.15.5
 	mvdan.cc/sh/v3 v3.7.0
 )
 
