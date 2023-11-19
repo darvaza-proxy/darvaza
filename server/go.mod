@@ -5,9 +5,9 @@ go 1.19
 replace darvaza.org/darvaza/shared => ../shared
 
 require (
-	darvaza.org/darvaza/shared v0.5.10
+	darvaza.org/darvaza/shared v0.5.11
 	darvaza.org/slog v0.5.4
-	github.com/miekg/dns v1.1.56
+	github.com/miekg/dns v1.1.57
 	github.com/naoina/toml v0.1.1
 )
 
@@ -20,5 +20,5 @@ require (
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.16.0 // indirect
+	golang.org/x/tools v0.16.1 // indirect
 )
