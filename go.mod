@@ -13,10 +13,10 @@ require (
 )
 
 require (
-	darvaza.org/core v0.10.0 // indirect
-	darvaza.org/slog v0.5.4 // indirect
-	darvaza.org/slog/handlers/cblog v0.5.6 // indirect
-	darvaza.org/slog/handlers/discard v0.4.6 // indirect
+	darvaza.org/core v0.11.3 // indirect
+	darvaza.org/slog v0.5.6 // indirect
+	darvaza.org/slog/handlers/cblog v0.5.8 // indirect
+	darvaza.org/slog/handlers/discard v0.4.9 // indirect
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/amery/defaults v0.1.0 // indirect
