@@ -9,8 +9,8 @@ replace (
 
 require (
 	darvaza.org/core v0.11.3
-	darvaza.org/darvaza/acme v0.1.7
-	darvaza.org/darvaza/shared v0.5.11
+	darvaza.org/darvaza/acme v0.1.8
+	darvaza.org/darvaza/shared v0.5.12
 	darvaza.org/middleware v0.2.7
 	darvaza.org/slog v0.5.6
 	darvaza.org/slog/handlers/discard v0.4.9
@@ -28,7 +28,7 @@ require (
 	github.com/stretchr/testify v1.8.4 // indirect
 	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
-	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
+	golang.org/x/exp v0.0.0-20240110193028-0dcbfd608b1e // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
