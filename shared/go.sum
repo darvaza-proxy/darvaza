@@ -1,11 +1,11 @@
-darvaza.org/core v0.10.0 h1:/nQOSWnMgWW8ZJmv3AEdTgIK+Pg4lkPd+VNejL84q3M=
-darvaza.org/core v0.10.0/go.mod h1:72iWMVoXjMHjsPSlctDzA7yKzwXsj5dO+se6F9B3ERs=
-darvaza.org/slog v0.5.4 h1:xzlWVzYh4tuZLnj4A9tOHXfn/SAEIkApXPvK3YDiW9g=
-darvaza.org/slog v0.5.4/go.mod h1:QFtY3QoQ7xxww85umlEKPcMCNzqNrHYqnj53KehsmBU=
-darvaza.org/slog/handlers/cblog v0.5.6 h1:6cwpqC7AdSFGjuz5P16vWv0Fl1Z+y6N54xZI1ynXJy8=
-darvaza.org/slog/handlers/cblog v0.5.6/go.mod h1:ZdNnVGf6rjjVS6dKp+KV4e1cYb5FXTBdgGL38taYxrw=
-darvaza.org/slog/handlers/discard v0.4.6 h1:TatHJn34y6eKQzNRHSo6lGZnJg4SLOGaWstlvwwOyrE=
-darvaza.org/slog/handlers/discard v0.4.6/go.mod h1:AG8WKr7m11NPPzvHW/b8nCT5RvYR9RZcIT/NWUOoMAo=
+darvaza.org/core v0.11.3 h1:fS8FHic5YIFHcPkc0JScv56/dHEg4iMQZCQBnG/jH5A=
+darvaza.org/core v0.11.3/go.mod h1:FO8+vzGWkDfpAePsmx9w8BSiJPGob17dWSsae/QNeIw=
+darvaza.org/slog v0.5.6 h1:VZR+l8ZX507nwzyM108Qj4OxX82qGThyoaa4ffElkNw=
+darvaza.org/slog v0.5.6/go.mod h1:dUTP+hZ1vMwQ0vsUGPSTpvf7BmJsjkQxMTjwPslXeCE=
+darvaza.org/slog/handlers/cblog v0.5.8 h1:tv+TOuLWbqdL573n85fqatkjpnKukKjLQjqc7gxe9t4=
+darvaza.org/slog/handlers/cblog v0.5.8/go.mod h1:vqw+xC5RzkSRtAHHSMWUBHM19v4EmtMIIwIvXGeqT+w=
+darvaza.org/slog/handlers/discard v0.4.9 h1:EjWLlx4nIzRDI80PrGjjN9tboxeLHcEPTKSkfd9BtL8=
+darvaza.org/slog/handlers/discard v0.4.9/go.mod h1:cai0DETkWSqcG5r8lJmOwLC4WI/S6AeX/8bIzQ0+AGM=
 github.com/klauspost/cpuid/v2 v2.0.12/go.mod h1:g2LTdtYhdyuGPqyWyv7qRAmj1WBqxuObKfj5c0PQa7c=
 github.com/klauspost/cpuid/v2 v2.2.6 h1:ndNyv040zDGIDh8thGkXYjnFtiN02M1PVVF+JE/48xc=
 github.com/klauspost/cpuid/v2 v2.2.6/go.mod h1:Lcz8mBdAVJIBVzewtcLocK12l3Y+JytZYpaMropDUws=
@@ -18,7 +18,6 @@ github.com/zeebo/pcg v1.0.1/go.mod h1:09F0S9iiKrwn9rlI5yjLkmrug154/YRW6KnnXVDM/l
 golang.org/x/crypto v0.18.0 h1:PGVlW0xEltQnzFZ55hkuX5+KLyrMYhHld1YHO4AKcdc=
 golang.org/x/crypto v0.18.0/go.mod h1:R0j02AL6hcrfOiy9T4ZYp/rcWeMxM3L6QYxlOuEG1mg=
 golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc h1:ao2WRsKSzW6KuUY9IWPwWahcHCgR0s52IfwutMfEbdM=
-golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc/go.mod h1:iRJReGqOEeBhDZGkGbynYwcHlctCvnjTYIamk7uXpHI=
 golang.org/x/net v0.20.0 h1:aCL9BSgETF1k+blQaYUBx9hJ9LOGP3gAVemcZlf1Kpo=
 golang.org/x/net v0.20.0/go.mod h1:z8BVo6PvndSri0LbOE3hAn0apkU+1YvI6E70E9jsnvY=
 golang.org/x/sync v0.6.0 h1:5BMeUDZ7vkXGfEr1x9B4bRcTH4lpkTkpdh0T/J+qjbQ=

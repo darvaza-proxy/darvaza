@@ -12,8 +12,8 @@ require (
 	darvaza.org/darvaza/acme v0.1.7
 	darvaza.org/darvaza/shared v0.5.11
 	darvaza.org/middleware v0.2.7
-	darvaza.org/slog v0.5.4
-	darvaza.org/slog/handlers/discard v0.4.6
+	darvaza.org/slog v0.5.6
+	darvaza.org/slog/handlers/discard v0.4.9
 	github.com/quic-go/quic-go v0.40.1
 	golang.org/x/net v0.20.0
 )
