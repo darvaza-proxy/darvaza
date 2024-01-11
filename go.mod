@@ -3,10 +3,10 @@ module darvaza.org/darvaza
 go 1.19
 
 require (
-	darvaza.org/darvaza/server v0.1.2
-	darvaza.org/darvaza/shared v0.5.10
-	darvaza.org/darvaza/shared/config v0.2.4
-	github.com/hashicorp/hcl/v2 v2.18.0
+	darvaza.org/darvaza/server v0.1.3
+	darvaza.org/darvaza/shared v0.5.12
+	darvaza.org/darvaza/shared/config v0.2.6
+	github.com/hashicorp/hcl/v2 v2.19.1
 	github.com/mgechev/revive v1.3.4
 	github.com/miekg/dns v1.1.57
 	github.com/spf13/cobra v1.8.0
@@ -45,7 +45,7 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/zclconf/go-cty v1.14.0 // indirect
+	github.com/zclconf/go-cty v1.14.1 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.20.0 // indirect
