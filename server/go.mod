@@ -5,7 +5,7 @@ go 1.19
 replace darvaza.org/darvaza/shared => ../shared
 
 require (
-	darvaza.org/darvaza/shared v0.5.10
+	darvaza.org/darvaza/shared v0.5.12
 	darvaza.org/slog v0.5.6
 	github.com/miekg/dns v1.1.57
 	github.com/naoina/toml v0.1.1
