@@ -1,11 +1,10 @@
 module darvaza.org/darvaza/shared/web
 
-go 1.19
+go 1.21
 
-require darvaza.org/core v0.11.3
+require darvaza.org/core v0.14.8
 
 require (
-	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
-	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/text v0.18.0 // indirect
 )
