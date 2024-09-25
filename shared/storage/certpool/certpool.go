@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"sync"
 
-	"darvaza.org/darvaza/shared/x"
+	"darvaza.org/core"
 	"darvaza.org/darvaza/shared/x509utils"
 )
 
@@ -81,9 +81,9 @@ func preClone(s *CertPool) CertPool {
 	return CertPool{
 		cached:   s.exportUnlocked(),
 		hashed:   make(map[Hash]*certPoolEntry, len(s.hashed)),
-		names:    x.CloneMapList(s.names),
-		patterns: x.CloneMapList(s.patterns),
-		subjects: x.CloneMapList(s.subjects),
+		names:    core.MapListCopy(s.names),
+		patterns: core.MapListCopy(s.patterns),
+		subjects: core.MapListCopy(s.subjects),
 	}
 }
 
