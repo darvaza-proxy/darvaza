@@ -9,6 +9,7 @@ require (
 	darvaza.org/darvaza/shared/config v0.2.6
 	darvaza.org/slog v0.5.10 // indirect
 	darvaza.org/slog/handlers/cblog v0.5.11 // indirect
+	darvaza.org/x/tls v0.2.0 // indirect
 )
 
 require (
@@ -19,7 +20,6 @@ require (
 )
 
 require (
-	darvaza.org/slog/handlers/discard v0.4.13 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/amery/defaults v0.1.0 // indirect

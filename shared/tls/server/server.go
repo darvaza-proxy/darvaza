@@ -15,7 +15,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"darvaza.org/darvaza/shared/tls/sni"
+	"darvaza.org/x/tls/sni"
 )
 
 type emptyStruct struct{}
