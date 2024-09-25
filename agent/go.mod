@@ -10,8 +10,8 @@ require (
 	darvaza.org/slog v0.5.10
 	darvaza.org/slog/handlers/discard v0.4.13
 	darvaza.org/x/fs v0.3.2 // indirect
+	darvaza.org/x/tls v0.2.0
 	darvaza.org/x/web v0.8.5 // indirect
-
 )
 
 require (
