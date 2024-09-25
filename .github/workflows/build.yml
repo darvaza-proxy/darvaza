@@ -1,31 +1,24 @@
 name: Build
-
 on:
   push:
     branches-ignore:
       - '**-wip'
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   make:
-    name: Build
     runs-on: ubuntu-latest
     # Pull requests from the same repository won't trigger this checks as they were already triggered by the push
     if: (github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository)
     strategy:
       matrix:
-        go: [ '1.20', '1.21' ]
-
+        go: [ '1.21', '1.22' ]
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Set up Go ${{ matrix.go }}
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ matrix.go }}
-      - name: Make build
-        run: make fmt build
-      - name: Test
-        run: make test
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go }}
+    - name: Build
+      run: make
+    - name: Test
+      run: make test
