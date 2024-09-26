@@ -130,7 +130,7 @@ func (srv *Server) grabQuicHeaders(ctx context.Context, h3s *http3.Server) error
 		case <-time.After(GrabQuicHeadersRetry):
 			hdr := make(http.Header)
 
-			if err := h3s.SetQuicHeaders(hdr); err == nil {
+			if err := h3s.SetQUICHeaders(hdr); err == nil {
 				// success
 				srv.appendQuicHeaders(hdr[AltSvcHeader])
 				return nil
