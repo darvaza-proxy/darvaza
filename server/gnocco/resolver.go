@@ -73,7 +73,7 @@ func loadFileColumn(file string, column int) ([]string, error) {
 	return result, nil
 }
 
-func (r *resolver) Lookup(_ *cache, w dns.ResponseWriter, req *dns.Msg) {
+func (r *resolver) Lookup(w dns.ResponseWriter, req *dns.Msg) {
 	var err error
 
 	if r.Iterative {

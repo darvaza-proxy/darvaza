@@ -8,16 +8,6 @@ import (
 	"darvaza.org/darvaza/shared/version"
 )
 
-type question struct {
-	qname  string
-	qtype  string
-	qclass string
-}
-
-func (q *question) String() string {
-	return q.qname + " " + q.qclass + " " + q.qtype
-}
-
 type gnoccoHandler struct {
 	Resolver *resolver
 	MaxJobs  int
@@ -35,16 +25,16 @@ func (h *gnoccoHandler) do(w dns.ResponseWriter, req *dns.Msg) {
 
 	if h.Jobs < h.MaxJobs {
 		q := req.Question[0]
-		myQ := question{q.Name, dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
+		qType := dns.TypeToString[q.Qtype]
+		qClass := dns.ClassToString[q.Qclass]
 
 		h.Jobs++
 		switch {
-		case myQ.qclass == "IN":
-			h.Resolver.Lookup(nil, w, req)
-		case myQ.qclass == "CH", myQ.qtype == "TXT":
+		case qClass == "IN":
+			h.Resolver.Lookup(w, req)
+		case qClass == "CH", qType == "TXT":
 			m := handleChaos(req)
 			err = w.WriteMsg(m)
-
 		default:
 		}
 		h.Jobs--
@@ -61,17 +51,17 @@ func (h *gnoccoHandler) do(w dns.ResponseWriter, req *dns.Msg) {
 
 func handleChaos(req *dns.Msg) (m *dns.Msg) {
 	reqQ := req.Question[0]
-	gq := question{reqQ.Name, dns.TypeToString[reqQ.Qtype], dns.ClassToString[reqQ.Qclass]}
+	qName := reqQ.Name
 
 	m = new(dns.Msg)
 	m.SetReply(req)
 	hdr := dns.RR_Header{
-		Name:   gq.qname,
+		Name:   qName,
 		Rrtype: dns.TypeTXT,
 		Class:  dns.ClassCHAOS,
 		Ttl:    0,
 	}
-	switch gq.qname {
+	switch qName {
 	case "authors.bind.":
 		m.Answer = append(m.Answer, &dns.TXT{
 			Hdr: hdr,
