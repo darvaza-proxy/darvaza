@@ -2,7 +2,7 @@ package gnocco
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -42,7 +42,6 @@ type Gnocco struct {
 	MaxQueries     int
 	Log            LogCfg
 	Cache          CacheCfg
-	hosts          HostsCfg
 	logger         slog.Logger
 }
 
@@ -66,7 +65,7 @@ func NewFromTOML(f string) (*Gnocco, error) {
 	}
 	defer file.Close()
 
-	buf, err := ioutil.ReadAll(file)
+	buf, err := io.ReadAll(file)
 	if err != nil {
 		return nil, fmt.Errorf("error %s occurred", err)
 	}

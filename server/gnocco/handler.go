@@ -1,8 +1,6 @@
 package gnocco
 
 import (
-	"net"
-
 	"github.com/miekg/dns"
 
 	"darvaza.org/slog"
@@ -32,14 +30,9 @@ func (cf *Gnocco) newHandler(m int) *gnoccoHandler {
 	return &gnoccoHandler{r, m, 0, cf.Logger()}
 }
 
-func getIPFromWriter(w dns.ResponseWriter) net.IP {
-	if _, ok := w.RemoteAddr().(*net.UDPAddr); ok {
-		return w.RemoteAddr().(*net.UDPAddr).IP
-	}
-	return w.RemoteAddr().(*net.TCPAddr).IP
-}
-
 func (h *gnoccoHandler) do(w dns.ResponseWriter, req *dns.Msg) {
+	var err error
+
 	if h.Jobs < h.MaxJobs {
 		q := req.Question[0]
 		myQ := question{q.Name, dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
@@ -50,7 +43,7 @@ func (h *gnoccoHandler) do(w dns.ResponseWriter, req *dns.Msg) {
 			h.Resolver.Lookup(nil, w, req)
 		case myQ.qclass == "CH", myQ.qtype == "TXT":
 			m := handleChaos(req)
-			w.WriteMsg(m)
+			err = w.WriteMsg(m)
 
 		default:
 		}
@@ -58,7 +51,11 @@ func (h *gnoccoHandler) do(w dns.ResponseWriter, req *dns.Msg) {
 	} else {
 		m := new(dns.Msg)
 		m.SetRcode(req, dns.RcodeServerFailure)
-		w.WriteMsg(m)
+		err = w.WriteMsg(m)
+	}
+
+	if err != nil {
+		h.logger.Error().Print(err)
 	}
 }
 

@@ -3,13 +3,16 @@ package gnocco
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"math/rand"
 	"net"
 	"os"
 	"strings"
 	"time"
 
+	"darvaza.org/core"
 	"darvaza.org/slog"
+
 	"github.com/miekg/dns"
 )
 
@@ -51,10 +54,12 @@ func (cf *Gnocco) newResolver() *resolver {
 func loadFileColumn(file string, column int) ([]string, error) {
 	result := make([]string, 0)
 	f, err := os.Open(file)
-	defer f.Close()
 	if err != nil {
 		return result, nil
 	}
+
+	defer unsafeClose(f)
+
 	scan := bufio.NewScanner(f)
 	for scan.Scan() {
 		lf := strings.TrimSpace(scan.Text())
@@ -69,31 +74,48 @@ func loadFileColumn(file string, column int) ([]string, error) {
 }
 
 func (r *resolver) Lookup(_ *cache, w dns.ResponseWriter, req *dns.Msg) {
+	var err error
+
 	if r.Iterative {
-		root := randomFromSlice(r.roots)
-		r.Logger.Info().Printf("using root %s", root)
-		root = root + ":53"
-		qn := dns.Fqdn(req.Question[0].Name)
-		qt := req.Question[0].Qtype
-		resp, err := r.Iterate(qn, qt, root)
-		if err == nil {
-			resp.SetReply(req)
-			w.WriteMsg(resp)
-		}
+		err = r.doInteractiveLookup(w, req)
 	} else {
-		var ip net.IP
-		if len(r.Resolvers) > 1 {
-			ip = r.Resolvers[randint(len(r.Resolvers))]
-		} else {
-			ip = r.Resolvers[0]
-		}
-		resp, err := dns.Exchange(req, net.JoinHostPort(ip.String(), "53"))
-		if err != nil {
-			r.Logger.Error().Print(err)
-		} else {
-			w.WriteMsg(resp)
-		}
+		err = r.doLookup(w, req)
 	}
+
+	if err != nil {
+		r.Logger.Error().Print(err)
+	}
+}
+
+func (r *resolver) doInteractiveLookup(w dns.ResponseWriter, req *dns.Msg) error {
+	root, _ := core.SliceRandom(r.roots)
+	r.Logger.Info().Printf("using root %s", root)
+	root = root + ":53"
+	qn := dns.Fqdn(req.Question[0].Name)
+	qt := req.Question[0].Qtype
+
+	resp, err := r.Iterate(qn, qt, root)
+	if err != nil {
+		return err
+	}
+
+	resp.SetReply(req)
+	return w.WriteMsg(resp)
+}
+
+func (r *resolver) doLookup(w dns.ResponseWriter, req *dns.Msg) error {
+	var ip net.IP
+	if len(r.Resolvers) > 1 {
+		ip = r.Resolvers[randint(len(r.Resolvers))]
+	} else {
+		ip = r.Resolvers[0]
+	}
+	resp, err := dns.Exchange(req, net.JoinHostPort(ip.String(), "53"))
+	if err != nil {
+		return err
+	}
+
+	return w.WriteMsg(resp)
 }
 
 // revive:disable:cognitive-complexity
@@ -122,7 +144,7 @@ func (r *resolver) Iterate(name string, qtype uint16, server string) (*dns.Msg, 
 		newMsg := newMsgFromParts(name, dns.TypeNS)
 		newMsg.Question[0].Qclass = dns.ClassINET
 
-		nns := randomFromSlice(nextServer)
+		nns, _ := core.SliceRandom(nextServer)
 		r.Logger.Info().Printf("using server %s", nns)
 		rsp, _, err := clientTalk(newMsg, nns+":53")
 		if wwerr := validateResp(rsp, err); wwerr != nil {
@@ -153,6 +175,7 @@ func validateResp(r *dns.Msg, err error) error {
 	}
 	return nil
 }
+
 func clientTalk(msg *dns.Msg, server string) (r *dns.Msg, rtt time.Duration, err error) {
 	client := &dns.Client{}
 	client.Net = "tcp"
@@ -171,18 +194,6 @@ func randint(upper int) int {
 	return result
 }
 
-func randomFromSlice(s []string) string {
-	var result string
-
-	switch len(s) {
-	case 0:
-		result = ""
-	case 1:
-		result = s[0]
-	default:
-		rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-		id := rnd.Intn(len(s))
-		result = s[id]
-	}
-	return result
+func unsafeClose(f io.Closer) {
+	_ = f.Close()
 }

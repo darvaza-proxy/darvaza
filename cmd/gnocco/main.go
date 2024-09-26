@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	if vrs {
-		fmt.Fprintf(os.Stdout, "Gnocco version %s, build date %s\n",
+		_, _ = fmt.Fprintf(os.Stdout, "Gnocco version %s, build date %s\n",
 			version.Version, version.BuildDate)
 		os.Exit(0)
 	}
