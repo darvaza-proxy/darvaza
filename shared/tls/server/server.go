@@ -224,7 +224,10 @@ func defaultTLSHandler(conn net.Conn) {
 		}
 		defer upstream.Close()
 
-		go io.Copy(upstream, io.MultiReader(bytes.NewReader(buf.Bytes()), c))
+		go func() {
+			_, _ = io.Copy(upstream, io.MultiReader(bytes.NewReader(buf.Bytes()), c))
+		}()
+
 		_, _ = io.Copy(c, upstream)
 	}
 }
