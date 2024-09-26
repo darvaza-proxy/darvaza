@@ -22,20 +22,12 @@ func (srv *Server) warn(err error) slog.Logger {
 	return log
 }
 
-func (srv *Server) info() slog.Logger {
-	return srv.cfg.Logger.Info()
-}
-
 func (srv *Server) withInfo() (slog.Logger, bool) {
 	return srv.cfg.Logger.Info().WithEnabled()
 }
 
 func (srv *Server) debug() slog.Logger {
 	return srv.cfg.Logger.Debug()
-}
-
-func (srv *Server) withDebug() (slog.Logger, bool) {
-	return srv.cfg.Logger.Debug().WithEnabled()
 }
 
 func (srv *Server) logListening(scheme string, addr net.Addr) {
