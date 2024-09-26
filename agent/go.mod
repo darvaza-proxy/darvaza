@@ -5,7 +5,6 @@ go 1.21
 require (
 	darvaza.org/core v0.14.8
 	darvaza.org/darvaza/acme v0.1.8
-	darvaza.org/darvaza/shared v0.5.12
 	darvaza.org/middleware v0.2.8
 	darvaza.org/slog v0.5.10
 	darvaza.org/slog/handlers/discard v0.4.13
@@ -15,6 +14,7 @@ require (
 )
 
 require (
+	darvaza.org/x/net v0.3.4
 	github.com/quic-go/quic-go v0.40.1
 	golang.org/x/net v0.29.0
 )
