@@ -61,7 +61,7 @@ func loadSystemRoots() (*CertPool, error) {
 	}
 
 	for _, d := range certDirectories {
-		x509utils.ReadStringPEM(d, fn)
+		_ = x509utils.ReadStringPEM(d, fn)
 	}
 
 	if pool.Count() > 0 {

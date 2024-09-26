@@ -146,8 +146,8 @@ func (s *CertPool) Minus(x x509utils.CertPooler) x509utils.CertPooler {
 
 	// use StoreReader interface
 	ctx := context.Background()
-	x.ForEach(ctx, func(cert *x509.Certificate) error {
-		out.deleteHash(HashCert(cert))
+	_ = x.ForEach(ctx, func(cert *x509.Certificate) error {
+		_ = out.deleteHash(HashCert(cert))
 		return nil
 	})
 
@@ -184,7 +184,7 @@ func (s *CertPool) addCertPooler(x x509utils.CertPooler) {
 
 	// use StoreReader interface
 	ctx := context.Background()
-	x.ForEach(ctx, func(cert *x509.Certificate) error {
+	_ = x.ForEach(ctx, func(cert *x509.Certificate) error {
 		s.addCertUnsafe(HashCert(cert), "", cert)
 		return nil
 	})

@@ -29,10 +29,6 @@ func (pb *PoolBuffer) withLogger(level slog.LogLevel) (slog.Logger, bool) {
 	return l.WithLevel(level).WithEnabled()
 }
 
-func (pb *PoolBuffer) debug() (slog.Logger, bool) {
-	return pb.withLogger(slog.Debug)
-}
-
 func (pb *PoolBuffer) info() (slog.Logger, bool) {
 	return pb.withLogger(slog.Debug)
 }
@@ -57,7 +53,7 @@ func hexString(data []byte) string {
 		if i > 0 {
 			_, _ = buf.WriteRune(':')
 		}
-		fmt.Fprintf(&buf, "%02X", x)
+		_, _ = fmt.Fprintf(&buf, "%02X", x)
 	}
 	return buf.String()
 }
