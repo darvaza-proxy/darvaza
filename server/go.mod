@@ -1,24 +1,28 @@
 module darvaza.org/darvaza/server
 
-go 1.19
-
-replace darvaza.org/darvaza/shared => ../shared
+go 1.21
 
 require (
+	darvaza.org/core v0.14.8 // indirect
 	darvaza.org/darvaza/shared v0.5.12
-	darvaza.org/slog v0.5.6
+	darvaza.org/slog v0.5.10
+	darvaza.org/slog/handlers/cblog v0.5.11 // indirect
+)
+
+require (
 	github.com/miekg/dns v1.1.57
 	github.com/naoina/toml v0.1.1
 )
 
 require (
-	darvaza.org/core v0.11.3 // indirect
-	darvaza.org/slog/handlers/cblog v0.5.8 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/naoina/go-stringutil v0.1.0 // indirect
-	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.16.1 // indirect
+	golang.org/x/mod v0.20.0 // indirect
+	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/text v0.18.0 // indirect
+	golang.org/x/tools v0.24.0 // indirect
 )
+
+replace darvaza.org/darvaza/shared => ../shared
