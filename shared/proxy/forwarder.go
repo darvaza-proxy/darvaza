@@ -11,6 +11,11 @@ import (
 	"darvaza.org/core"
 )
 
+// CloseWriter represents a connection that can close its Write stream
+type CloseWriter interface {
+	CloseWrite() error
+}
+
 // Forward will take a context, a "downstream" net.Conn and a netip.Addr it will
 // create a new connection "upstream" and it will move bytes between the two.
 // Practically it will proxy between the two connections
@@ -36,23 +41,26 @@ func Forward(ctx context.Context, conn net.Conn, addr netip.AddrPort) error {
 	var wg core.WaitGroup
 
 	wg.Go(func() error {
-		// We just want to CloseWrite to signal that we finished writing
-		// but naked net.Conn does not have it so we transform to TCPConn
-		if cw, ok := conn.(interface{ CloseWrite() error }); ok {
-			defer cw.CloseWrite()
-		}
-		_, err = io.Copy(conn, upstream)
-		return err
+		return copyConn(conn, upstream)
 	})
 
-	if cwu, ok := upstream.(interface{ CloseWrite() error }); ok {
-		defer cwu.CloseWrite()
-	}
-	_, err = io.Copy(upstream, conn)
-	if err != nil {
+	if err := copyConn(upstream, conn); err != nil {
 		return err
 	}
 
-	wg.Wait()
+	_ = wg.Wait()
 	return nil
+}
+
+func copyConn(from, to net.Conn) error {
+	// We just want to CloseWrite to signal that we finished writing
+	// but naked net.Conn does not have it so we transform to TCPConn
+	if w, ok := from.(CloseWriter); ok {
+		defer func() {
+			_ = w.CloseWrite()
+		}()
+	}
+
+	_, err := io.Copy(from, to)
+	return err
 }
