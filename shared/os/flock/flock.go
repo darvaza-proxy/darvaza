@@ -2,8 +2,14 @@
 package flock
 
 import (
+	"os"
 	"syscall"
+
+	"darvaza.org/x/fs/fssyscall"
 )
+
+// Handle is a OS-agnostic syscall handler
+type Handle = fssyscall.Handle
 
 // OpenerFunc is a function that opens a file
 type OpenerFunc func(string) (Handle, error)
@@ -29,13 +35,13 @@ func NewWithOpener(filename string, opener OpenerFunc) *Flock {
 	fl := &Flock{
 		filename: filename,
 		opener:   opener,
-		h:        deadHandle,
+		h:        fssyscall.ZeroHandle,
 	}
 	return fl
 }
 
 func defaultOpener(path string) (Handle, error) {
-	return openHandle(path, false, DefaultFileMode)
+	return fssyscall.Open(path, os.O_RDONLY, DefaultFileMode)
 }
 
 // Lock flocks a file by name
@@ -48,7 +54,7 @@ func Lock(filename string) (*Flock, error) {
 }
 
 func (lock *Flock) open() error {
-	if lock.h > deadHandle {
+	if !lock.h.IsZero() {
 		// already open
 		return syscall.EBUSY
 	}
@@ -64,9 +70,9 @@ func (lock *Flock) open() error {
 }
 
 func (lock *Flock) close() {
-	if h := lock.h; h > deadHandle {
-		defer closeHandle(h)
-		lock.h = deadHandle
+	if h := lock.h; !h.IsZero() {
+		_ = h.Close()
+		lock.h = fssyscall.ZeroHandle
 	}
 }
 
@@ -75,7 +81,7 @@ func (lock *Flock) Lock() error {
 	if err := lock.open(); err != nil {
 		// failed to open
 		return err
-	} else if err := lockHandle(lock.h); err != nil {
+	} else if err := fssyscall.LockEx(lock.h); err != nil {
 		// failed to flock
 		defer lock.close()
 		return err

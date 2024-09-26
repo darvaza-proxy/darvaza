@@ -7,6 +7,7 @@ require (
 	darvaza.org/slog v0.5.10
 	darvaza.org/slog/handlers/cblog v0.5.11
 	darvaza.org/slog/handlers/discard v0.4.13
+	darvaza.org/x/fs v0.3.2
 	darvaza.org/x/tls v0.2.0
 )
 
