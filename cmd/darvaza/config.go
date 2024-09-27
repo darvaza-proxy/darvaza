@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 
-	"darvaza.org/darvaza/shared/config"
 	"darvaza.org/darvaza/shared/tls/server"
+	"darvaza.org/x/config"
 )
 
 // Config is the main configuration item containig all
