@@ -6,6 +6,8 @@ darvaza.org/slog/handlers/cblog v0.5.11 h1:1fYuVA8TaqPYv6gGSiiGVlEkgwOZ+gLERZfRY
 darvaza.org/slog/handlers/cblog v0.5.11/go.mod h1:jrvotbxxOGY260A7IghA/EGj5drYbacsmHIKFbgXbeA=
 darvaza.org/slog/handlers/discard v0.4.13 h1:MsEaFB41j/G+aQ5NWkQhWQHRoqmh1C947AVvnHT7Prg=
 darvaza.org/slog/handlers/discard v0.4.13/go.mod h1:R6sCenDPfm9NU+sWJJ6l4gXVwL5Get6/cL19xhH9bns=
+darvaza.org/x/fs v0.3.2 h1:ZYjEpu5wddrsLHKcBvfVlAoPEIJpLsYr5MVoFb7/c1Y=
+darvaza.org/x/fs v0.3.2/go.mod h1:nUenMGryeLgm7BuIu46xpPBTBnWTrzZOTukROBAoK/I=
 darvaza.org/x/tls v0.2.0 h1:eKGJLQQbB2gPyQOvftYnJUyUQ0+9fMXq4T4qmJozNxg=
 darvaza.org/x/tls v0.2.0/go.mod h1:HqPujsXjpEQeAPWZzIfu8xBm8FQB7+3qn1Y/QILkXZc=
 github.com/klauspost/cpuid/v2 v2.0.12/go.mod h1:g2LTdtYhdyuGPqyWyv7qRAmj1WBqxuObKfj5c0PQa7c=

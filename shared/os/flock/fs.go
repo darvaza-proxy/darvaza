@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"darvaza.org/x/fs/fssyscall"
 )
 
 const (
@@ -75,7 +77,11 @@ func (opt Options) NewOpener(perm fs.FileMode) func(string) (Handle, error) {
 	perm = coalesceMode(perm, DefaultFileMode)
 
 	fn := func(path string) (Handle, error) {
-		return openHandle(path, opt.Create, perm)
+		mode := os.O_RDONLY
+		if opt.Create {
+			mode |= os.O_CREATE
+		}
+		return fssyscall.Open(path, mode, perm)
 	}
 
 	return fn
