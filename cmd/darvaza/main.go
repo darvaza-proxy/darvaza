@@ -15,9 +15,8 @@ const (
 //revive:enable:exported
 
 var (
-	cfg          = NewConfig()
-	cfgFile      string
-	cfgReadError error
+	cfg     = NewConfig()
+	cfgFile string
 )
 
 var rootCmd = &cobra.Command{
@@ -40,7 +39,6 @@ func init() {
 	cobra.OnInitialize(func() {
 		if cfgFile != "" {
 			if err := cfg.ReadInFile(cfgFile); err != nil {
-				cfgReadError = err
 				log.Println(err)
 			}
 		}

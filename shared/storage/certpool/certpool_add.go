@@ -32,7 +32,7 @@ func (s *CertPool) AppendCertsFromPEM(b []byte) bool {
 
 	var added bool
 
-	x509utils.ReadPEM(b, func(_ string, block *pem.Block) bool {
+	_ = x509utils.ReadPEM(b, func(_ string, block *pem.Block) bool {
 		if cert, _ := x509utils.BlockToCertificate(block); cert != nil && cert.IsCA {
 			if s.addCertUnsafe(HashCert(cert), "", cert) {
 				added = true

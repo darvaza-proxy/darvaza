@@ -3,7 +3,7 @@ module darvaza.org/darvaza
 go 1.21
 
 require (
-	darvaza.org/core v0.14.8 // indirect
+	darvaza.org/core v0.14.8
 	darvaza.org/darvaza/server v0.1.3
 	darvaza.org/darvaza/shared v0.5.12
 	darvaza.org/darvaza/shared/config v0.2.6

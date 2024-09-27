@@ -10,7 +10,7 @@ import (
 var dumpCmd = &cobra.Command{
 	Use:   "dump",
 	Short: "prints the config",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		_, err := cfg.WriteTo(os.Stdout)
 		return err
 	},

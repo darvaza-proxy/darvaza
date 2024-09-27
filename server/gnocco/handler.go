@@ -1,24 +1,12 @@
 package gnocco
 
 import (
-	"net"
-
 	"github.com/miekg/dns"
 
 	"darvaza.org/slog"
 
 	"darvaza.org/darvaza/shared/version"
 )
-
-type question struct {
-	qname  string
-	qtype  string
-	qclass string
-}
-
-func (q *question) String() string {
-	return q.qname + " " + q.qclass + " " + q.qtype
-}
 
 type gnoccoHandler struct {
 	Resolver *resolver
@@ -32,49 +20,48 @@ func (cf *Gnocco) newHandler(m int) *gnoccoHandler {
 	return &gnoccoHandler{r, m, 0, cf.Logger()}
 }
 
-func getIPFromWriter(w dns.ResponseWriter) net.IP {
-	if _, ok := w.RemoteAddr().(*net.UDPAddr); ok {
-		return w.RemoteAddr().(*net.UDPAddr).IP
-	}
-	return w.RemoteAddr().(*net.TCPAddr).IP
-}
-
 func (h *gnoccoHandler) do(w dns.ResponseWriter, req *dns.Msg) {
+	var err error
+
 	if h.Jobs < h.MaxJobs {
 		q := req.Question[0]
-		myQ := question{q.Name, dns.TypeToString[q.Qtype], dns.ClassToString[q.Qclass]}
+		qType := dns.TypeToString[q.Qtype]
+		qClass := dns.ClassToString[q.Qclass]
 
 		h.Jobs++
 		switch {
-		case myQ.qclass == "IN":
-			h.Resolver.Lookup(nil, w, req)
-		case myQ.qclass == "CH", myQ.qtype == "TXT":
+		case qClass == "IN":
+			h.Resolver.Lookup(w, req)
+		case qClass == "CH", qType == "TXT":
 			m := handleChaos(req)
-			w.WriteMsg(m)
-
+			err = w.WriteMsg(m)
 		default:
 		}
 		h.Jobs--
 	} else {
 		m := new(dns.Msg)
 		m.SetRcode(req, dns.RcodeServerFailure)
-		w.WriteMsg(m)
+		err = w.WriteMsg(m)
+	}
+
+	if err != nil {
+		h.logger.Error().Print(err)
 	}
 }
 
 func handleChaos(req *dns.Msg) (m *dns.Msg) {
 	reqQ := req.Question[0]
-	gq := question{reqQ.Name, dns.TypeToString[reqQ.Qtype], dns.ClassToString[reqQ.Qclass]}
+	qName := reqQ.Name
 
 	m = new(dns.Msg)
 	m.SetReply(req)
 	hdr := dns.RR_Header{
-		Name:   gq.qname,
+		Name:   qName,
 		Rrtype: dns.TypeTXT,
 		Class:  dns.ClassCHAOS,
 		Ttl:    0,
 	}
-	switch gq.qname {
+	switch qName {
 	case "authors.bind.":
 		m.Answer = append(m.Answer, &dns.TXT{
 			Hdr: hdr,

@@ -122,7 +122,7 @@ func (srv *Server) doCancel(err error) {
 
 // Wait waits until all workers are done
 func (srv *Server) Wait() error {
-	srv.wg.Wait()
+	_ = srv.wg.Wait()
 	return srv.Err()
 }
 

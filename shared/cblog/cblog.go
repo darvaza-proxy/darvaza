@@ -64,12 +64,9 @@ func (l *Logger) SetLogger(handlerType string, cfg map[string]any) {
 }
 
 func (l *Logger) run(messages <-chan cblog.LogMsg) {
-	for {
-		select {
-		case msg := <-messages:
-			for _, handler := range l.outputs {
-				handler.write(msg)
-			}
+	for msg := range messages {
+		for _, handler := range l.outputs {
+			handler.write(msg)
 		}
 	}
 }

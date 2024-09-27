@@ -15,14 +15,17 @@ import (
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "starts serving a proxy",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		server := darvaza.NewServer()
 		for i := range cfg.Proxies {
 			if z := cfg.Proxies[i].New(); z != nil {
 				server.Append(z)
 			}
 		}
-		go server.Run()
+
+		go func() {
+			_ = server.Run()
+		}()
 
 		sig := make(chan os.Signal, 1)
 		signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
