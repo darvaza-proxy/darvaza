@@ -6,9 +6,9 @@ require (
 	darvaza.org/core v0.14.8
 	darvaza.org/darvaza/server v0.1.3
 	darvaza.org/darvaza/shared v0.5.12
-	darvaza.org/darvaza/shared/config v0.2.6
 	darvaza.org/slog v0.5.10 // indirect
 	darvaza.org/slog/handlers/cblog v0.5.11 // indirect
+	darvaza.org/x/config v0.3.7
 	darvaza.org/x/tls v0.2.0 // indirect
 )
 
@@ -27,14 +27,14 @@ require (
 	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.5 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.16.0 // indirect
+	github.com/go-playground/validator/v10 v10.22.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/leodido/go-urn v1.2.4 // indirect
+	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
