@@ -3,9 +3,9 @@ module darvaza.org/darvaza/server
 go 1.21
 
 require (
-	darvaza.org/core v0.14.8
+	darvaza.org/core v0.14.10
 	darvaza.org/darvaza/shared v0.5.12
-	darvaza.org/slog v0.5.10
+	darvaza.org/slog v0.5.11
 	darvaza.org/slog/handlers/cblog v0.5.11 // indirect
 )
 

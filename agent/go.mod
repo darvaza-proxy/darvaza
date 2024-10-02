@@ -3,18 +3,18 @@ module darvaza.org/darvaza/agent
 go 1.21
 
 require (
-	darvaza.org/core v0.14.8
+	darvaza.org/core v0.14.10
 	darvaza.org/darvaza/acme v0.1.8
-	darvaza.org/middleware v0.2.8
-	darvaza.org/slog v0.5.10
-	darvaza.org/slog/handlers/discard v0.4.13
-	darvaza.org/x/fs v0.3.2 // indirect
-	darvaza.org/x/tls v0.2.0
-	darvaza.org/x/web v0.8.5 // indirect
+	darvaza.org/middleware v0.2.9
+	darvaza.org/slog v0.5.11
+	darvaza.org/slog/handlers/discard v0.4.14
+	darvaza.org/x/fs v0.3.3 // indirect
+	darvaza.org/x/net v0.3.4
+	darvaza.org/x/tls v0.2.1
+	darvaza.org/x/web v0.8.7 // indirect
 )
 
 require (
-	darvaza.org/x/net v0.3.4
 	github.com/quic-go/quic-go v0.40.1
 	golang.org/x/net v0.29.0
 )

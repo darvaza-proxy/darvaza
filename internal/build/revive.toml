@@ -17,14 +17,12 @@ enableAllRules = true
 [rule.cyclomatic]
   arguments = [10]
 [rule.line-length-limit]
-  arguments = [100]
+  arguments = [120]
   severity = "warning"
 [rule.comment-spacings]
   severity = "warning"
 [rule.empty-lines]
   severity = "warning"
-[rule.unhandled-error]
-  arguments = ["fmt\\..*"]
 
 # Disabled rules
 [rule.max-public-structs]
