@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	darvaza.org/core v0.14.10
-	darvaza.org/darvaza/acme v0.1.8
+	darvaza.org/darvaza/acme v0.2.0
 	darvaza.org/middleware v0.2.9
 	darvaza.org/slog v0.5.11
 	darvaza.org/slog/handlers/discard v0.4.14
