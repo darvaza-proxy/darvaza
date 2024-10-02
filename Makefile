@@ -11,6 +11,8 @@ GOUP_PACKAGES ?= ./...
 GOPATH ?= $(shell $(GO) env GOPATH)
 GOBIN ?= $(GOPATH)/bin
 
+export GOPATH GOBIN
+
 TOOLSDIR := $(CURDIR)/internal/build
 TMPDIR ?= $(CURDIR)/.tmp
 OUTDIR ?= $(TMPDIR)
@@ -71,4 +73,4 @@ generate: ; $(info $(M) running go:generate…)
 	$Q git grep -l '^//go:generate' | sort -uV | xargs -r -n1 $(GO) generate $(GOGENERATE_FLAGS)
 
 install:
-	$Q $(GO) install -v ./...
+	$Q $(GO) install -v -ldflags "$(GO_BUILD_CMD_LDFLAGS)" ./cmd/...
