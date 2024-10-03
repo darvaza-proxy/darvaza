@@ -3,10 +3,11 @@ package certpool
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"io/fs"
 	"sync"
 	"sync/atomic"
 
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 // PoolBuffer is a CertPool in the making
@@ -69,7 +70,7 @@ func (pb *PoolBuffer) Add(data ...string) error {
 	for _, s := range data {
 		var addErr error
 
-		readErr := x509utils.ReadStringPEM(s, func(fn string, block *pem.Block) bool {
+		readErr := x509utils.ReadStringPEM(s, func(_ fs.FS, fn string, block *pem.Block) bool {
 			if err := pb.addBlock(fn, block); err != nil {
 				addErr = err
 			}

@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"io/fs"
 
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 // ForEach iterates over all certificates
@@ -66,7 +66,7 @@ func (s *CertPool) Get(_ context.Context, name string) (*x509.Certificate, error
 }
 
 // Equal checks if another CertPooler is equal to this one
-func (s *CertPool) Equal(x x509utils.CertPooler) bool {
+func (s *CertPool) Equal(x x509utils.CertPool) bool {
 	if x == nil {
 		// s != nil
 		return false
@@ -87,7 +87,7 @@ func (s *CertPool) Equal(x x509utils.CertPooler) bool {
 	hashed, count := len(s.hashed), 0
 	ctx := context.Background()
 
-	iter := func(cert *x509.Certificate) error {
+	iter := func(_ context.Context, cert *x509.Certificate) error {
 		// not larger
 		count++
 		if count > hashed {
@@ -128,7 +128,7 @@ func equal(a *CertPool, b *CertPool) bool {
 }
 
 // Minus produces a new CertPool without any certificate on the given Pool
-func (s *CertPool) Minus(x x509utils.CertPooler) x509utils.CertPooler {
+func (s *CertPool) Minus(x x509utils.CertPool) x509utils.CertPool {
 	out := s.Copy(nil)
 
 	if x == nil {
@@ -162,7 +162,7 @@ func minus(out, b *CertPool) *CertPool {
 }
 
 // Plus produces a new CertPool with all certificate on the given Pool
-func (s *CertPool) Plus(x x509utils.CertPooler) x509utils.CertPooler {
+func (s *CertPool) Plus(x x509utils.CertPool) x509utils.CertPool {
 	out := s.Copy(nil)
 	if x != nil {
 		out.addCertPooler(x)
@@ -170,7 +170,7 @@ func (s *CertPool) Plus(x x509utils.CertPooler) x509utils.CertPooler {
 	return out
 }
 
-func (s *CertPool) addCertPooler(x x509utils.CertPooler) {
+func (s *CertPool) addCertPooler(x x509utils.CertPool) {
 	if b, ok := x.(*CertPool); ok {
 		// same type
 		b.mu.RLock()

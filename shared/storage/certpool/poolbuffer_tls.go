@@ -6,13 +6,13 @@ import (
 	"fmt"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/x509utils"
 	"darvaza.org/slog"
+	"darvaza.org/x/tls/x509utils"
 )
 
 // NewBundler creates a Bundler using the known CAs and provided roots.
 // If no base is given, system certs will be used instead.
-func (pb *PoolBuffer) NewBundler(roots x509utils.CertPooler) (*Bundler, error) {
+func (pb *PoolBuffer) NewBundler(roots x509utils.CertPool) (*Bundler, error) {
 	var err error
 
 	if pb.roots.Count() > 0 {
@@ -38,7 +38,7 @@ func (pb *PoolBuffer) NewBundler(roots x509utils.CertPooler) (*Bundler, error) {
 	return b, nil
 }
 
-func (*PoolBuffer) newRoots(ours *CertPool, base x509utils.CertPooler) (*CertPool, error) {
+func (*PoolBuffer) newRoots(ours *CertPool, base x509utils.CertPool) (*CertPool, error) {
 	if base == nil {
 		// SystemCertPool gives us a fresh clone, so we use that directly
 		pool, err := SystemCertPool()
@@ -186,7 +186,7 @@ func (pb *PoolBuffer) pairs() []pbPair {
 
 // Certificates exports all the Certificates it contains bundled considering
 // a given base
-func (pb *PoolBuffer) Certificates(base x509utils.CertPooler) ([]*tls.Certificate, error) {
+func (pb *PoolBuffer) Certificates(base x509utils.CertPool) ([]*tls.Certificate, error) {
 	// revive:enable:cognitive-complexity
 	// revive:enable:cyclomatic
 	var out []*tls.Certificate
@@ -270,7 +270,7 @@ func (pb *PoolBuffer) bundlePair(b *Bundler, cd *pbCertData, kd *pbKeyData) (
 
 // Bundle verifies a leaf x509.Certificate and return a tls.Certificate
 func (pb *PoolBuffer) Bundle(cert *x509.Certificate, key x509utils.PrivateKey,
-	roots x509utils.CertPooler) (*tls.Certificate, error) {
+	roots x509utils.CertPool) (*tls.Certificate, error) {
 	//
 	bundler, err := pb.NewBundler(roots)
 	if err != nil {

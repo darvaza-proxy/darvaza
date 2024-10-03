@@ -7,11 +7,12 @@ import (
 	"sync"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 var (
-	_ x509utils.CertPooler     = (*CertPool)(nil)
+	_ x509utils.CertPool       = (*CertPool)(nil)
 	_ x509utils.CertPoolWriter = (*CertPool)(nil)
 )
 
@@ -20,7 +21,7 @@ type CertPool struct {
 	mu sync.RWMutex
 
 	cached *x509.CertPool
-	hashed map[Hash]*certPoolEntry
+	hashed map[certpool.Hash]*certPoolEntry
 
 	names    map[string]*list.List
 	patterns map[string]*list.List
@@ -28,7 +29,7 @@ type CertPool struct {
 }
 
 type certPoolEntry struct {
-	hash     Hash
+	hash     certpool.Hash
 	cert     *x509.Certificate
 	names    []string
 	patterns []string
@@ -37,14 +38,14 @@ type certPoolEntry struct {
 // init reinitialises the CertPool
 func (s *CertPool) init() {
 	s.cached = nil
-	s.hashed = make(map[Hash]*certPoolEntry)
+	s.hashed = make(map[certpool.Hash]*certPoolEntry)
 	s.names = make(map[string]*list.List)
 	s.patterns = make(map[string]*list.List)
 	s.subjects = make(map[string]*list.List)
 }
 
 // Clone creates a copy of the CertPool
-func (s *CertPool) Clone() x509utils.CertPooler {
+func (s *CertPool) Clone() x509utils.CertPool {
 	return s.Copy(nil)
 }
 
@@ -80,7 +81,7 @@ func (s *CertPool) Copy(out *CertPool) *CertPool {
 func preClone(s *CertPool) CertPool {
 	return CertPool{
 		cached:   s.exportUnlocked(),
-		hashed:   make(map[Hash]*certPoolEntry, len(s.hashed)),
+		hashed:   make(map[certpool.Hash]*certPoolEntry, len(s.hashed)),
 		names:    core.MapListCopy(s.names),
 		patterns: core.MapListCopy(s.patterns),
 		subjects: core.MapListCopy(s.subjects),

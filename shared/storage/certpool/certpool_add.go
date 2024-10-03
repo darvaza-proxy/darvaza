@@ -5,11 +5,12 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
+	"io/fs"
 	"os"
 	"strings"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 // Put adds a certificate by name
@@ -32,7 +33,7 @@ func (s *CertPool) AppendCertsFromPEM(b []byte) bool {
 
 	var added bool
 
-	_ = x509utils.ReadPEM(b, func(_ string, block *pem.Block) bool {
+	_ = x509utils.ReadPEM(b, func(_ fs.FS, _ string, block *pem.Block) bool {
 		if cert, _ := x509utils.BlockToCertificate(block); cert != nil && cert.IsCA {
 			if s.addCertUnsafe(HashCert(cert), "", cert) {
 				added = true

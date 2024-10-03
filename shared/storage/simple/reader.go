@@ -7,11 +7,11 @@ import (
 	"io/fs"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 var (
-	_ x509utils.ReadStore = (*Store)(nil)
+	_ x509utils.CertPool = (*Store)(nil)
 )
 
 // revive:disable:cognitive-complexity
@@ -21,7 +21,7 @@ func (s *Store) Get(_ context.Context, name string) (*x509.Certificate, error) {
 	// revive:enable:cognitive-complexity
 	var out *x509.Certificate
 
-	if name, ok := x509utils.SanitiseName(name); ok {
+	if name, ok := x509utils.SanitizeName(name); ok {
 		s.lockInit()
 		defer s.mu.Unlock()
 

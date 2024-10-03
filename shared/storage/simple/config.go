@@ -1,15 +1,16 @@
 package simple
 
 import (
-	"darvaza.org/darvaza/shared/storage/certpool"
-	"darvaza.org/darvaza/shared/x509utils"
 	"darvaza.org/slog"
+	"darvaza.org/x/tls/x509utils"
+
+	"darvaza.org/darvaza/shared/storage/certpool"
 )
 
 // Config is a custom factory for the Store allowing the usage
 // of a Logger and a roots base different that what the system provides
 type Config struct {
-	Base   x509utils.CertPooler
+	Base   x509utils.CertPool
 	Logger slog.Logger
 }
 

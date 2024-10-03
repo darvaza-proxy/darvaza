@@ -5,7 +5,7 @@ import (
 	"io/fs"
 	"sync"
 
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 var (
@@ -44,7 +44,7 @@ func loadSystemRoots() (*CertPool, error) {
 	var pool CertPool
 	var err error
 
-	fn := func(_ string, block *pem.Block) bool {
+	fn := func(_ fs.FS, _ string, block *pem.Block) bool {
 		cert, err := x509utils.BlockToCertificate(block)
 		if err == nil {
 			pool.AddCert(cert)

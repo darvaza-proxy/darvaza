@@ -8,7 +8,7 @@ import (
 
 	"darvaza.org/core"
 	"darvaza.org/darvaza/shared/storage/certpool"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 // FindSupportedInMap attempts to find a matching supported tls.Certificate
@@ -19,8 +19,8 @@ func FindSupportedInMap(chi *tls.ClientHelloInfo,
 	var out *tls.Certificate
 
 	if name == "" {
-		// no sanitied name provided, produce one
-		s, ok := x509utils.SanitiseName(chi.ServerName)
+		// no sanitized name provided, produce one
+		s, ok := x509utils.SanitizeName(chi.ServerName)
 		if !ok {
 			return nil
 		}

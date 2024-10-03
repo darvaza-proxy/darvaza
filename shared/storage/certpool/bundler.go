@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"errors"
 
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 var (
@@ -14,8 +14,8 @@ var (
 
 // Bundler uses two CertPoolers to bundler keys and certificates
 type Bundler struct {
-	Roots x509utils.CertPooler
-	Inter x509utils.CertPooler
+	Roots x509utils.CertPool
+	Inter x509utils.CertPool
 }
 
 // Bundle bundles a key and a certificate into a *tls.Certificate
@@ -76,7 +76,7 @@ func copyRawChain(chain []*x509.Certificate) ([][]byte, bool) {
 
 // Bundle verifies a leaf x509.Certificate and return a tls.Certificate
 func (pool *CertPool) Bundle(cert *x509.Certificate, key x509utils.PrivateKey,
-	roots x509utils.CertPooler) (*tls.Certificate, error) {
+	roots x509utils.CertPool) (*tls.Certificate, error) {
 	if roots == nil {
 		var err error
 		roots, err = SystemCertPool()

@@ -4,7 +4,7 @@ import (
 	"container/list"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 func (s *CertPool) getAllHashByName(name string) []Hash {
@@ -39,7 +39,7 @@ func getEntriesInList(l *list.List) (out []*certPoolEntry, found bool) {
 
 // revive:disable:cognitive-complexity
 func (s *CertPool) getFirstByName(name string) *certPoolEntry {
-	name, ok := x509utils.SanitiseName(name)
+	name, ok := x509utils.SanitizeName(name)
 	if !ok {
 		return nil
 	}
@@ -74,7 +74,7 @@ func (s *CertPool) getFirstByName(name string) *certPoolEntry {
 }
 
 func (s *CertPool) getEntriesByName(name string) (out []*certPoolEntry, found bool) {
-	name, ok := x509utils.SanitiseName(name)
+	name, ok := x509utils.SanitizeName(name)
 	if !ok {
 		return nil, false
 	}

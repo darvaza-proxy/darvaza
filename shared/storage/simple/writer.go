@@ -10,12 +10,13 @@ import (
 	"strings"
 
 	"darvaza.org/core"
+	"darvaza.org/x/tls/x509utils"
+
 	"darvaza.org/darvaza/shared/storage/certpool"
-	"darvaza.org/darvaza/shared/x509utils"
 )
 
 var (
-	_ x509utils.WriteStore = (*Store)(nil)
+	_ x509utils.CertPoolWriter = (*Store)(nil)
 )
 
 // AddCert adds a Certificate to be paired with a key and bundled

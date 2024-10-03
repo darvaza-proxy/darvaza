@@ -4,7 +4,7 @@ import (
 	"crypto"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 // validateKey calls the key's Validate() if available

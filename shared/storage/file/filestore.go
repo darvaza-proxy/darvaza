@@ -10,12 +10,12 @@ import (
 
 	"darvaza.org/darvaza/shared/os"
 	"darvaza.org/darvaza/shared/os/flock"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 var (
-	_ x509utils.ReadStore  = (*Store)(nil)
-	_ x509utils.WriteStore = (*Store)(nil)
+	_ x509utils.CertPool       = (*Store)(nil)
+	_ x509utils.CertPoolWriter = (*Store)(nil)
 )
 
 // Store is a darvaza Storage implementation for storing x509 certificates as files
@@ -157,7 +157,7 @@ func (m *Store) forEachCert(fn func(string, *x509.Certificate) bool) error {
 		return nil
 	}
 
-	return x509utils.ReadStringPEM(m.fl.Base, func(fl string, block *pem.Block) bool {
+	return x509utils.ReadStringPEM(m.fl.Base, func(_ fs.FS, fl string, block *pem.Block) bool {
 		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
 			return fn(fl, cert)
 		}
