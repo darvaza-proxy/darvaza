@@ -3,14 +3,15 @@ package simple
 import (
 	"container/list"
 	"context"
-	"crypto/tls"
 	"sync"
 
 	"darvaza.org/core"
 	"darvaza.org/slog"
+	"darvaza.org/x/tls"
+	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 
-	"darvaza.org/darvaza/shared/storage/certpool"
-	"darvaza.org/darvaza/shared/x509utils"
+	legacy "darvaza.org/darvaza/shared/storage/certpool"
 
 	"golang.org/x/sync/singleflight"
 )
@@ -29,7 +30,7 @@ type Store struct {
 
 	roots   certpool.CertPool
 	inter   certpool.CertPool
-	bundler certpool.Bundler
+	bundler *tls.Bundler
 
 	keys     []x509utils.PrivateKey
 	certs    *list.List
@@ -49,8 +50,8 @@ type certInfo struct {
 func (s *Store) init() {
 	s.logger = defaultLogger()
 
-	s.roots.Reset()
-	s.inter.Reset()
+	_ = s.roots.Reset()
+	_ = s.inter.Reset()
 	s.bundler.Roots = &s.roots
 	s.bundler.Inter = &s.inter
 
@@ -70,7 +71,7 @@ func (s *Store) lockInit() {
 }
 
 // NewFromBuffer creates a Store from a given PoolBuffer
-func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, error) {
+func NewFromBuffer(pb *legacy.PoolBuffer, base x509utils.CertPool) (*Store, error) {
 	s := new(Store)
 	s.init()
 	if pb != nil {
@@ -87,32 +88,40 @@ func NewFromBuffer(pb *certpool.PoolBuffer, base x509utils.CertPooler) (*Store, 
 
 func addCerts(s *Store, certs ...*tls.Certificate) {
 	for _, c := range certs {
-		key, ok := c.PrivateKey.(x509utils.PrivateKey)
-		if !ok {
-			// drop keyless certificates
-			continue
-		}
+		addOneCert(s, c)
+	}
+}
 
-		// contains key
-		if !core.SliceContainsFn(s.keys, key, PrivateKeyEqual) {
-			// new key
-			s.keys = append(s.keys, key)
-		}
+func addOneCert(s *Store, c *tls.Certificate) {
+	key, ok := c.PrivateKey.(x509utils.PrivateKey)
+	if !ok {
+		// drop keyless certificates
+		return
+	}
 
-		// contains cert
-		hash := certpool.HashCert(c.Leaf)
-		if _, found := s.hashed[hash]; !found {
-			// new cert
-			names, patterns := x509utils.Names(c.Leaf)
+	// contains key
+	if !core.SliceContainsFn(s.keys, key, PrivateKeyEqual) {
+		// new key
+		s.keys = append(s.keys, key)
+	}
 
-			ci := &certInfo{
-				c:        c,
-				hash:     hash,
-				names:    names,
-				patterns: patterns,
-			}
-			addCertInfo(s, ci)
+	// contains cert
+	hash, ok := certpool.HashCert(c.Leaf)
+	if !ok {
+		return
+	}
+
+	if _, found := s.hashed[hash]; !found {
+		// new cert
+		names, patterns := x509utils.Names(c.Leaf)
+
+		ci := &certInfo{
+			c:        c,
+			hash:     hash,
+			names:    names,
+			patterns: patterns,
 		}
+		addCertInfo(s, ci)
 	}
 }
 

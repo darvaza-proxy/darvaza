@@ -1,12 +1,15 @@
+// Package certpool ...
 package certpool
 
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"io/fs"
 	"sync"
 	"sync/atomic"
 
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 // PoolBuffer is a CertPool in the making
@@ -14,10 +17,10 @@ type PoolBuffer struct {
 	mu     sync.Mutex
 	logger atomic.Value
 
-	index map[Hash]*pbCertData
-	roots CertPool
-	inter CertPool
-	certs CertPool
+	index map[certpool.Hash]*pbCertData
+	roots *certpool.CertPool
+	inter *certpool.CertPool
+	certs *certpool.CertPool
 	keys  pbKeys
 }
 
@@ -27,9 +30,9 @@ func (pb *PoolBuffer) Reset() {
 	defer pb.mu.Unlock()
 
 	pb.index = nil
-	pb.roots.Reset()
-	pb.inter.Reset()
-	pb.certs.Reset()
+	_ = pb.roots.Reset()
+	_ = pb.inter.Reset()
+	_ = pb.certs.Reset()
 	pb.keys.Reset()
 }
 
@@ -69,7 +72,7 @@ func (pb *PoolBuffer) Add(data ...string) error {
 	for _, s := range data {
 		var addErr error
 
-		readErr := x509utils.ReadStringPEM(s, func(fn string, block *pem.Block) bool {
+		readErr := x509utils.ReadStringPEM(s, func(_ fs.FS, fn string, block *pem.Block) bool {
 			if err := pb.addBlock(fn, block); err != nil {
 				addErr = err
 			}
@@ -126,17 +129,17 @@ func (pb *PoolBuffer) Export() *x509.CertPool {
 }
 
 // Pool returns a new CertPool with the CA certificates
-func (pb *PoolBuffer) Pool() *CertPool {
+func (pb *PoolBuffer) Pool() *certpool.CertPool {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 
-	return pb.inter.Copy(nil)
+	return pb.inter.Copy(nil, nil)
 }
 
 // CopyPool copies the CA certificates into the given CertPool
-func (pb *PoolBuffer) CopyPool(out *CertPool) *CertPool {
+func (pb *PoolBuffer) CopyPool(out *certpool.CertPool) *certpool.CertPool {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 
-	return pb.inter.Copy(out)
+	return pb.inter.Copy(out, nil)
 }

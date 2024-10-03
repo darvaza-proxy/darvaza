@@ -8,14 +8,16 @@ import (
 	"fmt"
 	"io/fs"
 
+	"darvaza.org/core"
+
 	"darvaza.org/darvaza/shared/os"
 	"darvaza.org/darvaza/shared/os/flock"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 var (
-	_ x509utils.ReadStore  = (*Store)(nil)
-	_ x509utils.WriteStore = (*Store)(nil)
+	_ x509utils.CertPool       = (*Store)(nil)
+	_ x509utils.CertPoolWriter = (*Store)(nil)
 )
 
 // Store is a darvaza Storage implementation for storing x509 certificates as files
@@ -30,17 +32,23 @@ func (m *Store) Get(_ context.Context, name string) (*x509.Certificate, error) {
 	return cert, err
 }
 
-// ForEach will walk the store and ececute the StoreIterFunc for each certificate
-// it can decode
-func (m *Store) ForEach(_ context.Context, f x509utils.StoreIterFunc) error {
-	return m.forEachCert(func(_ string, cert *x509.Certificate) bool {
-		if err := f(cert); err != nil {
-			// TODO: terminate or just continue?
-			return true
-		}
+// Clone ...
+func (m *Store) Clone() x509utils.CertPool { return m }
 
-		// next
-		return false
+// Export ...
+func (*Store) Export() *x509.CertPool { panic(core.ErrTODO) }
+
+// Import ...
+func (*Store) Import(_ context.Context, _ x509utils.CertPool) (int, error) { return 0, core.ErrTODO }
+
+// ImportPEM ...
+func (*Store) ImportPEM(_ context.Context, _ []byte) (int, error) { return 0, core.ErrTODO }
+
+// ForEach will walk the store and execute the StoreIterFunc for each certificate
+// it can decode
+func (m *Store) ForEach(ctx context.Context, f func(context.Context, *x509.Certificate) bool) {
+	_ = m.forEachCert(func(_ string, cert *x509.Certificate) bool {
+		return f(ctx, cert)
 	})
 }
 
@@ -153,11 +161,7 @@ func verifyHostname(cert *x509.Certificate, name string) bool {
 }
 
 func (m *Store) forEachCert(fn func(string, *x509.Certificate) bool) error {
-	if fn == nil {
-		return nil
-	}
-
-	return x509utils.ReadStringPEM(m.fl.Base, func(fl string, block *pem.Block) bool {
+	return x509utils.ReadStringPEM(m.fl.Base, func(_ fs.FS, fl string, block *pem.Block) bool {
 		if cert, _ := x509utils.BlockToCertificate(block); cert != nil {
 			return fn(fl, cert)
 		}

@@ -1,7 +1,6 @@
 package simple
 
 import (
-	"bytes"
 	"container/list"
 	"context"
 	"crypto/tls"
@@ -10,20 +9,23 @@ import (
 	"strings"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/storage/certpool"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 var (
-	_ x509utils.WriteStore = (*Store)(nil)
+	_ x509utils.CertPoolWriter = (*Store)(nil)
 )
 
 // AddCert adds a Certificate to be paired with a key and bundled
 func (s *Store) AddCert(name string, cert *x509.Certificate) error {
+	hash, ok := certpool.HashCert(cert)
+	if !ok {
+		return core.Wrap(core.ErrInvalid, "bad cert")
+	}
 	s.lockInit()
 	defer s.mu.Unlock()
 
-	hash := certpool.HashCert(cert)
 	if ci, ok := s.hashed[hash]; ok {
 		// known
 		if name != "" {
@@ -140,11 +142,16 @@ func (s *Store) DeleteCert(_ context.Context, cert *x509.Certificate) error {
 }
 
 func (s *Store) findCertInfo(cert *x509.Certificate) *certInfo {
-	hash := certpool.HashCert(cert)
-	if ci, ok := s.hashed[hash]; ok {
-		return ci
+	hash, ok := certpool.HashCert(cert)
+	if !ok {
+		return nil
 	}
-	return nil
+
+	ci, ok := s.hashed[hash]
+	if !ok {
+		return nil
+	}
+	return ci
 }
 
 func (s *Store) deleteByCertInfo(ci *certInfo) {
@@ -161,8 +168,8 @@ func deleteMapListElementByHash(m map[string]*list.List,
 
 	// leaf has the hash we need
 	match := func(c *tls.Certificate) bool {
-		h := certpool.HashCert(c.Leaf)
-		return bytes.Equal(hash[:], h[:])
+		h, ok := certpool.HashCert(c.Leaf)
+		return ok && hash == h
 	}
 
 	deleteMapListElementByMatcher(m, once, keys, match)
@@ -207,3 +214,9 @@ func deleteListElementByPointer[T any](l *list.List, ptr *T, once bool) int {
 	core.ListForEachElement(l, fn)
 	return count
 }
+
+// Import ...
+func (*Store) Import(context.Context, x509utils.CertPool) (int, error) { return 0, core.ErrTODO }
+
+// ImportPEM ...
+func (*Store) ImportPEM(context.Context, []byte) (int, error) { return 0, core.ErrTODO }
