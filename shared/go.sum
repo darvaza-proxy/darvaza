@@ -6,6 +6,8 @@ darvaza.org/slog/handlers/cblog v0.6.1 h1:/w87RhoDqpkgYV2BiCb/XYR4oTUdHQeUbVN0aJ
 darvaza.org/slog/handlers/cblog v0.6.1/go.mod h1:/b53h0tmpjPfCQTRWwTrwNUGBO1x7g+sr0nw6i6KhCo=
 darvaza.org/slog/handlers/discard v0.5.1 h1:WvSrGXbAfCVxSrMIS2pWzKxb2u4ZDoQtunl15aEFA/4=
 darvaza.org/slog/handlers/discard v0.5.1/go.mod h1:p+gdX9PZ/Ke6Ax+7z/rXpGS9wxnSFi/idXXBtylemc4=
+darvaza.org/x/container v0.2.1 h1:f4FmP6yFpiGkSFIoVzM35opLVZhzGlySNZIN9zGwBJs=
+darvaza.org/x/container v0.2.1/go.mod h1:9pnms6LoEK8d19R5a8Oxj3Z+kdN2Tw6Z+twr/YcffRE=
 darvaza.org/x/fs v0.4.1 h1:Wnme0TCsLTn5bR3ZssryU2KDIxm2e+WKiAubBPhFsLE=
 darvaza.org/x/fs v0.4.1/go.mod h1:a31XSiTxSyRuFKS6GKmVeS+8SRGMVmC1XD/jwhm22kE=
 darvaza.org/x/tls v0.5.1 h1:k7dyfUldCz0O2u4NZg6LF/AAsz3uteBPcvd46HjZuA4=

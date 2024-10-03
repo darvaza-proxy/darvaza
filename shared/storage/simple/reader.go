@@ -7,11 +7,11 @@ import (
 	"io/fs"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 var (
-	_ x509utils.ReadStore = (*Store)(nil)
+	_ x509utils.CertPool = (*Store)(nil)
 )
 
 // revive:disable:cognitive-complexity
@@ -21,7 +21,7 @@ func (s *Store) Get(_ context.Context, name string) (*x509.Certificate, error) {
 	// revive:enable:cognitive-complexity
 	var out *x509.Certificate
 
-	if name, ok := x509utils.SanitiseName(name); ok {
+	if name, ok := x509utils.SanitizeName(name); ok {
 		s.lockInit()
 		defer s.mu.Unlock()
 
@@ -66,33 +66,36 @@ func (s *Store) Get(_ context.Context, name string) (*x509.Certificate, error) {
 	return nil, fs.ErrNotExist
 }
 
-// revive:disable:cognitive-complexity
-
 // ForEach iterates over all stored certificates
-func (s *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
-	// revive:enable:cognitive-complexity
-	var err error
-
+//
+//revive:disable:cognitive-complexity
+func (s *Store) ForEach(ctx context.Context, f func(context.Context, *x509.Certificate) bool) {
+	//revive:enable:cognitive-complexity
 	if f != nil {
 		s.lockInit()
 
 		core.ListForEach(s.certs, func(ci *certInfo) bool {
+			ok := true
+
 			if ci.c.Leaf != nil {
 				s.mu.Unlock()
-				err = f(ci.c.Leaf)
+				ok = f(ctx, ci.c.Leaf)
 				s.mu.Lock()
 			}
 
 			select {
 			case <-ctx.Done():
-				err = ctx.Err()
 				return true
 			default:
-				return err != nil
+				return !ok
 			}
 		})
 		s.mu.Unlock()
 	}
-
-	return err
 }
+
+// Clone ...
+func (s *Store) Clone() x509utils.CertPool { return s }
+
+// Export ...
+func (*Store) Export() *x509.CertPool { panic(core.ErrTODO) }

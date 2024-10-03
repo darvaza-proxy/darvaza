@@ -1,14 +1,13 @@
 package simple
 
 import (
-	"bytes"
 	"container/list"
 	"crypto/tls"
 	"crypto/x509"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/storage/certpool"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 // FindSupportedInMap attempts to find a matching supported tls.Certificate
@@ -19,8 +18,8 @@ func FindSupportedInMap(chi *tls.ClientHelloInfo,
 	var out *tls.Certificate
 
 	if name == "" {
-		// no sanitied name provided, produce one
-		s, ok := x509utils.SanitiseName(chi.ServerName)
+		// no sanitized name provided, produce one
+		s, ok := x509utils.SanitizeName(chi.ServerName)
 		if !ok {
 			return nil
 		}
@@ -59,8 +58,7 @@ func mapListContainsHash(m map[string]*list.List, name string, hash certpool.Has
 	var found bool
 
 	core.MapListForEach(m, name, func(c *tls.Certificate) bool {
-		h := certpool.HashCert(c.Leaf)
-		if bytes.Equal(hash[:], h[:]) {
+		if hash.EqualCert(c.Leaf) {
 			found = true
 		}
 		return found

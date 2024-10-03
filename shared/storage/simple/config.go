@@ -1,15 +1,16 @@
 package simple
 
 import (
-	"darvaza.org/darvaza/shared/storage/certpool"
-	"darvaza.org/darvaza/shared/x509utils"
 	"darvaza.org/slog"
+	"darvaza.org/x/tls/x509utils"
+
+	legacy "darvaza.org/darvaza/shared/storage/certpool"
 )
 
 // Config is a custom factory for the Store allowing the usage
 // of a Logger and a roots base different that what the system provides
 type Config struct {
-	Base   x509utils.CertPooler
+	Base   x509utils.CertPool
 	Logger slog.Logger
 }
 
@@ -39,8 +40,8 @@ func (c *Config) New(blocks ...string) (*Store, error) {
 	return s, nil
 }
 
-func (c *Config) newPoolBuffer(blocks ...string) (*certpool.PoolBuffer, error) {
-	var pb certpool.PoolBuffer
+func (c *Config) newPoolBuffer(blocks ...string) (*legacy.PoolBuffer, error) {
+	var pb legacy.PoolBuffer
 
 	if c.Logger != nil {
 		pb.SetLogger(c.Logger)

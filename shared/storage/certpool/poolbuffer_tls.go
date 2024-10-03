@@ -1,60 +1,15 @@
 package certpool
 
 import (
-	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/x509utils"
 	"darvaza.org/slog"
+	"darvaza.org/x/tls"
+	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
-
-// NewBundler creates a Bundler using the known CAs and provided roots.
-// If no base is given, system certs will be used instead.
-func (pb *PoolBuffer) NewBundler(roots x509utils.CertPooler) (*Bundler, error) {
-	var err error
-
-	if pb.roots.Count() > 0 {
-		// inject self-signed
-		roots, err = pb.newRoots(&pb.roots, roots)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if roots == nil {
-		// no base, use system's
-		roots, err = SystemCertPool()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	b := &Bundler{
-		Roots: roots,
-		Inter: pb.inter.Clone(),
-	}
-	return b, nil
-}
-
-func (*PoolBuffer) newRoots(ours *CertPool, base x509utils.CertPooler) (*CertPool, error) {
-	if base == nil {
-		// SystemCertPool gives us a fresh clone, so we use that directly
-		pool, err := SystemCertPool()
-		if err != nil {
-			return nil, err
-		}
-		pool.addCertPooler(ours)
-		return pool, nil
-	}
-
-	if pool, ok := ours.Plus(base).(*CertPool); ok {
-		return pool, nil
-	}
-
-	panic("unreachable")
-}
 
 type pbPair struct {
 	cert *pbCertData
@@ -186,20 +141,19 @@ func (pb *PoolBuffer) pairs() []pbPair {
 
 // Certificates exports all the Certificates it contains bundled considering
 // a given base
-func (pb *PoolBuffer) Certificates(base x509utils.CertPooler) ([]*tls.Certificate, error) {
+func (pb *PoolBuffer) Certificates(base x509utils.CertPool) ([]*tls.Certificate, error) {
 	// revive:enable:cognitive-complexity
 	// revive:enable:cyclomatic
 	var out []*tls.Certificate
 	var errors core.CompoundError
 
-	b, err := pb.NewBundler(base)
-	if err != nil {
-		err = core.Wrap(err, "failed to create certpool.Bundler")
-		return nil, err
+	b := &tls.Bundler{
+		Roots: pb.roots,
+		Inter: base,
 	}
 
 	// deduplication
-	certs := make(map[Hash]bool)
+	certs := make(map[certpool.Hash]bool)
 
 	// pairs
 	for _, pair := range pb.pairs() {
@@ -246,7 +200,7 @@ func (pb *PoolBuffer) Certificates(base x509utils.CertPooler) ([]*tls.Certificat
 	return out, errors.AsError()
 }
 
-func (pb *PoolBuffer) bundlePair(b *Bundler, cd *pbCertData, kd *pbKeyData) (
+func (pb *PoolBuffer) bundlePair(b *tls.Bundler, cd *pbCertData, kd *pbKeyData) (
 	*tls.Certificate, error) {
 	//
 	var cert *x509.Certificate
@@ -269,12 +223,11 @@ func (pb *PoolBuffer) bundlePair(b *Bundler, cd *pbCertData, kd *pbKeyData) (
 }
 
 // Bundle verifies a leaf x509.Certificate and return a tls.Certificate
-func (pb *PoolBuffer) Bundle(cert *x509.Certificate, key x509utils.PrivateKey,
-	roots x509utils.CertPooler) (*tls.Certificate, error) {
+func (*PoolBuffer) Bundle(cert *x509.Certificate, key x509utils.PrivateKey,
+	roots x509utils.CertPool) (*tls.Certificate, error) {
 	//
-	bundler, err := pb.NewBundler(roots)
-	if err != nil {
-		return nil, err
+	bundler := &tls.Bundler{
+		Roots: roots,
 	}
 
 	return bundler.Bundle(cert, key)

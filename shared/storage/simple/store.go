@@ -3,17 +3,16 @@ package simple
 
 import (
 	"context"
-	"crypto/tls"
 	"crypto/x509"
 	"io/fs"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/storage"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls"
+	"darvaza.org/x/tls/x509utils"
 )
 
 var (
-	_ storage.Store = (*Store)(nil)
+	_ tls.Store = (*Store)(nil)
 )
 
 // GetCAPool returns a reference to the Certificates Pool
@@ -43,7 +42,7 @@ func (s *Store) GetCertificateWithCallback(chi *tls.ClientHelloInfo,
 		name = chi.Conn.LocalAddr().String()
 	}
 
-	name, ok := x509utils.SanitiseName(name)
+	name, ok := x509utils.SanitizeName(name)
 	if ok {
 		// find name match locally
 		s.lockInit()

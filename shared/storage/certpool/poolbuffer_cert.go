@@ -3,20 +3,22 @@ package certpool
 import (
 	"crypto/x509"
 
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/core"
+	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 type pbCertData struct {
 	Filename string
 	Cert     *x509.Certificate
 
-	Hash Hash
+	Hash certpool.Hash
 	Pub  x509utils.PublicKey
 }
 
 func (pb *PoolBuffer) addCertUnlocked(fn string, cert *x509.Certificate) error {
 	if pb.index == nil {
-		pb.index = make(map[Hash]*pbCertData)
+		pb.index = make(map[certpool.Hash]*pbCertData)
 	}
 
 	if cert == nil {
@@ -27,7 +29,11 @@ func (pb *PoolBuffer) addCertUnlocked(fn string, cert *x509.Certificate) error {
 		return err
 	}
 
-	hash := HashCert(cert)
+	hash, ok := certpool.HashCert(cert)
+	if !ok {
+		return core.Wrap(core.ErrInvalid, "bad cert")
+	}
+
 	if _, ok := pb.index[hash]; !ok {
 		// new cert
 		pb.index[hash] = &pbCertData{
@@ -36,20 +42,20 @@ func (pb *PoolBuffer) addCertUnlocked(fn string, cert *x509.Certificate) error {
 			Pub:      cert.PublicKey.(x509utils.PublicKey),
 		}
 
-		pb.addCertToPools(hash, cert)
+		pb.addCertToPools(cert)
 	}
 
 	return nil
 }
 
-func (pb *PoolBuffer) addCertToPools(hash Hash, cert *x509.Certificate) {
+func (pb *PoolBuffer) addCertToPools(cert *x509.Certificate) {
 	if cert.IsCA {
 		if x509utils.IsSelfSigned(cert) {
-			pb.roots.addCertUnsafe(hash, "", cert)
+			pb.roots.AddCert(cert)
 		}
-		pb.inter.addCertUnsafe(hash, "", cert)
+		pb.inter.AddCert(cert)
 	} else {
-		pb.certs.addCertUnsafe(hash, "", cert)
+		pb.certs.AddCert(cert)
 	}
 }
 
