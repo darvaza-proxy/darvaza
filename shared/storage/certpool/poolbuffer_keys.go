@@ -4,7 +4,7 @@ import (
 	"container/list"
 
 	"darvaza.org/core"
-	"darvaza.org/darvaza/shared/x509utils"
+	"darvaza.org/x/tls/x509utils"
 )
 
 type pbKeys struct {

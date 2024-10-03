@@ -1,8 +1,13 @@
+// Package storage ...
 package storage
+
+import (
+	"darvaza.org/x/tls"
+)
 
 // RootStore represents a view of the Store that can be used for generic setup
 type RootStore interface {
-	Store
+	tls.Store
 
 	// AddCACert can either add a certificate chain by content, filename, or directory
 	// to scan
