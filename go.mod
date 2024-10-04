@@ -3,7 +3,7 @@ module darvaza.org/darvaza
 go 1.21
 
 require (
-	darvaza.org/core v0.14.10
+	darvaza.org/core v0.15.0
 	darvaza.org/darvaza/server v0.1.5
 	darvaza.org/darvaza/shared v0.6.1
 	darvaza.org/slog v0.5.11 // indirect
@@ -36,12 +36,12 @@ require (
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/zclconf/go-cty v1.14.1 // indirect
-	golang.org/x/crypto v0.27.0 // indirect
+	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.25.0 // indirect
-	golang.org/x/text v0.18.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 )
 
