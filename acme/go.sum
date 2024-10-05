@@ -1,7 +1,7 @@
-darvaza.org/core v0.15.0 h1:9BCUOH3Evu7l4KzqSr49AgQHw9hQSckYVzTkaa3bOB0=
-darvaza.org/core v0.15.0/go.mod h1:pXwSuJ8r20wSBOS8s5QfhkI2UvRSZgriwYtSIa+fojs=
-darvaza.org/middleware v0.2.9 h1:iE+da/qDlzRnR7Rx8TpNmCxJQQatZ2S8O/wcSlq7/mA=
-darvaza.org/middleware v0.2.9/go.mod h1:hv5j36aIK+x+c1O7uc6q1jOUHBZzFXaslUhyYL/W+K8=
+darvaza.org/core v0.15.1 h1:OxAeTM1HnbpkGzalk2HmZiEsRKeOZrgoeQyHokEKVMA=
+darvaza.org/core v0.15.1/go.mod h1:zvFshV8ncuQcvZxjPsHfBgBvVtwa+bHAWDpMQ3N/Ajc=
+darvaza.org/middleware v0.2.10 h1:DX6DTeRuCMH+nEKR9fsSut2c62aarjSxn9oKtXRg65E=
+darvaza.org/middleware v0.2.10/go.mod h1:QJjzlTXX3xSAq+owN0BNJ3kcAZ+3J8+2G9ayig+W+Iw=
 darvaza.org/x/fs v0.3.3 h1:EXMgutKhk0fljRlDCkJb7RrbMJRhyfnO41h7bxchAFs=
 darvaza.org/x/fs v0.3.3/go.mod h1:BJBKXHolO5w7up9jqQLk8iLVtmubjUCx3Qp6K0aw9cg=
 darvaza.org/x/web v0.9.0 h1:rRuBBWsDIEke/Lz103xSaOEexthV3d3rH819cpToUPA=

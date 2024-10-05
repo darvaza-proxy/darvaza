@@ -3,8 +3,8 @@ module darvaza.org/darvaza/acme
 go 1.21
 
 require (
-	darvaza.org/core v0.15.0 // indirect
-	darvaza.org/middleware v0.2.9
+	darvaza.org/core v0.15.1 // indirect
+	darvaza.org/middleware v0.2.10
 	darvaza.org/x/fs v0.3.3 // indirect
 	darvaza.org/x/web v0.9.0 // indirect
 )
