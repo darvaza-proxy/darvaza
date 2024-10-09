@@ -77,9 +77,11 @@ func (s *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
 		s.lockInit()
 
 		core.ListForEach(s.certs, func(ci *certInfo) bool {
+			ok := true
+
 			if ci.c.Leaf != nil {
 				s.mu.Unlock()
-				err = f(ci.c.Leaf)
+				ok = f(ctx, ci.c.Leaf)
 				s.mu.Lock()
 			}
 
@@ -88,7 +90,7 @@ func (s *Store) ForEach(ctx context.Context, f x509utils.StoreIterFunc) error {
 				err = ctx.Err()
 				return true
 			default:
-				return err != nil
+				return !ok
 			}
 		})
 		s.mu.Unlock()

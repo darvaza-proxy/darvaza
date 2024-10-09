@@ -8,6 +8,7 @@ import (
 	"darvaza.org/core"
 	"darvaza.org/slog"
 	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 // NewBundler creates a Bundler using the known CAs and provided roots.
@@ -25,7 +26,7 @@ func (pb *PoolBuffer) NewBundler(roots x509utils.CertPool) (*Bundler, error) {
 
 	if roots == nil {
 		// no base, use system's
-		roots, err = SystemCertPool()
+		roots, err = certpool.SystemCertPool()
 		if err != nil {
 			return nil, err
 		}
@@ -199,7 +200,7 @@ func (pb *PoolBuffer) Certificates(base x509utils.CertPool) ([]*tls.Certificate,
 	}
 
 	// deduplication
-	certs := make(map[Hash]bool)
+	certs := make(map[certpool.Hash]bool)
 
 	// pairs
 	for _, pair := range pb.pairs() {

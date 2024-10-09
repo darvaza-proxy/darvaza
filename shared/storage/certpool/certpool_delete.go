@@ -7,6 +7,7 @@ import (
 	"io/fs"
 
 	"darvaza.org/core"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 // Delete removes a certificate by name
@@ -31,10 +32,14 @@ func (s *CertPool) DeleteCert(_ context.Context, cert *x509.Certificate) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	return s.deleteHash(HashCert(cert))
+	hash, ok := certpool.HashCert(cert)
+	if !ok {
+		return core.ErrNotExists
+	}
+	return s.deleteHash(hash)
 }
 
-func (s *CertPool) deleteHash(hash [HashSize]byte) error {
+func (s *CertPool) deleteHash(hash certpool.Hash) error {
 	if p, ok := s.hashed[hash]; ok {
 		s.cached = nil // invalidate cache
 		deleteHashFromNames(s.names, hash, p.names...)
@@ -49,7 +54,7 @@ func (s *CertPool) deleteHash(hash [HashSize]byte) error {
 	return fs.ErrNotExist
 }
 
-func deleteHashFromNames(m map[string]*list.List, hash Hash, names ...string) {
+func deleteHashFromNames(m map[string]*list.List, hash certpool.Hash, names ...string) {
 	for _, name := range names {
 		if l, ok := m[name]; ok {
 			deleteHashFromList(l, hash)
@@ -57,7 +62,7 @@ func deleteHashFromNames(m map[string]*list.List, hash Hash, names ...string) {
 	}
 }
 
-func deleteHashFromList(l *list.List, hash Hash) {
+func deleteHashFromList(l *list.List, hash certpool.Hash) {
 	core.ListForEachElement(l, func(e *list.Element) bool {
 		if p, ok := e.Value.(*certPoolEntry); ok {
 			if p.hash == hash {

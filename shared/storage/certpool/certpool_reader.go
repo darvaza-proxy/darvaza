@@ -6,6 +6,7 @@ import (
 	"io/fs"
 
 	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 // ForEach iterates over all certificates
@@ -34,9 +35,7 @@ func iterStep(ctx context.Context, fn x509utils.StoreIterFunc, cert *x509.Certif
 		err = ctx.Err()
 		term = true
 	default:
-		if err = fn(cert); err != nil {
-			term = true
-		}
+		term = !fn(ctx, cert)
 	}
 	return term, err
 }
@@ -95,7 +94,7 @@ func (s *CertPool) Equal(x x509utils.CertPool) bool {
 		}
 
 		// and all certs there exist here
-		h := HashCert(cert)
+		h := certpool.HashCert(cert)
 		if _, found := s.hashed[h]; !found {
 			return fs.ErrNotExist
 		}

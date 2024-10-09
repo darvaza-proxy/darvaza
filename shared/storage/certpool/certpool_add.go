@@ -11,15 +11,19 @@ import (
 
 	"darvaza.org/core"
 	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 // Put adds a certificate by name
 func (s *CertPool) Put(_ context.Context, name string, cert *x509.Certificate) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	hash, ok := certpool.HashCert(cert)
+	if ok {
+		s.mu.Lock()
+		defer s.mu.Unlock()
 
-	if s.addCertUnsafe(HashCert(cert), name, cert) {
-		return nil
+		if s.addCertUnsafe(hash, name, cert) {
+			return nil
+		}
 	}
 
 	return os.ErrExist
@@ -35,7 +39,8 @@ func (s *CertPool) AppendCertsFromPEM(b []byte) bool {
 
 	_ = x509utils.ReadPEM(b, func(_ fs.FS, _ string, block *pem.Block) bool {
 		if cert, _ := x509utils.BlockToCertificate(block); cert != nil && cert.IsCA {
-			if s.addCertUnsafe(HashCert(cert), "", cert) {
+			hash, _ := certpool.HashCert(cert)
+			if s.addCertUnsafe(hash, "", cert) {
 				added = true
 			}
 		}
@@ -51,12 +56,13 @@ func (s *CertPool) AddCert(cert *x509.Certificate) bool {
 	defer s.mu.Unlock()
 
 	if cert != nil && cert.IsCA {
-		return s.addCertUnsafe(HashCert(cert), "", cert)
+		hash, _ := certpool.HashCert(cert)
+		return s.addCertUnsafe(hash, "", cert)
 	}
 	return false
 }
 
-func (s *CertPool) addCertUnsafe(hash Hash, name string, cert *x509.Certificate) bool {
+func (s *CertPool) addCertUnsafe(hash certpool.Hash, name string, cert *x509.Certificate) bool {
 	var added bool
 
 	if s.hashed == nil {

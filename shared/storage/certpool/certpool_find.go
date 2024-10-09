@@ -5,11 +5,12 @@ import (
 
 	"darvaza.org/core"
 	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
-func (s *CertPool) getAllHashByName(name string) []Hash {
+func (s *CertPool) getAllHashByName(name string) []certpool.Hash {
 	if entries, ok := s.getEntriesByName(name); ok {
-		out := make([]Hash, 0, len(entries))
+		out := make([]certpool.Hash, 0, len(entries))
 		for _, e := range entries {
 			if !core.SliceContains(out, e.hash) {
 				out = append(out, e.hash)

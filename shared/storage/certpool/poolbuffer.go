@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 
 	"darvaza.org/x/tls/x509utils"
+	"darvaza.org/x/tls/x509utils/certpool"
 )
 
 // PoolBuffer is a CertPool in the making
@@ -15,7 +16,7 @@ type PoolBuffer struct {
 	mu     sync.Mutex
 	logger atomic.Value
 
-	index map[Hash]*pbCertData
+	index map[certpool.Hash]*pbCertData
 	roots CertPool
 	inter CertPool
 	certs CertPool
