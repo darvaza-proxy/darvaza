@@ -3,14 +3,14 @@ module darvaza.org/darvaza/server
 go 1.21
 
 require (
-	darvaza.org/core v0.15.0
-	darvaza.org/darvaza/shared v0.6.1
-	darvaza.org/slog v0.5.11
-	darvaza.org/slog/handlers/cblog v0.5.11 // indirect
+	darvaza.org/core v0.15.1
+	darvaza.org/darvaza/shared v0.6.2
+	darvaza.org/slog v0.5.12
+	darvaza.org/slog/handlers/cblog v0.5.12 // indirect
 )
 
 require (
-	github.com/miekg/dns v1.1.57
+	github.com/miekg/dns v1.1.62
 	github.com/naoina/toml v0.1.1
 )
 

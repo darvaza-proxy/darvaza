@@ -3,19 +3,19 @@ module darvaza.org/darvaza
 go 1.21
 
 require (
-	darvaza.org/core v0.15.0
+	darvaza.org/core v0.15.1
 	darvaza.org/darvaza/server v0.1.5
-	darvaza.org/darvaza/shared v0.6.1
-	darvaza.org/slog v0.5.11 // indirect
-	darvaza.org/slog/handlers/cblog v0.5.11 // indirect
-	darvaza.org/x/config v0.3.7
-	darvaza.org/x/tls v0.2.1 // indirect
+	darvaza.org/darvaza/shared v0.6.2
+	darvaza.org/slog v0.5.12 // indirect
+	darvaza.org/slog/handlers/cblog v0.5.12 // indirect
+	darvaza.org/x/config v0.3.8
+	darvaza.org/x/tls v0.2.3 // indirect
 )
 
 require (
 	github.com/hashicorp/hcl/v2 v2.19.1
-	github.com/miekg/dns v1.1.57
-	github.com/spf13/cobra v1.8.0
+	github.com/miekg/dns v1.1.62
+	github.com/spf13/cobra v1.8.1
 )
 
 require (
@@ -33,8 +33,9 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.1 // indirect
-	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/zclconf/go-cty v1.14.1 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
