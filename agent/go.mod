@@ -3,20 +3,20 @@ module darvaza.org/darvaza/agent
 go 1.21
 
 require (
-	darvaza.org/core v0.15.1
+	darvaza.org/core v0.15.3
 	darvaza.org/darvaza/acme v0.2.0
 	darvaza.org/middleware v0.2.10
-	darvaza.org/slog v0.5.12
-	darvaza.org/slog/handlers/discard v0.4.15
-	darvaza.org/x/fs v0.3.3 // indirect
-	darvaza.org/x/net v0.3.5
-	darvaza.org/x/tls v0.2.3
-	darvaza.org/x/web v0.9.0 // indirect
+	darvaza.org/slog v0.5.14
+	darvaza.org/slog/handlers/discard v0.4.16
+	darvaza.org/x/fs v0.3.5 // indirect
+	darvaza.org/x/net v0.3.7
+	darvaza.org/x/tls v0.3.0
+	darvaza.org/x/web v0.9.2 // indirect
 )
 
 require (
 	github.com/quic-go/quic-go v0.42.0
-	golang.org/x/net v0.30.0
+	golang.org/x/net v0.31.0
 )
 
 require (
@@ -28,14 +28,14 @@ require (
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	go.uber.org/mock v0.4.0 // indirect
-	golang.org/x/crypto v0.28.0 // indirect
+	golang.org/x/crypto v0.29.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
+	google.golang.org/protobuf v1.35.2 // indirect
 )
 
 replace (
