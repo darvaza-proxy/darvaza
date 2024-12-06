@@ -8,6 +8,8 @@ darvaza.org/slog/handlers/cblog v0.5.13 h1:0XHqi5mwni0x34VXM0DhMSRuTYT1d9AxgW5II
 darvaza.org/slog/handlers/cblog v0.5.13/go.mod h1:tjbUKxwNPkjh/BjD+0NHOc6eG6XBFnMcmC+dH4+w2Io=
 darvaza.org/x/config v0.3.8 h1:EF4idB1r3dWR8aFQw+AI+TsmyQL2Ug1HVb4T+t2tBfU=
 darvaza.org/x/config v0.3.8/go.mod h1:2S6FKUaSyp34tF6c/oXiwsv4lRMIrcf9N1RsCtyZVaI=
+darvaza.org/x/config v0.3.10 h1:l3wcQhHVbeyYfe5v9VQspQmfbY+fFpNp1yf58kuGYyA=
+darvaza.org/x/config v0.3.10/go.mod h1:TeQ0kMoowAnJx4exXBxNJFTtviq6+pgTH9oi3gSztuI=
 darvaza.org/x/tls v0.3.0 h1:N/0okYJluCsT/XG6cuUbLBN85diAFU1njxDA2hSW7zs=
 darvaza.org/x/tls v0.3.0/go.mod h1:/s2GkmRYUyDfFHrvqdxISzBKVl8WRrif3E1/IVJmzAA=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
