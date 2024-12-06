@@ -8,8 +8,8 @@ require (
 	darvaza.org/middleware v0.2.10
 	darvaza.org/slog v0.5.14
 	darvaza.org/slog/handlers/discard v0.4.16
-	darvaza.org/x/fs v0.3.5 // indirect
-	darvaza.org/x/net v0.3.7
+	darvaza.org/x/fs v0.3.6 // indirect
+	darvaza.org/x/net v0.4.0
 	darvaza.org/x/tls v0.3.0
 	darvaza.org/x/web v0.9.2 // indirect
 )
