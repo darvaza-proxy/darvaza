@@ -14,7 +14,7 @@ require (
 require (
 	github.com/zeebo/blake3 v0.2.4
 	golang.org/x/net v0.31.0
-	golang.org/x/sync v0.9.0
+	golang.org/x/sync v0.10.0
 )
 
 require (
