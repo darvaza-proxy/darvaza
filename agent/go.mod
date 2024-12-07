@@ -10,7 +10,7 @@ require (
 	darvaza.org/slog/handlers/discard v0.4.16
 	darvaza.org/x/fs v0.3.6 // indirect
 	darvaza.org/x/net v0.4.0
-	darvaza.org/x/tls v0.3.0
+	darvaza.org/x/tls v0.4.1
 	darvaza.org/x/web v0.9.2 // indirect
 )
 
