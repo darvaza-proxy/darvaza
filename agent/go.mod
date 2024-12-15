@@ -3,14 +3,14 @@ module darvaza.org/darvaza/agent
 go 1.21
 
 require (
-	darvaza.org/core v0.15.3
+	darvaza.org/core v0.15.4
 	darvaza.org/darvaza/acme v0.2.0
 	darvaza.org/middleware v0.2.10
 	darvaza.org/slog v0.5.14
 	darvaza.org/slog/handlers/discard v0.4.16
 	darvaza.org/x/fs v0.3.6 // indirect
 	darvaza.org/x/net v0.4.0
-	darvaza.org/x/tls v0.4.1
+	darvaza.org/x/tls v0.4.3
 	darvaza.org/x/web v0.9.2 // indirect
 )
 
@@ -28,7 +28,7 @@ require (
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	go.uber.org/mock v0.4.0 // indirect
-	golang.org/x/crypto v0.30.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
