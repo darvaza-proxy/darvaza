@@ -3,7 +3,7 @@ module darvaza.org/darvaza/agent
 go 1.21
 
 require (
-	darvaza.org/core v0.15.3
+	darvaza.org/core v0.15.4
 	darvaza.org/darvaza/acme v0.2.0
 	darvaza.org/middleware v0.2.10
 	darvaza.org/slog v0.5.14
