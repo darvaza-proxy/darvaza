@@ -5,13 +5,13 @@ go 1.21
 require (
 	darvaza.org/core v0.15.4
 	darvaza.org/darvaza/acme v0.2.0
-	darvaza.org/middleware v0.2.10
+	darvaza.org/middleware v0.2.11
 	darvaza.org/slog v0.5.14
 	darvaza.org/slog/handlers/discard v0.4.16
-	darvaza.org/x/fs v0.3.6 // indirect
+	darvaza.org/x/fs v0.3.7 // indirect
 	darvaza.org/x/net v0.4.0
 	darvaza.org/x/tls v0.4.1
-	darvaza.org/x/web v0.9.2 // indirect
+	darvaza.org/x/web v0.9.4 // indirect
 )
 
 require (
