@@ -16,7 +16,7 @@ require (
 
 require (
 	github.com/quic-go/quic-go v0.42.0
-	golang.org/x/net v0.32.0
+	golang.org/x/net v0.33.0
 )
 
 require (
