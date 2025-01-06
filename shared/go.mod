@@ -8,7 +8,7 @@ require (
 	darvaza.org/slog/handlers/cblog v0.5.13
 	darvaza.org/slog/handlers/discard v0.4.16
 	darvaza.org/x/fs v0.3.7
-	darvaza.org/x/tls v0.4.1
+	darvaza.org/x/tls v0.4.3
 )
 
 require (
@@ -19,7 +19,7 @@ require (
 
 require (
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
-	golang.org/x/crypto v0.30.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 )

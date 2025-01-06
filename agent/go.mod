@@ -10,7 +10,7 @@ require (
 	darvaza.org/slog/handlers/discard v0.4.16
 	darvaza.org/x/fs v0.3.7 // indirect
 	darvaza.org/x/net v0.4.2
-	darvaza.org/x/tls v0.4.1
+	darvaza.org/x/tls v0.4.3
 	darvaza.org/x/web v0.9.4 // indirect
 )
 
@@ -28,7 +28,7 @@ require (
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	go.uber.org/mock v0.4.0 // indirect
-	golang.org/x/crypto v0.30.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
