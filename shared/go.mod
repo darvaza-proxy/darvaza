@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	darvaza.org/core v0.15.6
-	darvaza.org/slog v0.5.14
+	darvaza.org/slog v0.5.15
 	darvaza.org/slog/handlers/cblog v0.5.13
 	darvaza.org/slog/handlers/discard v0.4.16
 	darvaza.org/x/fs v0.3.7
