@@ -7,7 +7,7 @@ require (
 	darvaza.org/darvaza/acme v0.2.0
 	darvaza.org/middleware v0.2.11
 	darvaza.org/slog v0.5.15
-	darvaza.org/slog/handlers/discard v0.4.16
+	darvaza.org/slog/handlers/discard v0.4.17
 	darvaza.org/x/fs v0.3.7 // indirect
 	darvaza.org/x/net v0.4.2
 	darvaza.org/x/tls v0.4.3
