@@ -1,6 +1,6 @@
 module darvaza.org/darvaza/agent
 
-go 1.21
+go 1.22
 
 require (
 	darvaza.org/core v0.15.6
@@ -15,7 +15,7 @@ require (
 )
 
 require (
-	github.com/quic-go/quic-go v0.42.0
+	github.com/quic-go/quic-go v0.48.2
 	golang.org/x/net v0.34.0
 )
 
@@ -25,7 +25,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/pprof v0.0.0-20231229205709-960ae82b1e42 // indirect
 	github.com/onsi/ginkgo/v2 v2.15.0 // indirect
-	github.com/quic-go/qpack v0.4.0 // indirect
+	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	go.uber.org/mock v0.4.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
