@@ -6,7 +6,7 @@ require (
 	darvaza.org/core v0.15.6
 	darvaza.org/darvaza/shared v0.6.2
 	darvaza.org/slog v0.5.15
-	darvaza.org/slog/handlers/cblog v0.5.13 // indirect
+	darvaza.org/slog/handlers/cblog v0.5.14 // indirect
 )
 
 require (

@@ -6,10 +6,10 @@ require (
 	darvaza.org/core v0.15.6
 	darvaza.org/darvaza/server v0.1.5
 	darvaza.org/darvaza/shared v0.6.2
-	darvaza.org/slog v0.5.14 // indirect
-	darvaza.org/slog/handlers/cblog v0.5.13 // indirect
+	darvaza.org/slog v0.5.15 // indirect
+	darvaza.org/slog/handlers/cblog v0.5.14 // indirect
 	darvaza.org/x/config v0.3.12
-	darvaza.org/x/tls v0.4.3 // indirect
+	darvaza.org/x/tls v0.4.5 // indirect
 )
 
 require (
@@ -28,14 +28,11 @@ require (
 	github.com/go-playground/validator/v10 v10.23.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.1 // indirect
-	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/zclconf/go-cty v1.14.1 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
