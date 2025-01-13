@@ -3,15 +3,15 @@ module darvaza.org/darvaza/agent
 go 1.22
 
 require (
-	darvaza.org/core v0.15.6
+	darvaza.org/core v0.16.0
 	darvaza.org/darvaza/acme v0.2.0
-	darvaza.org/middleware v0.2.11
-	darvaza.org/slog v0.5.15
-	darvaza.org/slog/handlers/discard v0.4.17
+	darvaza.org/middleware v0.3.1
+	darvaza.org/slog v0.6.0
+	darvaza.org/slog/handlers/discard v0.5.0
 	darvaza.org/x/fs v0.3.8 // indirect
 	darvaza.org/x/net v0.4.4
 	darvaza.org/x/tls v0.4.5
-	darvaza.org/x/web v0.9.4 // indirect
+	darvaza.org/x/web v0.9.6 // indirect
 )
 
 require (

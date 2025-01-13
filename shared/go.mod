@@ -3,11 +3,11 @@ module darvaza.org/darvaza/shared
 go 1.22
 
 require (
-	darvaza.org/core v0.15.6
-	darvaza.org/slog v0.5.15
-	darvaza.org/slog/handlers/cblog v0.5.14
-	darvaza.org/slog/handlers/discard v0.4.17
-	darvaza.org/x/fs v0.3.8
+	darvaza.org/core v0.16.0
+	darvaza.org/slog v0.6.0
+	darvaza.org/slog/handlers/cblog v0.6.0
+	darvaza.org/slog/handlers/discard v0.5.0
+	darvaza.org/x/fs v0.4.0
 	darvaza.org/x/tls v0.4.5
 )
 
