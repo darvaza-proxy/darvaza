@@ -45,7 +45,6 @@ type certInfo struct {
 	patterns []string
 }
 
-
 // init unconditionally initializes the Store
 func (s *Store) init() {
 	s.logger = defaultLogger()
