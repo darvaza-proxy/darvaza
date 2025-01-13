@@ -2,7 +2,7 @@ module darvaza.org/darvaza/agent
 
 go 1.22.0
 
-toolchain go1.22.6
+toolchain go1.22.10
 
 require (
 	darvaza.org/core v0.16.0
