@@ -8,8 +8,8 @@ darvaza.org/slog/handlers/discard v0.5.0 h1:kgNDaqDZZNV0gXaapWN/Z0coe/l9AkNd2a+4
 darvaza.org/slog/handlers/discard v0.5.0/go.mod h1:t4R47ZXL+J7RUuR084/gmbU2SIE/GvwFFrkZeVN1lec=
 darvaza.org/x/fs v0.4.0 h1:JtHbbdb3JTHoIhhE2fVS7HqBl8zP3mCqkgl95P6PdLI=
 darvaza.org/x/fs v0.4.0/go.mod h1:U7VqqFg4pcHiOWD58HbxnAMtKAUdAHi+ZN0Yo48mebk=
-darvaza.org/x/tls v0.4.5 h1:idEXS2gyRN5AQhRr89ojEOmgdCO6oKNApUdJ1kUofxA=
-darvaza.org/x/tls v0.4.5/go.mod h1:7N47Kbl2s675SZbtsKbrPs6lx0QOgNJMSHvyELZcDt0=
+darvaza.org/x/tls v0.5.0 h1:XPtm39KLo0bZj1QgMpvsuB+WO+SjJbiLZfiqrH8/t4Y=
+darvaza.org/x/tls v0.5.0/go.mod h1:er8R30aiDKBXS379EV5pSecNDQEj/bLy7uD0qhs8lXU=
 github.com/klauspost/cpuid/v2 v2.2.9 h1:66ze0taIn2H33fBvCkXuv9BmCwDfafmiIVpKV9kKGuY=
 github.com/klauspost/cpuid/v2 v2.2.9/go.mod h1:rqkxqrZ1EhYM9G+hXH7YdowN5R5RGN6NK4QwQ3WMXF8=
 github.com/zeebo/assert v1.1.0 h1:hU1L1vLTHsnO8x8c9KAR5GmM5QscxHg5RNU5z5qbUWY=
