@@ -155,7 +155,7 @@ func (s *Store) deleteByCertInfo(ci *certInfo) {
 }
 
 func deleteMapListElementByHash(m map[string]*list.List,
-	keys []string, hash certpool.Hash) int {
+	keys []string, hash certpool.Hash) {
 	// for each name we can only have one match
 	const once = true
 
@@ -165,18 +165,15 @@ func deleteMapListElementByHash(m map[string]*list.List,
 		return bytes.Equal(hash[:], h[:])
 	}
 
-	return deleteMapListElementByMatcher(m, once, keys, match)
+	deleteMapListElementByMatcher(m, once, keys, match)
 }
 
 func deleteMapListElementByMatcher[T any, K comparable](m map[K]*list.List, once bool, keys []K,
-	match func(v T) bool) int {
-	var count int
-
+	match func(v T) bool) {
 	fn := func(key K, el *list.Element) bool {
 		if v, ok := el.Value.(T); ok {
 			if match(v) {
 				m[key].Remove(el)
-				count++
 				return once
 			}
 		}
@@ -189,8 +186,6 @@ func deleteMapListElementByMatcher[T any, K comparable](m map[K]*list.List, once
 			return fn(key, el)
 		})
 	}
-
-	return count
 }
 
 func deleteListElementByPointer[T any](l *list.List, ptr *T, once bool) int {
