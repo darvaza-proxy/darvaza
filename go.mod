@@ -7,7 +7,7 @@ toolchain go1.22.6
 require (
 	darvaza.org/core v0.16.0
 	darvaza.org/darvaza/server v0.1.5
-	darvaza.org/darvaza/shared v0.6.2
+	darvaza.org/darvaza/shared v0.7.0
 	darvaza.org/slog v0.6.0 // indirect
 	darvaza.org/slog/handlers/cblog v0.6.0 // indirect
 	darvaza.org/x/config v0.4.1
