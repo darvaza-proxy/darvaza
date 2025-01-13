@@ -13,7 +13,7 @@ import (
 	"darvaza.org/x/config"
 )
 
-// Config is the main configuration item containig all
+// Config is the main configuration item containing all
 // the ProxyConfigs.
 type Config struct {
 	Proxies []server.ProxyConfig `hcl:"proxy,block"`

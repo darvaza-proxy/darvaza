@@ -94,12 +94,10 @@ func (heg *Group) onError(err error) error {
 	return err
 }
 
-func (heg *Group) tryCancel() bool {
+func (heg *Group) tryCancel() {
 	if heg.cancelled.CompareAndSwap(false, true) {
 		heg.cancel()
-		return true
 	}
-	return false
 }
 
 // Cancelled tells if the Group has been cancelled
