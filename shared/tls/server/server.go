@@ -33,8 +33,8 @@ type Proxy struct {
 	cancel      context.CancelFunc
 	inShutdown  int32
 	mu          sync.Mutex
-	listeners   map[*net.Listener]emptyStruct
-	activeConns map[*net.Conn]emptyStruct
+	listeners   map[net.Listener]emptyStruct
+	activeConns map[net.Conn]emptyStruct
 	tlsHandler  func(net.Conn)
 }
 
@@ -42,11 +42,11 @@ func (p *Proxy) shuttingDown() bool {
 	return atomic.LoadInt32(&p.inShutdown) != 0
 }
 
-func (p *Proxy) trackL(ln *net.Listener) {
+func (p *Proxy) trackL(ln net.Listener) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.listeners == nil {
-		p.listeners = make(map[*net.Listener]emptyStruct)
+		p.listeners = make(map[net.Listener]emptyStruct)
 	}
 	if !p.shuttingDown() {
 		if _, found := p.listeners[ln]; !found {
@@ -57,11 +57,11 @@ func (p *Proxy) trackL(ln *net.Listener) {
 	}
 }
 
-func (p *Proxy) trackConn(c *net.Conn) {
+func (p *Proxy) trackConn(c net.Conn) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.activeConns == nil {
-		p.activeConns = make(map[*net.Conn]emptyStruct)
+		p.activeConns = make(map[net.Conn]emptyStruct)
 	}
 
 	if !p.shuttingDown() {
@@ -88,7 +88,7 @@ func (pc *ProxyConfig) New() *Proxy {
 			log.Printf("cannot listen on %s.\n %q\n", laddr, err)
 			continue
 		}
-		p.trackL(&l)
+		p.trackL(l)
 	}
 	p.tlsHandler = defaultTLSHandler
 	return p
@@ -103,13 +103,13 @@ func (p *Proxy) Run() error {
 	for l := range p.listeners {
 		// TODO: Go(func () error{}) means no l tag
 		// https://golang.org/doc/faq#closures_and_goroutines
-		l := l
+		lsn := l
 		p.errGroup.Go(func() error {
 			for {
 				if p.shuttingDown() {
 					return fmt.Errorf("server shutting down")
 				}
-				conn, err := (*l).Accept()
+				conn, err := (lsn).Accept()
 				if err != nil {
 					select {
 					case <-p.errCtx.Done():
@@ -118,7 +118,7 @@ func (p *Proxy) Run() error {
 						return err
 					}
 				}
-				p.trackConn(&conn)
+				p.trackConn(conn)
 				go p.tlsHandler(conn)
 			}
 		})
@@ -133,7 +133,7 @@ func (p *Proxy) closeListeners() error {
 	//revive:enable:cognitive-complexity
 	var err error
 	for ln := range p.listeners {
-		cerr := (*ln).Close()
+		cerr := ln.Close()
 		if cerr != nil {
 			if cerr.(*net.OpError).Unwrap().Error() != "use of closed network connection" {
 				if err == nil {
@@ -164,7 +164,7 @@ func (p *Proxy) Cancel() error {
 	atomic.StoreInt32(&p.inShutdown, 1)
 
 	for c := range p.activeConns {
-		err := (*c).Close()
+		err := c.Close()
 		if err != nil && err.(*net.OpError).Unwrap().Error() != "use of closed network connection" {
 			log.Println(err)
 		}
