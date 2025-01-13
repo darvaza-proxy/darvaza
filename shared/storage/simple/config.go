@@ -2,9 +2,8 @@ package simple
 
 import (
 	"darvaza.org/slog"
+	"darvaza.org/x/tls/store/buffer"
 	"darvaza.org/x/tls/x509utils"
-
-	legacy "darvaza.org/darvaza/shared/storage/certpool"
 )
 
 // Config is a custom factory for the Store allowing the usage
@@ -40,8 +39,8 @@ func (c *Config) New(blocks ...string) (*Store, error) {
 	return s, nil
 }
 
-func (c *Config) newPoolBuffer(blocks ...string) (*legacy.PoolBuffer, error) {
-	var pb legacy.PoolBuffer
+func (c *Config) newPoolBuffer(blocks ...string) (*buffer.Buffer, error) {
+	var pb buffer.Buffer
 
 	if c.Logger != nil {
 		pb.SetLogger(c.Logger)
