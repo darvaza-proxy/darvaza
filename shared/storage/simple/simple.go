@@ -45,7 +45,7 @@ type certInfo struct {
 	patterns []string
 }
 
-// init unconditionaly initialises the Store
+// init unconditionally initializes the Store
 func (s *Store) init() {
 	s.logger = defaultLogger()
 
@@ -61,7 +61,7 @@ func (s *Store) init() {
 	s.patterns = make(map[string]*list.List)
 }
 
-// lockInit will acquire a lock and initialise the Store if needed
+// lockInit will acquire a lock and initialize the Store if needed
 func (s *Store) lockInit() {
 	s.mu.Lock()
 	if s.hashed == nil {
