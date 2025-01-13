@@ -100,10 +100,7 @@ func (pc *ProxyConfig) New() *Proxy {
 // Run is starting a TLSproxy that accepts connections.
 func (p *Proxy) Run() error {
 	//revive:enable:cognitive:complexity
-	for l := range p.listeners {
-		// TODO: Go(func () error{}) means no l tag
-		// https://golang.org/doc/faq#closures_and_goroutines
-		lsn := l
+	for lsn := range p.listeners {
 		p.errGroup.Go(func() error {
 			for {
 				if p.shuttingDown() {
@@ -126,8 +123,6 @@ func (p *Proxy) Run() error {
 	return p.errGroup.Wait()
 }
 
-// TODO: reimplemet and fix revive
-//
 //revive:disable:cognitive-complexity
 func (p *Proxy) closeListeners() error {
 	//revive:enable:cognitive-complexity

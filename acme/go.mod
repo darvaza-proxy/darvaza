@@ -1,6 +1,6 @@
 module darvaza.org/darvaza/acme
 
-go 1.21
+go 1.22
 
 require (
 	darvaza.org/core v0.15.4 // indirect
