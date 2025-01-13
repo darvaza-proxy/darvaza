@@ -1,15 +1,17 @@
 module darvaza.org/darvaza
 
-go 1.22
+go 1.22.0
+
+toolchain go1.22.6
 
 require (
 	darvaza.org/core v0.16.0
 	darvaza.org/darvaza/server v0.1.5
 	darvaza.org/darvaza/shared v0.6.2
-	darvaza.org/slog v0.5.15 // indirect
-	darvaza.org/slog/handlers/cblog v0.5.14 // indirect
+	darvaza.org/slog v0.6.0 // indirect
+	darvaza.org/slog/handlers/cblog v0.6.0 // indirect
 	darvaza.org/x/config v0.4.1
-	darvaza.org/x/tls v0.4.5 // indirect
+	darvaza.org/x/tls v0.5.0 // indirect
 )
 
 require (
@@ -33,14 +35,14 @@ require (
 	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/zclconf/go-cty v1.14.1 // indirect
+	github.com/zclconf/go-cty v1.16.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/mod v0.20.0 // indirect
+	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	golang.org/x/tools v0.24.0 // indirect
+	golang.org/x/tools v0.29.0 // indirect
 )
 
 replace (

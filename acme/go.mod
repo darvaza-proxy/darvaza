@@ -5,8 +5,8 @@ go 1.22
 require (
 	darvaza.org/core v0.16.0 // indirect
 	darvaza.org/middleware v0.3.1
-	darvaza.org/x/fs v0.3.8 // indirect
-	darvaza.org/x/web v0.9.6 // indirect
+	darvaza.org/x/fs v0.4.0 // indirect
+	darvaza.org/x/web v0.10.0 // indirect
 )
 
 require (
