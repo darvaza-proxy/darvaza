@@ -5,15 +5,14 @@ import (
 	"context"
 	"sync"
 
+	"golang.org/x/sync/singleflight"
+
 	"darvaza.org/core"
 	"darvaza.org/slog"
 	"darvaza.org/x/tls"
+	"darvaza.org/x/tls/store/buffer"
 	"darvaza.org/x/tls/x509utils"
 	"darvaza.org/x/tls/x509utils/certpool"
-
-	legacy "darvaza.org/darvaza/shared/storage/certpool"
-
-	"golang.org/x/sync/singleflight"
 )
 
 // A Getter is a helper to get a certificate for a name
@@ -71,7 +70,7 @@ func (s *Store) lockInit() {
 }
 
 // NewFromBuffer creates a Store from a given PoolBuffer
-func NewFromBuffer(pb *legacy.PoolBuffer, base x509utils.CertPool) (*Store, error) {
+func NewFromBuffer(pb *buffer.Buffer, base x509utils.CertPool) (*Store, error) {
 	s := new(Store)
 	s.init()
 	if pb != nil {
