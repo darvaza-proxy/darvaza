@@ -12,7 +12,7 @@ require (
 )
 
 require (
-	github.com/miekg/dns v1.1.62
+	github.com/miekg/dns v1.1.63
 	github.com/naoina/toml v0.1.1
 )
 

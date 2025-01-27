@@ -16,7 +16,7 @@ require (
 
 require (
 	github.com/hashicorp/hcl/v2 v2.23.0
-	github.com/miekg/dns v1.1.62
+	github.com/miekg/dns v1.1.63
 	github.com/spf13/cobra v1.8.1
 )
 
