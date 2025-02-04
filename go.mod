@@ -2,7 +2,7 @@ module darvaza.org/darvaza
 
 go 1.22.0
 
-toolchain go1.22.10
+toolchain go1.22.12
 
 require (
 	darvaza.org/core v0.16.0
