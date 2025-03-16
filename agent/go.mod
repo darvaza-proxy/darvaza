@@ -7,13 +7,13 @@ toolchain go1.22.10
 require (
 	darvaza.org/core v0.16.1
 	darvaza.org/darvaza/acme v0.3.0
-	darvaza.org/middleware v0.3.1
+	darvaza.org/middleware v0.3.2
 	darvaza.org/slog v0.6.1
 	darvaza.org/slog/handlers/discard v0.5.1
 	darvaza.org/x/fs v0.4.1 // indirect
 	darvaza.org/x/net v0.5.1
 	darvaza.org/x/tls v0.5.1
-	darvaza.org/x/web v0.10.0 // indirect
+	darvaza.org/x/web v0.10.1 // indirect
 )
 
 require (
