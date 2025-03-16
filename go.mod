@@ -8,10 +8,10 @@ require (
 	darvaza.org/core v0.16.1
 	darvaza.org/darvaza/server v0.2.0
 	darvaza.org/darvaza/shared v0.7.0
-	darvaza.org/slog v0.6.0 // indirect
-	darvaza.org/slog/handlers/cblog v0.6.0 // indirect
+	darvaza.org/slog v0.6.1 // indirect
+	darvaza.org/slog/handlers/cblog v0.6.1 // indirect
 	darvaza.org/x/config v0.4.2
-	darvaza.org/x/tls v0.5.0 // indirect
+	darvaza.org/x/tls v0.5.1 // indirect
 )
 
 require (
