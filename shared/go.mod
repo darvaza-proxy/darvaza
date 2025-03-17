@@ -1,6 +1,8 @@
 module darvaza.org/darvaza/shared
 
-go 1.22
+go 1.23.0
+
+toolchain go1.24.1
 
 require (
 	darvaza.org/core v0.16.1
@@ -14,7 +16,7 @@ require (
 require (
 	github.com/zeebo/blake3 v0.2.4
 	golang.org/x/net v0.35.0
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.12.0
 )
 
 require (
