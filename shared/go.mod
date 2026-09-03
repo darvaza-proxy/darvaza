@@ -1,6 +1,6 @@
 module darvaza.org/darvaza/shared
 
-go 1.22
+go 1.25.0
 
 require (
 	darvaza.org/core v0.16.1
@@ -13,13 +13,13 @@ require (
 
 require (
 	github.com/zeebo/blake3 v0.2.4
-	golang.org/x/net v0.35.0
-	golang.org/x/sync v0.11.0
+	golang.org/x/net v0.55.0
+	golang.org/x/sync v0.20.0
 )
 
 require (
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 )
