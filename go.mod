@@ -1,8 +1,6 @@
 module darvaza.org/darvaza
 
-go 1.22.0
-
-toolchain go1.22.10
+go 1.25.0
 
 require (
 	darvaza.org/core v0.16.1
@@ -15,7 +13,7 @@ require (
 )
 
 require (
-	github.com/hashicorp/hcl/v2 v2.23.0
+	github.com/hashicorp/hcl/v2 v2.25.0
 	github.com/miekg/dns v1.1.63
 	github.com/spf13/cobra v1.8.1
 )
@@ -24,6 +22,7 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/amery/defaults v0.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+	github.com/apparentlymart/go-textseg/v17 v17.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -35,14 +34,14 @@ require (
 	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/zclconf/go-cty v1.16.0 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
-	golang.org/x/tools v0.29.0 // indirect
+	github.com/zclconf/go-cty v1.19.0 // indirect
+	golang.org/x/crypto v0.43.0 // indirect
+	golang.org/x/mod v0.29.0 // indirect
+	golang.org/x/net v0.46.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/tools v0.38.0 // indirect
 )
 
 replace (
