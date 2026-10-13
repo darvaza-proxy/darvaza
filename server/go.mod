@@ -1,8 +1,6 @@
 module darvaza.org/darvaza/server
 
-go 1.22.0
-
-toolchain go1.22.10
+go 1.25.0
 
 require (
 	darvaza.org/core v0.16.1
@@ -19,12 +17,12 @@ require (
 require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/naoina/go-stringutil v0.1.0 // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
-	golang.org/x/tools v0.29.0 // indirect
+	golang.org/x/mod v0.35.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
+	golang.org/x/tools v0.44.0 // indirect
 )
 
 replace darvaza.org/darvaza/shared => ../shared
